@@ -45,6 +45,14 @@
     if (className) element.classList.add(className);
   };
 
+  const setProgress = (id, value, tone = "pink") => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    const safe = Math.max(0, Math.min(Number(value || 0), 100));
+    element.style.width = `${safe}%`;
+    element.dataset.tone = tone;
+  };
+
   function setMetric(id, value, polarity = null) {
     const element = document.getElementById(id);
     if (!element) return;
@@ -202,6 +210,7 @@
     const gap = target - sales;
 
     setText("sales-progress", `${numberText(progress, 1)}%`, progress >= 100 ? "pos" : progress >= 80 ? "warn" : null);
+    setProgress("sales-progress-bar", progress, progress >= 100 ? "green" : progress >= 80 ? "amber" : "pink");
     setText("sales-progress-note", progress >= 100 ? "היעד החודשי הושג" : `נותרו ${money(Math.max(gap, 0))} ליעד`);
     setText("sales-daily-rate", money(dailyRate));
     setText("sales-daily-rate-note", `ממוצע לפי ${dayOfMonth} ימים בחודש`);
@@ -242,26 +251,34 @@
     const estimatedNetProfit = sales - expenses - totalTaxReserve;
     const estimatedNetMargin = sales > 0 ? estimatedNetProfit / sales : 0;
     const checkingGap = checkingBalance - checkingTarget;
+    const expenseProgress = expenses > 0 && expenseTarget > 0 ? (expenses / expenseTarget) * 100 : 0;
+    const checkingProgress = checkingTarget > 0 ? Math.max(0, checkingBalance / checkingTarget) * 100 : 0;
+    const marginProgress = netMarginTarget > 0 ? (estimatedNetMargin / netMarginTarget) * 100 : 0;
+    const dailyNeededScore = requiredDaily > 0 ? (dailyTarget / requiredDaily) * 100 : 100;
 
     setText("immediate-receipts", money(immediateReceipts), immediateReceipts >= immediateTarget ? "pos" : null);
-    setText("immediate-receipts-note", monthly.immediate_receipts_status === "confirmed" ? "נתון מאומת מהמערכת" : "מבוסס על הנתון החודשי הזמין");
     setText("immediate-receipts-target", money(immediateTarget));
-    setText("immediate-receipts-target-note", `${money(dailyTarget)} × ${totalWorkingDays} ימי עבודה`);
     setText("immediate-receipts-progress", `${numberText(immediateProgress, 1)}%`, immediateProgress >= 100 ? "pos" : immediateProgress >= 75 ? "warn" : "neg");
     setText("immediate-receipts-progress-note", immediateGap <= 0 ? "היעד הושג" : `חסרים ${money(immediateGap)} ליעד החודשי`);
+    setProgress("immediate-progress-bar", immediateProgress, immediateProgress >= 100 ? "green" : immediateProgress >= 75 ? "amber" : "pink");
+
     setText("immediate-receipts-daily-needed", money(requiredDaily), requiredDaily <= dailyTarget ? "pos" : "warn");
     setText("immediate-receipts-daily-needed-note", `${remainingWorkingDays} ימי עבודה נותרו לפי מודל של 23 ימים`);
+    setProgress("daily-needed-progress-bar", dailyNeededScore, requiredDaily <= dailyTarget ? "green" : "amber");
 
     setText("monthly-expenses", expenses > 0 ? money(expenses) : "אין נתון", expenses > expenseTarget ? "neg" : expenses > 0 ? "pos" : null);
-    setText("monthly-expenses-note", expenses > 0 ? (expenses > expenseTarget ? `חריגה של ${money(expenses - expenseTarget)}` : `נותרה מסגרת של ${money(expenseTarget - expenses)}`) : "ה־RPC עדיין אינו מחזיר הוצאות חודשיות בפועל");
     setText("monthly-expense-target", money(expenseTarget));
-    setText("monthly-expense-target-note", "יעד הוצאות חודשי קבוע");
+    setText("monthly-expenses-note", expenses > 0 ? (expenses > expenseTarget ? `חריגה של ${money(expenses - expenseTarget)}` : `נותרה מסגרת של ${money(expenseTarget - expenses)}`) : "ה־RPC עדיין אינו מחזיר הוצאות חודשיות בפועל");
+    setProgress("expense-progress-bar", expenseProgress, expenses > expenseTarget ? "red" : "green");
 
     setText("checking-gap", money(Math.abs(checkingGap)), checkingGap >= 0 ? "pos" : "neg");
     setText("checking-gap-note", checkingGap >= 0 ? `העו״ש מעל היעד ב־${money(checkingGap)}` : `חסרים ${money(Math.abs(checkingGap))} ליעד עו״ש של ${money(checkingTarget)}`);
+    setProgress("checking-progress-bar", checkingProgress, checkingBalance >= checkingTarget ? "green" : checkingBalance >= 0 ? "amber" : "red");
 
-    setText("net-margin", `${numberText(estimatedNetMargin * 100, 1)}%`, estimatedNetMargin >= netMarginTarget ? "pos" : "warn");
+    setText("net-margin", expenses > 0 ? `${numberText(estimatedNetMargin * 100, 1)}%` : "חלקי", expenses > 0 ? (estimatedNetMargin >= netMarginTarget ? "pos" : "warn") : null);
+    setText("net-margin-target", `${numberText(netMarginTarget * 100, 0)}%`);
     setText("net-margin-note", expenses > 0 ? `יעד: ${numberText(netMarginTarget * 100, 0)}% לאחר רזרבת מס` : "חישוב חלקי עד שיוחזרו הוצאות חודשיות בפועל");
+    setProgress("margin-progress-bar", expenses > 0 ? marginProgress : 0, estimatedNetMargin >= netMarginTarget ? "green" : "amber");
   }
 
   function renderCashflowInsights(days, checkingBalance) {
@@ -284,6 +301,7 @@
     setText("forecast-largest-expense-note", largestExpenseDay && largestExpenseDay.expense > 0 ? `הוצאה צפויה: ${money(largestExpenseDay.expense)}` : "אין הוצאות מתוזמנות");
     setText("forecast-coverage", `${numberText(coverage * 100, 0)}%`, coverage >= 1 ? "pos" : "neg");
     setText("forecast-coverage-note", coverage >= 1 ? "ההכנסות הצפויות מכסות את ההוצאות" : `חסר כיסוי של ${money(Math.max(totalExpense - totalIncome, 0))}`);
+    setProgress("coverage-progress-bar", coverage * 100, coverage >= 1 ? "green" : coverage >= 0.75 ? "amber" : "red");
   }
 
   function renderReport(report) {
