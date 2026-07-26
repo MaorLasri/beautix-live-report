@@ -6,15 +6,15 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>BeautiX Live Report</title>
-  <link rel="stylesheet" href="styles.css?v=20260727-0200" />
+  <title>BeautiX Test Dashboard</title>
+  <link rel="stylesheet" href="styles.css?v=20260727-0340" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <main class="app-shell">
     <section id="login-view" class="auth-card">
-      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-0200" alt="BeautiX" /></div>
-      <p>כניסה לדו״ח החי</p>
+      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-0340" alt="BeautiX" /></div>
+      <p>כניסה לדו״ח הבדיקה</p>
       <form id="login-form">
         <label>אימייל<input id="email" type="email" autocomplete="email" required /></label>
         <label>סיסמה<input id="password" type="password" autocomplete="current-password" required /></label>
@@ -26,22 +26,26 @@
     <section id="report-view" hidden>
       <header class="topbar">
         <div class="brand-block">
-          <img class="brand-logo" src="assets/beautix-logo.png?v=20260727-0200" alt="BeautiX" />
-          <div><p class="report-title">דו״ח חי</p><p id="last-updated">טוען נתונים...</p></div>
+          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-0340" alt="BeautiX" /></div>
+          <div><p class="report-title">דשבורד בדיקה</p><p id="last-updated">טוען נתונים...</p></div>
         </div>
-        <div class="actions">
-          <button id="refresh-btn" type="button">רענון</button>
-          <button id="logout-btn" type="button" class="secondary">יציאה</button>
-        </div>
+        <div class="actions"><button id="refresh-btn" type="button">רענון</button><button id="logout-btn" type="button" class="secondary">יציאה</button></div>
       </header>
+
+      <div class="status-legend" aria-label="מקרא צבעים">
+        <span><i class="legend-dot green"></i>תקין / היעד הושג</span>
+        <span><i class="legend-dot amber"></i>דורש תשומת לב</span>
+        <span><i class="legend-dot red"></i>סיכון / חריגה</span>
+        <span><i class="legend-dot pink"></i>יעד פעיל</span>
+      </div>
 
       <section class="dashboard-section overview-section">
         <div class="section-title-block"><span class="section-kicker">תמונת מצב</span><h2>שיפורים, תובנות ובריאות כללית</h2><p>הנושאים החשובים ביותר לניהול העסק עכשיו</p></div>
         <div class="grid overview-grid">
           <article class="card"><span>הדבר החשוב ביותר עכשיו</span><strong id="primary-insight">—</strong><p id="primary-insight-note">—</p></article>
           <article class="card"><span>בריאות עסקית</span><strong id="business-health-score">—</strong><div class="progress-track"><i id="business-health-bar"></i></div><p id="business-health-note">—</p></article>
-          <article class="card"><span>סיכון מרכזי</span><strong id="primary-risk">—</strong><p id="primary-risk-note">—</p></article>
-          <article class="card"><span>פעולה מומלצת</span><strong id="recommended-action">—</strong><p id="recommended-action-note">—</p></article>
+          <article class="card"><span>מגמת בריאות שבועית</span><strong id="health-weekly-trend">—</strong><div id="health-weekly-bars" class="mini-bars"></div><p id="health-weekly-note">—</p></article>
+          <article class="card"><span>איך לשפר את הציון</span><strong id="health-improvement">—</strong><p id="health-improvement-note">—</p></article>
         </div>
       </section>
 
@@ -49,18 +53,12 @@
         <div class="section-title-block"><span class="section-kicker">מכירות</span><h2>ביצועים, יעדים ותחזית</h2><p>מצב המכירות החודשי, קצב ההתקדמות והיעד הפעיל</p></div>
         <div class="grid sales-grid">
           <article class="card"><span>מכירות החודש</span><strong id="sales">—</strong><p id="sales-note">—</p></article>
-          <article class="card goal-card">
-            <div class="metric-head"><span>יעד מכירות חודשי</span><strong id="sales-progress">—</strong></div>
-            <div class="metric-row"><b id="sales-target">—</b><small>יעד פעיל</small></div>
-            <div class="progress-track large"><i id="sales-progress-bar"></i></div>
-            <p id="sales-progress-note">—</p>
-            <ul id="sales-milestones" class="milestones"></ul>
-          </article>
+          <article class="card goal-card"><div class="metric-head"><span>יעד מכירות חודשי</span><strong id="sales-progress">—</strong></div><div class="metric-row"><b id="sales-target">—</b><small>יעד פעיל</small></div><div class="progress-track large"><i id="sales-progress-bar"></i></div><p id="sales-progress-note">—</p><ul id="sales-milestones" class="milestones"></ul></article>
           <article class="card"><span>קצב מכירות יומי</span><strong id="sales-daily-rate">—</strong><p id="sales-daily-rate-note">—</p></article>
-          <article class="card"><span>תחזית סוף חודש</span><strong id="sales-forecast">—</strong><div class="progress-track"><i id="sales-forecast-progress-bar"></i></div><p id="sales-forecast-note">—</p></article>
+          <article class="card"><span>תחזית סוף חודש</span><strong id="sales-forecast">—</strong><p id="sales-forecast-note">—</p></article>
           <article class="card"><span>פער מהיעד</span><strong id="sales-gap">—</strong><p id="sales-gap-note">—</p></article>
           <article class="card"><span>תקבולים מיידיים</span><strong id="immediate-receipts">—</strong><div class="progress-track"><i id="immediate-progress-bar"></i></div><p id="immediate-receipts-progress-note">—</p></article>
-          <article class="card"><span>נדרש לכל יום עבודה שנותר</span><strong id="immediate-receipts-daily-needed">—</strong><div class="progress-track"><i id="daily-needed-progress-bar"></i></div><p id="immediate-receipts-daily-needed-note">—</p></article>
+          <article class="card"><span>נדרש לכל יום עבודה שנותר</span><strong id="immediate-receipts-daily-needed">—</strong><p id="immediate-receipts-daily-needed-note">—</p></article>
         </div>
       </section>
 
@@ -83,7 +81,7 @@
           <article class="card"><span>זיכויים עתידיים</span><strong id="future-clearing">—</strong><p>כל הזיכויים הצפויים במערכת</p></article>
           <article class="card"><span>יעד עו״ש</span><strong id="checking-target">—</strong><div class="progress-track"><i id="checking-target-progress-bar"></i></div><p id="checking-target-note">—</p></article>
           <article class="card"><span>רווח נקי משוער</span><strong id="net-margin">—</strong><div class="metric-row sub"><small>יעד</small><b id="net-margin-target">30%</b></div><div class="progress-track"><i id="margin-progress-bar"></i></div><p id="net-margin-note">—</p></article>
-          <article class="card"><span>רזרבת מס כוללת</span><strong id="tax-reserve">—</strong><p>סכום מומלץ לשמור מחוץ לתפעול השוטף</p></article>
+          <article class="card tax-total-card"><span>סה״כ לשמור לכל המסים החודש</span><strong id="all-tax-reserve">—</strong><p>מע״מ לאחר קיזוז + מס הכנסה משוער</p></article>
         </div>
       </section>
 
@@ -102,32 +100,19 @@
       </section>
 
       <section class="dashboard-section assets-section">
-        <div class="section-title-block"><span class="section-kicker">הלוואות ונכסים</span><h2>התחייבויות ונכסים חיוביים</h2><p>כרטיס נפרד לכל פריט חשוב</p></div>
+        <div class="section-title-block"><span class="section-kicker">הלוואות ונכסים</span><h2>התחייבויות ונכסים חיוביים</h2><p>כרטיס נפרד לכל פריט חשוב עם אפשרות לפתיחת פרטים</p></div>
         <div id="loan-asset-cards" class="grid asset-grid"></div>
       </section>
 
       <section class="dashboard-section cashflow-section">
-        <div class="section-heading-row">
-          <div class="section-title-block"><span class="section-kicker">תזרים מזומנים</span><h2>30 הימים הבאים</h2><p>המבנה היומי נשאר כפי שהוא</p></div>
-          <div class="bulk-actions" aria-label="שליטה בכרטיסי הימים">
-            <button id="expand-all-btn" type="button">הרחב הכל</button>
-            <button id="collapse-all-btn" type="button" class="secondary">כווץ הכל</button>
-          </div>
-        </div>
-        <div class="cashflow-summary-grid">
-          <article class="summary-card"><span>הכנסות צפויות</span><strong id="forecast-income">—</strong></article>
-          <article class="summary-card"><span>הוצאות צפויות</span><strong id="forecast-expense">—</strong></article>
-          <article class="summary-card"><span>תזרים נטו</span><strong id="forecast-net">—</strong></article>
-          <article class="summary-card"><span>יתרה חזויה בסוף התקופה</span><strong id="forecast-ending-balance">—</strong></article>
-        </div>
+        <div class="section-heading-row"><div class="section-title-block"><span class="section-kicker">תזרים מזומנים</span><h2>30 הימים הבאים</h2><p>המבנה היומי נשאר כפי שהוא</p></div><div class="bulk-actions"><button id="expand-all-btn" type="button">הרחב הכל</button><button id="collapse-all-btn" type="button" class="secondary">כווץ הכל</button></div></div>
+        <div class="cashflow-summary-grid"><article class="summary-card"><span>הכנסות צפויות</span><strong id="forecast-income">—</strong></article><article class="summary-card"><span>הוצאות צפויות</span><strong id="forecast-expense">—</strong></article><article class="summary-card"><span>תזרים נטו</span><strong id="forecast-net">—</strong></article><article class="summary-card"><span>יתרה חזויה בסוף התקופה</span><strong id="forecast-ending-balance">—</strong></article></div>
         <div id="days" class="day-stack"></div>
       </section>
-
       <section id="report-error" class="error-box" hidden></section>
     </section>
   </main>
-
-  <script src="config.js?v=20260727-0200"></script>
-  <script src="app.js?v=20260727-0200"></script>
+  <script src="config.js?v=20260727-0340"></script>
+  <script src="app.js?v=20260727-0340"></script>
 </body>
 </html>
