@@ -101,28 +101,54 @@ button:disabled { cursor: wait; opacity: .65; }
 .topbar p { margin: 0; opacity: .9; }
 .actions { display: flex; gap: 10px; }
 
-.grid { display: grid; gap: 16px; }
-.kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 18px; }
-.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.section { margin-top: 24px; }
-.section h2 { margin: 0 0 14px; }
+.dashboard-section {
+  position: relative;
+  margin-top: 34px;
+  padding-top: 8px;
+}
+.dashboard-section + .dashboard-section {
+  margin-top: 42px;
+  padding-top: 34px;
+  border-top: 1px solid var(--border);
+}
+.dashboard-section + .dashboard-section::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: 0;
+  width: 82px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pink), var(--pink-dark));
+}
+.section-title-block { margin-bottom: 16px; }
+.section-title-block h2 { margin: 3px 0 4px; font-size: 24px; }
+.section-title-block p { margin: 0; color: var(--muted); font-size: 14px; }
+.section-kicker {
+  color: var(--pink-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
 .section-heading-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 14px;
   margin-bottom: 14px;
 }
-.section-heading-row h2 { margin: 0; }
-.compact-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
 .bulk-actions { display: flex; gap: 10px; }
+
+.grid { display: grid; gap: 16px; }
+.kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
 .card,
 .insight-card,
 .summary-card,
 .insight-strip article,
-.business-kpi-card,
-.dashboard-panel {
+.business-kpi-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -144,7 +170,8 @@ button:disabled { cursor: wait; opacity: .65; }
 .summary-card strong,
 .insight-strip strong,
 .business-kpi-card strong,
-.business-kpi-card b {
+.business-kpi-card b,
+.goal-card b {
   font-size: 26px;
   direction: ltr;
   unicode-bidi: isolate;
@@ -154,10 +181,35 @@ button:disabled { cursor: wait; opacity: .65; }
 .neg { color: var(--red) !important; }
 .warn { color: var(--amber) !important; }
 
+.goal-card {
+  grid-column: span 2;
+  background: linear-gradient(135deg, rgba(255,47,143,.08), #fff 58%);
+  border-color: rgba(255,47,143,.22);
+}
+.goal-card p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+.goal-history {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.goal-history span {
+  margin: 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f6f8fa;
+  font-weight: 700;
+}
+.goal-history small { color: var(--muted); line-height: 1.45; }
+
 .insight-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  margin-top: 16px;
 }
 .insight-card {
   padding: 18px;
@@ -172,10 +224,6 @@ button:disabled { cursor: wait; opacity: .65; }
   font-size: 13px;
 }
 
-.dashboard-panel {
-  padding: 18px;
-  background: linear-gradient(180deg, #ffffff, #fbfdfe);
-}
 .business-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -312,6 +360,7 @@ button:disabled { cursor: wait; opacity: .65; }
   .insight-grid,
   .cashflow-summary-grid,
   .business-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .goal-card,
   .featured-goal { grid-column: span 2; }
   .insight-strip { grid-template-columns: 1fr; }
   .day-toggle { grid-template-columns: 1fr; }
@@ -328,10 +377,11 @@ button:disabled { cursor: wait; opacity: .65; }
   .cashflow-summary-grid,
   .business-kpi-grid,
   .day-body { grid-template-columns: 1fr; }
-  .business-kpi-card.featured-goal { grid-column: auto; }
+  .goal-card,
+  .featured-goal { grid-column: auto; }
   .day-kpis { grid-template-columns: repeat(2, 1fr); }
   .actions, .bulk-actions { width: 100%; }
   .actions button, .bulk-actions button { flex: 1; }
   .section-heading-row { align-items: stretch; flex-direction: column; }
-  .metric-head, .metric-row { align-items: flex-start; flex-direction: column; }
+  .dashboard-section + .dashboard-section { margin-top: 32px; padding-top: 28px; }
 }
