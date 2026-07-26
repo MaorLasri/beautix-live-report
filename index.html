@@ -7,13 +7,16 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>BeautiX Test Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260727-0345" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260727-1700" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <main class="app-shell">
     <section id="login-view" class="auth-card">
-      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-0345" alt="BeautiX" /></div>
+      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-1700" alt="BeautiX" /></div>
       <p>כניסה לדו״ח הבדיקה</p>
       <form id="login-form">
         <label>אימייל<input id="email" type="email" autocomplete="email" required /></label>
@@ -26,8 +29,8 @@
     <section id="report-view" hidden>
       <header class="topbar">
         <div class="brand-block">
-          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-0345" alt="BeautiX" /></div>
-          <div><p class="report-title">דשבורד בדיקה <strong style="display:inline-block;margin-right:8px;padding:4px 10px;border-radius:999px;background:#fff;color:#d71873;font-size:13px;letter-spacing:.08em;">TEST</strong></p><p id="last-updated">טוען נתונים...</p></div>
+          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-1700" alt="BeautiX" /></div>
+          <div><p class="report-title">דשבורד בדיקה <strong class="test-badge">TEST</strong></p><p id="last-updated">טוען נתונים...</p></div>
         </div>
         <div class="actions"><button id="refresh-btn" type="button">רענון</button><button id="logout-btn" type="button" class="secondary">יציאה</button></div>
       </header>
@@ -114,7 +117,7 @@
     </section>
   </main>
 
-  <script src="config.js?v=20260727-0345"></script>
-  <script src="app.js?v=20260727-0345"></script>
+  <script src="config.js?v=20260727-1700"></script>
+  <script src="app.js?v=20260727-1700"></script>
 </body>
 </html>
