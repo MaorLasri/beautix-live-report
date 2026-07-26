@@ -1,9 +1,6 @@
 (() => {
   const config = window.BEAUTIX_CONFIG;
-  const client = window.supabase.createClient(
-    config.supabaseUrl,
-    config.supabasePublishableKey
-  );
+  const client = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey);
 
   const loginView = document.getElementById("login-view");
   const reportView = document.getElementById("report-view");
@@ -58,15 +55,11 @@
     if (!element) return;
     element.textContent = money(value);
     element.classList.remove("pos", "neg");
-    if (polarity === "balance") {
-      element.classList.add(Number(value) >= 0 ? "pos" : "neg");
-    }
+    if (polarity === "balance") element.classList.add(Number(value) >= 0 ? "pos" : "neg");
   }
 
   function normalizeReport(payload) {
-    if (Array.isArray(payload) && payload.length === 1 && payload[0]?.report) {
-      return payload[0].report;
-    }
+    if (Array.isArray(payload) && payload.length === 1 && payload[0]?.report) return payload[0].report;
     if (payload?.report) return payload.report;
     return payload;
   }
@@ -207,17 +200,35 @@
     const dailyRate = sales / dayOfMonth;
     const forecast = dailyRate * monthEnd;
     const progress = target > 0 ? (sales / target) * 100 : 0;
+    const forecastProgress = target > 0 ? (forecast / target) * 100 : 0;
     const gap = target - sales;
 
     setText("sales-progress", `${numberText(progress, 1)}%`, progress >= 100 ? "pos" : progress >= 80 ? "warn" : null);
     setProgress("sales-progress-bar", progress, progress >= 100 ? "green" : progress >= 80 ? "amber" : "pink");
-    setText("sales-progress-note", progress >= 100 ? "היעד החודשי הושג" : `נותרו ${money(Math.max(gap, 0))} ליעד`);
+    setText("sales-progress-note", progress >= 100 ? `היעד הושג ונחצה ב־${money(Math.abs(gap))}` : `נותרו ${money(Math.max(gap, 0))} ליעד`);
     setText("sales-daily-rate", money(dailyRate));
     setText("sales-daily-rate-note", `ממוצע לפי ${dayOfMonth} ימים בחודש`);
     setText("sales-forecast", money(forecast), forecast >= target ? "pos" : "warn");
-    setText("sales-forecast-note", forecast >= target ? "בקצב הנוכחי היעד צפוי להישבר" : "בקצב הנוכחי צפוי חוסר מול היעד");
+    setProgress("sales-forecast-progress-bar", forecastProgress, forecast >= target ? "green" : "amber");
+    setText("sales-forecast-note", forecast >= target ? `תחזית של ${numberText(forecastProgress, 1)}% מהיעד` : `תחזית של ${numberText(forecastProgress, 1)}% מהיעד`);
     setText("sales-gap", money(Math.abs(gap)), gap <= 0 ? "pos" : "neg");
     setText("sales-gap-note", gap <= 0 ? `מעל היעד ב־${money(Math.abs(gap))}` : `נדרש קצב של ${money(gap / Math.max(monthEnd - dayOfMonth, 1))} ליום עד סוף החודש`);
+
+    const goalHistory = report.sales?.goal_history || report.settings?.sales_goal_history || null;
+    const achievedAt = goalHistory?.achieved_at || report.sales?.goal_achieved_at || null;
+    const modifiedAt = goalHistory?.modified_at || report.settings?.sales_goal_modified_at || null;
+    const previousTarget = Number(goalHistory?.previous_target || report.settings?.previous_monthly_sales_target || 0);
+
+    setText("sales-goal-status", progress >= 100 ? "היעד הושג" : "היעד עדיין פעיל", progress >= 100 ? "pos" : "warn");
+    if (achievedAt || modifiedAt || previousTarget > 0) {
+      const parts = [];
+      if (achievedAt) parts.push(`הושג ב־${dateText(achievedAt)}`);
+      if (modifiedAt) parts.push(`עודכן ב־${dateText(modifiedAt)}`);
+      if (previousTarget > 0) parts.push(`יעד קודם: ${money(previousTarget)}`);
+      setText("sales-goal-history", parts.join(" · "));
+    } else {
+      setText("sales-goal-history", `יעד נוכחי: ${money(target)} · אין עדיין היסטוריית שינוי מתועדת ב־Supabase`);
+    }
   }
 
   function renderBusinessKpis(report, checkingBalance) {
@@ -247,7 +258,6 @@
     const immediateProgress = immediateTarget > 0 ? (immediateReceipts / immediateTarget) * 100 : 0;
     const immediateGap = Math.max(immediateTarget - immediateReceipts, 0);
     const requiredDaily = remainingWorkingDays > 0 ? immediateGap / remainingWorkingDays : immediateGap;
-
     const estimatedNetProfit = sales - expenses - totalTaxReserve;
     const estimatedNetMargin = sales > 0 ? estimatedNetProfit / sales : 0;
     const checkingGap = checkingBalance - checkingTarget;
@@ -294,7 +304,6 @@
     setText("forecast-expense", money(totalExpense), totalExpense > 0 ? "neg" : null);
     setText("forecast-net", money(net), net >= 0 ? "pos" : "neg");
     setText("forecast-ending-balance", money(endingBalance), endingBalance >= 0 ? "pos" : "neg");
-
     setText("forecast-low-day", lowDay ? dateText(lowDay.date) : "—", lowDay?.projectedBalance >= 0 ? "pos" : "neg");
     setText("forecast-low-note", lowDay ? `יתרה חזויה: ${money(lowDay.projectedBalance)}` : "אין נתונים");
     setText("forecast-largest-expense-day", largestExpenseDay && largestExpenseDay.expense > 0 ? dateText(largestExpenseDay.date) : "—");
@@ -311,7 +320,7 @@
     const futureClearing = (report.future_clearing || []).filter((item) => item.status === "expected").reduce((sum, item) => sum + Number(item.net || 0), 0);
 
     setMetric("sales", report.sales?.income || 0);
-    setMetric("sales-target", report.settings?.monthly_sales_target || 0);
+    setMetric("sales-target", report.settings?.monthly_sales_target || report.sales?.target || 0);
     setMetric("checking", checkingBalance, "balance");
     setMetric("future-clearing", futureClearing);
     setMetric("output-vat", report.tax?.output_vat_exact || 0);
@@ -325,10 +334,7 @@
     renderCashflowInsights(days, checkingBalance);
     renderDays(days);
 
-    lastUpdated.textContent = `עודכן מהמסד: ${new Intl.DateTimeFormat("he-IL", {
-      dateStyle: "short",
-      timeStyle: "medium"
-    }).format(new Date())}`;
+    lastUpdated.textContent = `עודכן מהמסד: ${new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeStyle: "medium" }).format(new Date())}`;
   }
 
   async function loadReport() {
@@ -339,9 +345,7 @@
     refreshBtn.textContent = "מרענן...";
 
     try {
-      const { data, error } = await client.rpc(config.reportRpc, {
-        _cache_bust: Date.now()
-      });
+      const { data, error } = await client.rpc(config.reportRpc, { _cache_bust: Date.now() });
       if (error && error.code === "PGRST202") {
         const fallback = await client.rpc(config.reportRpc);
         if (fallback.error) throw fallback.error;
@@ -399,21 +403,16 @@
     showLogin();
   });
 
-  refreshBtn.addEventListener("click", async () => {
-    await loadReport();
-  });
-
+  refreshBtn.addEventListener("click", loadReport);
   expandAllBtn.addEventListener("click", () => setAllCards(true));
   collapseAllBtn.addEventListener("click", () => setAllCards(false));
 
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && !reportView.hidden) loadReport();
   });
-
   window.addEventListener("focus", () => {
     if (!reportView.hidden) loadReport();
   });
-
   client.auth.onAuthStateChange((_event, session) => {
     if (!session) showLogin();
   });
