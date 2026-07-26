@@ -7,25 +7,19 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>BeautiX Live Report</title>
-  <link rel="stylesheet" href="styles.css?v=20260726-2235" />
+  <link rel="stylesheet" href="styles.css?v=20260726-2315" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <main class="app-shell">
     <section id="login-view" class="auth-card">
       <div class="login-brand">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKACAYAAAB/cZl+AAAA" alt="BeautiX" />
+        <img src="assets/beautix-logo.png?v=20260726-2315" alt="BeautiX" />
       </div>
       <p>כניסה לדו״ח החי</p>
       <form id="login-form">
-        <label>
-          אימייל
-          <input id="email" type="email" autocomplete="email" required />
-        </label>
-        <label>
-          סיסמה
-          <input id="password" type="password" autocomplete="current-password" required />
-        </label>
+        <label>אימייל<input id="email" type="email" autocomplete="email" required /></label>
+        <label>סיסמה<input id="password" type="password" autocomplete="current-password" required /></label>
         <button type="submit">כניסה</button>
         <p id="login-error" class="error" hidden></p>
       </form>
@@ -34,7 +28,7 @@
     <section id="report-view" hidden>
       <header class="topbar">
         <div class="brand-block">
-          <img class="brand-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKACAYAAAB/cZl+AAAA" alt="BeautiX" />
+          <img class="brand-logo" src="assets/beautix-logo.png?v=20260726-2315" alt="BeautiX" />
           <div>
             <p class="report-title">דו״ח חי</p>
             <p id="last-updated">טוען נתונים...</p>
@@ -55,26 +49,10 @@
 
       <section class="section">
         <div class="insight-grid">
-          <article class="insight-card">
-            <span>התקדמות ליעד</span>
-            <strong id="sales-progress">—</strong>
-            <p id="sales-progress-note">—</p>
-          </article>
-          <article class="insight-card">
-            <span>קצב מכירות יומי</span>
-            <strong id="sales-daily-rate">—</strong>
-            <p id="sales-daily-rate-note">—</p>
-          </article>
-          <article class="insight-card">
-            <span>תחזית סוף חודש</span>
-            <strong id="sales-forecast">—</strong>
-            <p id="sales-forecast-note">—</p>
-          </article>
-          <article class="insight-card">
-            <span>פער מהיעד</span>
-            <strong id="sales-gap">—</strong>
-            <p id="sales-gap-note">—</p>
-          </article>
+          <article class="insight-card"><span>התקדמות ליעד</span><strong id="sales-progress">—</strong><p id="sales-progress-note">—</p></article>
+          <article class="insight-card"><span>קצב מכירות יומי</span><strong id="sales-daily-rate">—</strong><p id="sales-daily-rate-note">—</p></article>
+          <article class="insight-card"><span>תחזית סוף חודש</span><strong id="sales-forecast">—</strong><p id="sales-forecast-note">—</p></article>
+          <article class="insight-card"><span>פער מהיעד</span><strong id="sales-gap">—</strong><p id="sales-gap-note">—</p></article>
         </div>
       </section>
 
@@ -117,7 +95,7 @@
     </section>
   </main>
 
-  <script src="config.js?v=20260726-2235"></script>
-  <script src="app.js?v=20260726-2235"></script>
+  <script src="config.js?v=20260726-2315"></script>
+  <script src="app.js?v=20260726-2315"></script>
 </body>
 </html>
