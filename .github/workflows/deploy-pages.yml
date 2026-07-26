@@ -1,4 +1,4 @@
-name: Deploy live and test dashboards
+name: Version, backup and deploy dashboards
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  version-backup-deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -26,10 +26,37 @@ jobs:
     steps:
       - name: Checkout workflow branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create version and backup tag
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          SOURCE_BRANCH="${GITHUB_REF_NAME}"
+          SAFE_BRANCH="${SOURCE_BRANCH//\//-}"
+          TIMESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
+          SHORT_SHA="$(git rev-parse --short=8 HEAD)"
+          VERSION="v${TIMESTAMP}-${SHORT_SHA}"
+          BACKUP_TAG="backup/${SAFE_BRANCH}/${VERSION}"
+
+          git tag -a "$BACKUP_TAG" -m "Automated backup for ${SOURCE_BRANCH} publish ${VERSION}"
+          git push origin "$BACKUP_TAG"
+
+          {
+            echo "version=$VERSION"
+            echo "backup_tag=$BACKUP_TAG"
+            echo "source_branch=$SOURCE_BRANCH"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Prepare combined site
         run: |
-          rm -rf _site
+          set -euo pipefail
+          rm -rf _site live-src test-src
           mkdir -p _site/test
 
           git clone --depth 1 --branch live https://github.com/${{ github.repository }}.git live-src
@@ -38,6 +65,17 @@ jobs:
           rsync -a --exclude='.git' --exclude='.github' live-src/ _site/
           rsync -a --exclude='.git' --exclude='.github' test-src/ _site/test/
 
+          cat > _site/version.json <<EOF
+          {
+            "version": "${{ steps.version.outputs.version }}",
+            "backup_tag": "${{ steps.version.outputs.backup_tag }}",
+            "source_branch": "${{ steps.version.outputs.source_branch }}",
+            "commit": "${GITHUB_SHA}",
+            "published_at_utc": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          }
+          EOF
+
+          cp _site/version.json _site/test/version.json
           touch _site/.nojekyll
 
       - name: Configure Pages
