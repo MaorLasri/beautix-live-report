@@ -211,6 +211,59 @@
     setText("sales-gap-note", gap <= 0 ? `מעל היעד ב־${money(Math.abs(gap))}` : `נדרש קצב של ${money(gap / Math.max(monthEnd - dayOfMonth, 1))} ליום עד סוף החודש`);
   }
 
+  function renderBusinessKpis(report, checkingBalance) {
+    const settings = report.settings || {};
+    const monthly = report.monthly || {};
+    const sales = Number(report.sales?.income || monthly.sales || 0);
+    const immediateReceipts = Number(monthly.immediate_receipts || monthly.bank_receipts || 0);
+    const immediateTarget = Number(settings.monthly_revenue_target || 57500);
+    const dailyTarget = Number(settings.daily_immediate_receipts_target || 2500);
+    const expenseTarget = Number(settings.monthly_expense_target || 20000);
+    const checkingTarget = Number(settings.available_cash_target || 10000);
+    const netMarginTarget = Number(settings.net_profit_margin_target || 0.3);
+    const expenses = Number(monthly.business_expenses || 0);
+    const totalTaxReserve = Number(report.tax?.total_tax_reserve || 0);
+
+    const latestDate = report.sales?.latest ? new Date(`${String(report.sales.latest).slice(0, 10)}T00:00:00`) : new Date();
+    const year = latestDate.getFullYear();
+    const month = latestDate.getMonth();
+    const totalWorkingDays = 23;
+    let elapsedWorkingDays = 0;
+    for (let day = 1; day <= latestDate.getDate(); day += 1) {
+      const d = new Date(year, month, day);
+      const weekday = d.getDay();
+      if (weekday !== 5 && weekday !== 6) elapsedWorkingDays += 1;
+    }
+    const remainingWorkingDays = Math.max(totalWorkingDays - elapsedWorkingDays, 0);
+    const immediateProgress = immediateTarget > 0 ? (immediateReceipts / immediateTarget) * 100 : 0;
+    const immediateGap = Math.max(immediateTarget - immediateReceipts, 0);
+    const requiredDaily = remainingWorkingDays > 0 ? immediateGap / remainingWorkingDays : immediateGap;
+
+    const estimatedNetProfit = sales - expenses - totalTaxReserve;
+    const estimatedNetMargin = sales > 0 ? estimatedNetProfit / sales : 0;
+    const checkingGap = checkingBalance - checkingTarget;
+
+    setText("immediate-receipts", money(immediateReceipts), immediateReceipts >= immediateTarget ? "pos" : null);
+    setText("immediate-receipts-note", monthly.immediate_receipts_status === "confirmed" ? "נתון מאומת מהמערכת" : "מבוסס על הנתון החודשי הזמין");
+    setText("immediate-receipts-target", money(immediateTarget));
+    setText("immediate-receipts-target-note", `${money(dailyTarget)} × ${totalWorkingDays} ימי עבודה`);
+    setText("immediate-receipts-progress", `${numberText(immediateProgress, 1)}%`, immediateProgress >= 100 ? "pos" : immediateProgress >= 75 ? "warn" : "neg");
+    setText("immediate-receipts-progress-note", immediateGap <= 0 ? "היעד הושג" : `חסרים ${money(immediateGap)} ליעד החודשי`);
+    setText("immediate-receipts-daily-needed", money(requiredDaily), requiredDaily <= dailyTarget ? "pos" : "warn");
+    setText("immediate-receipts-daily-needed-note", `${remainingWorkingDays} ימי עבודה נותרו לפי מודל של 23 ימים`);
+
+    setText("monthly-expenses", expenses > 0 ? money(expenses) : "אין נתון", expenses > expenseTarget ? "neg" : expenses > 0 ? "pos" : null);
+    setText("monthly-expenses-note", expenses > 0 ? (expenses > expenseTarget ? `חריגה של ${money(expenses - expenseTarget)}` : `נותרה מסגרת של ${money(expenseTarget - expenses)}`) : "ה־RPC עדיין אינו מחזיר הוצאות חודשיות בפועל");
+    setText("monthly-expense-target", money(expenseTarget));
+    setText("monthly-expense-target-note", "יעד הוצאות חודשי קבוע");
+
+    setText("checking-gap", money(Math.abs(checkingGap)), checkingGap >= 0 ? "pos" : "neg");
+    setText("checking-gap-note", checkingGap >= 0 ? `העו״ש מעל היעד ב־${money(checkingGap)}` : `חסרים ${money(Math.abs(checkingGap))} ליעד עו״ש של ${money(checkingTarget)}`);
+
+    setText("net-margin", `${numberText(estimatedNetMargin * 100, 1)}%`, estimatedNetMargin >= netMarginTarget ? "pos" : "warn");
+    setText("net-margin-note", expenses > 0 ? `יעד: ${numberText(netMarginTarget * 100, 0)}% לאחר רזרבת מס` : "חישוב חלקי עד שיוחזרו הוצאות חודשיות בפועל");
+  }
+
   function renderCashflowInsights(days, checkingBalance) {
     const totalIncome = days.reduce((sum, day) => sum + day.income, 0);
     const totalExpense = days.reduce((sum, day) => sum + day.expense, 0);
@@ -250,6 +303,7 @@
 
     const days = buildForecast(report);
     renderSalesInsights(report);
+    renderBusinessKpis(report, checkingBalance);
     renderCashflowInsights(days, checkingBalance);
     renderDays(days);
 
@@ -265,8 +319,11 @@
     reportError.hidden = true;
     refreshBtn.disabled = true;
     refreshBtn.textContent = "מרענן...";
+
     try {
-      const { data, error } = await client.rpc(config.reportRpc, { _cache_bust: Date.now() });
+      const { data, error } = await client.rpc(config.reportRpc, {
+        _cache_bust: Date.now()
+      });
       if (error && error.code === "PGRST202") {
         const fallback = await client.rpc(config.reportRpc);
         if (fallback.error) throw fallback.error;
@@ -324,7 +381,10 @@
     showLogin();
   });
 
-  refreshBtn.addEventListener("click", loadReport);
+  refreshBtn.addEventListener("click", async () => {
+    await loadReport();
+  });
+
   expandAllBtn.addEventListener("click", () => setAllCards(true));
   collapseAllBtn.addEventListener("click", () => setAllCards(false));
 
