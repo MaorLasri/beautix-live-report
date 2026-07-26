@@ -114,13 +114,15 @@ button:disabled { cursor: wait; opacity: .65; }
   margin-bottom: 14px;
 }
 .section-heading-row h2 { margin: 0; }
+.compact-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
 .bulk-actions { display: flex; gap: 10px; }
 
 .card,
 .insight-card,
 .summary-card,
 .insight-strip article,
-.business-kpi-card {
+.business-kpi-card,
+.dashboard-panel {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -141,7 +143,8 @@ button:disabled { cursor: wait; opacity: .65; }
 .insight-card strong,
 .summary-card strong,
 .insight-strip strong,
-.business-kpi-card strong {
+.business-kpi-card strong,
+.business-kpi-card b {
   font-size: 26px;
   direction: ltr;
   unicode-bidi: isolate;
@@ -169,6 +172,10 @@ button:disabled { cursor: wait; opacity: .65; }
   font-size: 13px;
 }
 
+.dashboard-panel {
+  padding: 18px;
+  background: linear-gradient(180deg, #ffffff, #fbfdfe);
+}
 .business-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -187,7 +194,45 @@ button:disabled { cursor: wait; opacity: .65; }
   width: 4px;
   background: linear-gradient(180deg, var(--pink), var(--pink-dark));
 }
-.business-kpi-card strong { font-size: 24px; }
+.business-kpi-card.featured-goal {
+  grid-column: span 2;
+  background: linear-gradient(135deg, rgba(255,47,143,.08), rgba(255,255,255,1));
+}
+.metric-head,
+.metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.metric-head strong { font-size: 24px; }
+.metric-row b { font-size: 28px; }
+.metric-row small { color: var(--muted); }
+.metric-row.sub { margin-top: 10px; }
+.metric-row.sub b { font-size: 16px; }
+
+.progress-track {
+  width: 100%;
+  height: 9px;
+  margin-top: 14px;
+  background: #edf1f4;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.progress-track.large { height: 12px; }
+.progress-track i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--pink), var(--pink-dark));
+  transition: width .35s ease;
+}
+.progress-track i[data-tone="green"] { background: linear-gradient(90deg, #43b66b, var(--green)); }
+.progress-track i[data-tone="amber"] { background: linear-gradient(90deg, #f3bf4f, var(--amber)); }
+.progress-track i[data-tone="red"] { background: linear-gradient(90deg, #e56b6b, var(--red)); }
+.progress-track i[data-tone="pink"] { background: linear-gradient(90deg, var(--pink), var(--pink-dark)); }
 
 .cashflow-summary-grid {
   display: grid;
@@ -267,6 +312,7 @@ button:disabled { cursor: wait; opacity: .65; }
   .insight-grid,
   .cashflow-summary-grid,
   .business-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .featured-goal { grid-column: span 2; }
   .insight-strip { grid-template-columns: 1fr; }
   .day-toggle { grid-template-columns: 1fr; }
 }
@@ -282,8 +328,10 @@ button:disabled { cursor: wait; opacity: .65; }
   .cashflow-summary-grid,
   .business-kpi-grid,
   .day-body { grid-template-columns: 1fr; }
+  .business-kpi-card.featured-goal { grid-column: auto; }
   .day-kpis { grid-template-columns: repeat(2, 1fr); }
   .actions, .bulk-actions { width: 100%; }
   .actions button, .bulk-actions button { flex: 1; }
   .section-heading-row { align-items: stretch; flex-direction: column; }
+  .metric-head, .metric-row { align-items: flex-start; flex-direction: column; }
 }
