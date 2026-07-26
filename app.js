@@ -12,6 +12,8 @@
   const reportError = document.getElementById("report-error");
   const refreshBtn = document.getElementById("refresh-btn");
   const logoutBtn = document.getElementById("logout-btn");
+  const expandAllBtn = document.getElementById("expand-all-btn");
+  const collapseAllBtn = document.getElementById("collapse-all-btn");
   const daysContainer = document.getElementById("days");
   const lastUpdated = document.getElementById("last-updated");
 
@@ -152,6 +154,20 @@
       .replaceAll("'", "&#039;");
   }
 
+  function setCardOpen(card, open) {
+    const button = card.querySelector(".day-toggle");
+    const panel = card.querySelector("div[id^='day-panel-']");
+    button.setAttribute("aria-expanded", String(open));
+    panel.hidden = !open;
+    card.classList.toggle("is-open", open);
+  }
+
+  function setAllCards(open) {
+    document.querySelectorAll("[data-day-card]").forEach((card) => {
+      setCardOpen(card, open);
+    });
+  }
+
   function renderDays(days) {
     daysContainer.innerHTML = days.map((day, index) => `
       <article class="day-card" data-day-card>
@@ -187,12 +203,9 @@
 
     document.querySelectorAll("[data-day-card]").forEach((card) => {
       const button = card.querySelector(".day-toggle");
-      const panel = card.querySelector("div[id^='day-panel-']");
       button.addEventListener("click", () => {
         const open = button.getAttribute("aria-expanded") === "true";
-        button.setAttribute("aria-expanded", String(!open));
-        panel.hidden = open;
-        card.classList.toggle("is-open", !open);
+        setCardOpen(card, !open);
       });
     });
   }
@@ -291,6 +304,9 @@
   refreshBtn.addEventListener("click", async () => {
     await loadReport();
   });
+
+  expandAllBtn.addEventListener("click", () => setAllCards(true));
+  collapseAllBtn.addEventListener("click", () => setAllCards(false));
 
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && !reportView.hidden) loadReport();
