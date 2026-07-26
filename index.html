@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BeautiX Live Report</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <section id="login-view" class="auth-card">
+      <h1>BeautiX</h1>
+      <p>כניסה לדו״ח החי</p>
+      <form id="login-form">
+        <label>
+          אימייל
+          <input id="email" type="email" autocomplete="email" required />
+        </label>
+        <label>
+          סיסמה
+          <input id="password" type="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit">כניסה</button>
+        <p id="login-error" class="error" hidden></p>
+      </form>
+    </section>
+
+    <section id="report-view" hidden>
+      <header class="topbar">
+        <div>
+          <h1>BeautiX — דו״ח חי</h1>
+          <p id="last-updated">טוען נתונים...</p>
+        </div>
+        <div class="actions">
+          <button id="refresh-btn" type="button">רענון</button>
+          <button id="logout-btn" type="button" class="secondary">יציאה</button>
+        </div>
+      </header>
+
+      <section class="grid kpis">
+        <article class="card"><span>מכירות החודש</span><strong id="sales">—</strong></article>
+        <article class="card"><span>יעד חודשי</span><strong id="sales-target">—</strong></article>
+        <article class="card"><span>עו״ש עסקי</span><strong id="checking">—</strong></article>
+        <article class="card"><span>זיכויים עתידיים</span><strong id="future-clearing">—</strong></article>
+      </section>
+
+      <section class="section">
+        <h2>מסים</h2>
+        <div class="grid four">
+          <article class="card"><span>מע״מ עסקאות מדויק</span><strong id="output-vat">—</strong></article>
+          <article class="card"><span>מע״מ תשומות משוער</span><strong id="input-vat">—</strong></article>
+          <article class="card"><span>מע״מ לאחר קיזוז</span><strong id="vat-payable">—</strong></article>
+          <article class="card"><span>רזרבת מס כוללת</span><strong id="tax-reserve">—</strong></article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>30 הימים הבאים</h2>
+        <div id="days" class="day-stack"></div>
+      </section>
+
+      <section id="report-error" class="error-box" hidden></section>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
