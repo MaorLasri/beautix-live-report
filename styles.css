@@ -48,14 +48,16 @@ button { cursor: pointer; }
   background: white;
 }
 .auth-card button,
-.actions button {
+.actions button,
+.bulk-actions button {
   border: 0;
   border-radius: 12px;
   padding: 11px 16px;
   background: var(--navy);
   color: white;
 }
-.actions .secondary { background: #e8eef2; color: var(--text); }
+.actions .secondary,
+.bulk-actions .secondary { background: #e8eef2; color: var(--text); }
 
 .topbar {
   background: linear-gradient(135deg, var(--navy), #245b73);
@@ -76,6 +78,15 @@ button { cursor: pointer; }
 .four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .section { margin-top: 24px; }
 .section h2 { margin: 0 0 14px; }
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.section-heading-row h2 { margin: 0; }
+.bulk-actions { display: flex; gap: 10px; }
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -153,6 +164,9 @@ button { cursor: pointer; }
   .topbar { align-items: flex-start; flex-direction: column; }
   .kpis, .four, .day-body { grid-template-columns: 1fr; }
   .day-kpis { grid-template-columns: repeat(2, 1fr); }
-  .actions { width: 100%; }
-  .actions button { flex: 1; }
+  .actions,
+  .bulk-actions { width: 100%; }
+  .actions button,
+  .bulk-actions button { flex: 1; }
+  .section-heading-row { align-items: stretch; flex-direction: column; }
 }
