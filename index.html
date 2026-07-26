@@ -7,14 +7,14 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>BeautiX Live Report</title>
-  <link rel="stylesheet" href="styles.css?v=20260726-2355" />
+  <link rel="stylesheet" href="styles.css?v=20260727-0015" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <main class="app-shell">
     <section id="login-view" class="auth-card">
       <div class="login-brand">
-        <img src="assets/beautix-logo.png?v=20260726-2355" alt="BeautiX" />
+        <img src="assets/beautix-logo.png?v=20260727-0015" alt="BeautiX" />
       </div>
       <p>כניסה לדו״ח החי</p>
       <form id="login-form">
@@ -28,7 +28,7 @@
     <section id="report-view" hidden>
       <header class="topbar">
         <div class="brand-block">
-          <img class="brand-logo" src="assets/beautix-logo.png?v=20260726-2355" alt="BeautiX" />
+          <img class="brand-logo" src="assets/beautix-logo.png?v=20260727-0015" alt="BeautiX" />
           <div>
             <p class="report-title">דו״ח חי</p>
             <p id="last-updated">טוען נתונים...</p>
@@ -49,54 +49,51 @@
 
       <section class="section">
         <div class="insight-grid">
-          <article class="insight-card"><span>התקדמות ליעד</span><strong id="sales-progress">—</strong><p id="sales-progress-note">—</p></article>
+          <article class="insight-card"><span>התקדמות ליעד</span><strong id="sales-progress">—</strong><div class="progress-track"><i id="sales-progress-bar"></i></div><p id="sales-progress-note">—</p></article>
           <article class="insight-card"><span>קצב מכירות יומי</span><strong id="sales-daily-rate">—</strong><p id="sales-daily-rate-note">—</p></article>
           <article class="insight-card"><span>תחזית סוף חודש</span><strong id="sales-forecast">—</strong><p id="sales-forecast-note">—</p></article>
           <article class="insight-card"><span>פער מהיעד</span><strong id="sales-gap">—</strong><p id="sales-gap-note">—</p></article>
         </div>
       </section>
 
-      <section class="section">
-        <h2>יעדים עסקיים ותקבולים מיידיים</h2>
+      <section class="section dashboard-panel">
+        <div class="section-heading-row compact-heading">
+          <div>
+            <h2>יעדים עסקיים ותקבולים מיידיים</h2>
+            <p>תמונת מצב מרוכזת של היעדים המרכזיים והמרחק מהם</p>
+          </div>
+        </div>
         <div class="business-kpi-grid">
-          <article class="business-kpi-card">
-            <span>תקבולים מיידיים בפועל</span>
-            <strong id="immediate-receipts">—</strong>
-            <p id="immediate-receipts-note">—</p>
-          </article>
-          <article class="business-kpi-card">
-            <span>יעד תקבולים מיידיים</span>
-            <strong id="immediate-receipts-target">—</strong>
-            <p id="immediate-receipts-target-note">—</p>
-          </article>
-          <article class="business-kpi-card">
-            <span>עמידה ביעד תקבולים</span>
-            <strong id="immediate-receipts-progress">—</strong>
+          <article class="business-kpi-card featured-goal">
+            <div class="metric-head"><span>תקבולים מיידיים</span><strong id="immediate-receipts-progress">—</strong></div>
+            <div class="metric-row"><b id="immediate-receipts">—</b><small>מתוך <span id="immediate-receipts-target">—</span></small></div>
+            <div class="progress-track large"><i id="immediate-progress-bar"></i></div>
             <p id="immediate-receipts-progress-note">—</p>
           </article>
           <article class="business-kpi-card">
             <span>נדרש לכל יום עבודה שנותר</span>
             <strong id="immediate-receipts-daily-needed">—</strong>
+            <div class="progress-track"><i id="daily-needed-progress-bar"></i></div>
             <p id="immediate-receipts-daily-needed-note">—</p>
           </article>
           <article class="business-kpi-card">
-            <span>הוצאות חודשיות בפועל</span>
+            <span>הוצאות חודשיות</span>
             <strong id="monthly-expenses">—</strong>
+            <div class="metric-row sub"><small>יעד חודשי</small><b id="monthly-expense-target">—</b></div>
+            <div class="progress-track"><i id="expense-progress-bar"></i></div>
             <p id="monthly-expenses-note">—</p>
           </article>
           <article class="business-kpi-card">
-            <span>יעד הוצאות חודשי</span>
-            <strong id="monthly-expense-target">—</strong>
-            <p id="monthly-expense-target-note">—</p>
-          </article>
-          <article class="business-kpi-card">
-            <span>פער מיעד העו״ש</span>
+            <span>מצב עו״ש מול היעד</span>
             <strong id="checking-gap">—</strong>
+            <div class="progress-track"><i id="checking-progress-bar"></i></div>
             <p id="checking-gap-note">—</p>
           </article>
           <article class="business-kpi-card">
             <span>רווח נקי משוער</span>
             <strong id="net-margin">—</strong>
+            <div class="metric-row sub"><small>יעד</small><b id="net-margin-target">30%</b></div>
+            <div class="progress-track"><i id="margin-progress-bar"></i></div>
             <p id="net-margin-note">—</p>
           </article>
         </div>
@@ -131,7 +128,7 @@
         <div class="insight-strip">
           <article><span>יום השפל החזוי</span><strong id="forecast-low-day">—</strong><p id="forecast-low-note">—</p></article>
           <article><span>היום עם ההוצאה הגבוהה ביותר</span><strong id="forecast-largest-expense-day">—</strong><p id="forecast-largest-expense-note">—</p></article>
-          <article><span>כיסוי התחייבויות</span><strong id="forecast-coverage">—</strong><p id="forecast-coverage-note">—</p></article>
+          <article><span>כיסוי התחייבויות</span><strong id="forecast-coverage">—</strong><div class="progress-track"><i id="coverage-progress-bar"></i></div><p id="forecast-coverage-note">—</p></article>
         </div>
 
         <div id="days" class="day-stack"></div>
@@ -141,7 +138,7 @@
     </section>
   </main>
 
-  <script src="config.js?v=20260726-2355"></script>
-  <script src="app.js?v=20260726-2355"></script>
+  <script src="config.js?v=20260727-0015"></script>
+  <script src="app.js?v=20260727-0015"></script>
 </body>
 </html>
