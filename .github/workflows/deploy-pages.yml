@@ -1,0 +1,53 @@
+name: Deploy live and test dashboards
+
+on:
+  push:
+    branches:
+      - live
+      - test-dashboard
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout workflow branch
+        uses: actions/checkout@v4
+
+      - name: Prepare combined site
+        run: |
+          rm -rf _site
+          mkdir -p _site/test
+
+          git clone --depth 1 --branch live https://github.com/${{ github.repository }}.git live-src
+          git clone --depth 1 --branch test-dashboard https://github.com/${{ github.repository }}.git test-src
+
+          rsync -a --exclude='.git' --exclude='.github' live-src/ _site/
+          rsync -a --exclude='.git' --exclude='.github' test-src/ _site/test/
+
+          touch _site/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
