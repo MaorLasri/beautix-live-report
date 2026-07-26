@@ -16,6 +16,7 @@
   const lastUpdated = document.getElementById("last-updated");
 
   let refreshTimer = null;
+  let isLoading = false;
 
   const money = (value) => {
     const number = Number(value || 0);
@@ -213,27 +214,43 @@
     setMetric("tax-reserve", report.tax?.total_tax_reserve || 0);
 
     renderDays(buildForecast(report));
-    lastUpdated.textContent = `עודכן: ${new Intl.DateTimeFormat("he-IL", {
+    lastUpdated.textContent = `עודכן מהמסד: ${new Intl.DateTimeFormat("he-IL", {
       dateStyle: "short",
-      timeStyle: "short"
+      timeStyle: "medium"
     }).format(new Date())}`;
   }
 
   async function loadReport() {
+    if (isLoading) return;
+    isLoading = true;
     reportError.hidden = true;
     refreshBtn.disabled = true;
+    refreshBtn.textContent = "מרענן...";
+
     try {
-      const { data, error } = await client.rpc(config.reportRpc);
-      if (error) throw error;
-      const report = normalizeReport(data);
-      if (!report) throw new Error("לא התקבלו נתונים מהשרת");
-      renderReport(report);
+      const { data, error } = await client.rpc(config.reportRpc, {
+        _cache_bust: Date.now()
+      });
+      if (error && error.code === "PGRST202") {
+        const fallback = await client.rpc(config.reportRpc);
+        if (fallback.error) throw fallback.error;
+        const report = normalizeReport(fallback.data);
+        if (!report) throw new Error("לא התקבלו נתונים מהשרת");
+        renderReport(report);
+      } else {
+        if (error) throw error;
+        const report = normalizeReport(data);
+        if (!report) throw new Error("לא התקבלו נתונים מהשרת");
+        renderReport(report);
+      }
     } catch (error) {
       console.error(error);
       reportError.textContent = `שגיאה בטעינת הדו״ח: ${error.message}`;
       reportError.hidden = false;
     } finally {
       refreshBtn.disabled = false;
+      refreshBtn.textContent = "רענון";
+      isLoading = false;
     }
   }
 
@@ -249,7 +266,7 @@
     reportView.hidden = false;
     await loadReport();
     if (refreshTimer) clearInterval(refreshTimer);
-    refreshTimer = setInterval(loadReport, config.refreshIntervalMs);
+    refreshTimer = setInterval(loadReport, config.refreshIntervalMs || 30000);
   }
 
   loginForm.addEventListener("submit", async (event) => {
@@ -271,10 +288,16 @@
     showLogin();
   });
 
-  refreshBtn.addEventListener("click", loadReport);
+  refreshBtn.addEventListener("click", async () => {
+    await loadReport();
+  });
 
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && !reportView.hidden) loadReport();
+  });
+
+  window.addEventListener("focus", () => {
+    if (!reportView.hidden) loadReport();
   });
 
   client.auth.onAuthStateChange((_event, session) => {
