@@ -1,10 +1,8 @@
-name: Version, backup and deploy dashboards
+name: Deploy BeautiX live and test dashboards
 
 on:
   push:
     branches:
-      - live
-      - test-dashboard
       - main
   workflow_dispatch:
 
@@ -14,68 +12,110 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: beautix-pages
+  cancel-in-progress: false
 
 jobs:
-  version-backup-deploy:
+  deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - name: Checkout workflow branch
+      - name: Checkout deployment controller
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
-      - name: Create version and backup tag
-        id: version
+      - name: Fetch live and test branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin live test-dashboard --tags --force
+
+      - name: Resolve versions and create backups
+        id: versions
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          SOURCE_BRANCH="${GITHUB_REF_NAME}"
-          SAFE_BRANCH="${SOURCE_BRANCH//\//-}"
+          LIVE_SHA="$(git rev-parse origin/live)"
+          TEST_SHA="$(git rev-parse origin/test-dashboard)"
           TIMESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
-          SHORT_SHA="$(git rev-parse --short=8 HEAD)"
-          VERSION="v${TIMESTAMP}-${SHORT_SHA}"
-          BACKUP_TAG="backup/${SAFE_BRANCH}/${VERSION}"
+          LIVE_VERSION="live-v${TIMESTAMP}-${LIVE_SHA:0:8}"
+          TEST_VERSION="test-v${TIMESTAMP}-${TEST_SHA:0:8}"
+          LIVE_TAG="backup/live/${LIVE_VERSION}"
+          TEST_TAG="backup/test-dashboard/${TEST_VERSION}"
 
-          git tag -a "$BACKUP_TAG" -m "Automated backup for ${SOURCE_BRANCH} publish ${VERSION}"
-          git push origin "$BACKUP_TAG"
+          if ! git rev-parse "$LIVE_TAG" >/dev/null 2>&1; then
+            git tag -a "$LIVE_TAG" "$LIVE_SHA" -m "Automated live backup ${LIVE_VERSION}"
+            git push origin "$LIVE_TAG"
+          fi
+
+          if ! git rev-parse "$TEST_TAG" >/dev/null 2>&1; then
+            git tag -a "$TEST_TAG" "$TEST_SHA" -m "Automated test backup ${TEST_VERSION}"
+            git push origin "$TEST_TAG"
+          fi
 
           {
-            echo "version=$VERSION"
-            echo "backup_tag=$BACKUP_TAG"
-            echo "source_branch=$SOURCE_BRANCH"
+            echo "live_sha=$LIVE_SHA"
+            echo "test_sha=$TEST_SHA"
+            echo "live_version=$LIVE_VERSION"
+            echo "test_version=$TEST_VERSION"
+            echo "live_tag=$LIVE_TAG"
+            echo "test_tag=$TEST_TAG"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Prepare combined site
+      - name: Build combined Pages site
+        shell: bash
         run: |
           set -euo pipefail
           rm -rf _site live-src test-src
           mkdir -p _site/test
 
-          git clone --depth 1 --branch live https://github.com/${{ github.repository }}.git live-src
-          git clone --depth 1 --branch test-dashboard https://github.com/${{ github.repository }}.git test-src
+          git worktree add --detach live-src "${{ steps.versions.outputs.live_sha }}"
+          git worktree add --detach test-src "${{ steps.versions.outputs.test_sha }}"
 
-          rsync -a --exclude='.git' --exclude='.github' live-src/ _site/
-          rsync -a --exclude='.git' --exclude='.github' test-src/ _site/test/
+          rsync -a --delete --exclude='.git' --exclude='.github' live-src/ _site/
+          rsync -a --delete --exclude='.git' --exclude='.github' test-src/ _site/test/
+
+          PUBLISHED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
           cat > _site/version.json <<EOF
           {
-            "version": "${{ steps.version.outputs.version }}",
-            "backup_tag": "${{ steps.version.outputs.backup_tag }}",
-            "source_branch": "${{ steps.version.outputs.source_branch }}",
-            "commit": "${GITHUB_SHA}",
-            "published_at_utc": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            "environment": "live",
+            "version": "${{ steps.versions.outputs.live_version }}",
+            "backup_tag": "${{ steps.versions.outputs.live_tag }}",
+            "source_branch": "live",
+            "commit": "${{ steps.versions.outputs.live_sha }}",
+            "published_at_utc": "${PUBLISHED_AT}"
           }
           EOF
 
-          cp _site/version.json _site/test/version.json
+          cat > _site/test/version.json <<EOF
+          {
+            "environment": "test",
+            "version": "${{ steps.versions.outputs.test_version }}",
+            "backup_tag": "${{ steps.versions.outputs.test_tag }}",
+            "source_branch": "test-dashboard",
+            "commit": "${{ steps.versions.outputs.test_sha }}",
+            "published_at_utc": "${PUBLISHED_AT}"
+          }
+          EOF
+
+          cat > _site/test/deployment-marker.json <<EOF
+          {
+            "dashboard": "test",
+            "branch": "test-dashboard",
+            "commit": "${{ steps.versions.outputs.test_sha }}",
+            "version": "${{ steps.versions.outputs.test_version }}"
+          }
+          EOF
+
           touch _site/.nojekyll
 
       - name: Configure Pages
