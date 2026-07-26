@@ -20,14 +20,15 @@
   let refreshTimer = null;
   let isLoading = false;
 
-  const money = (value) => {
-    const number = Number(value || 0);
-    return new Intl.NumberFormat("he-IL", {
-      style: "currency",
-      currency: "ILS",
-      maximumFractionDigits: 2
-    }).format(number);
-  };
+  const money = (value) => new Intl.NumberFormat("he-IL", {
+    style: "currency",
+    currency: "ILS",
+    maximumFractionDigits: 2
+  }).format(Number(value || 0));
+
+  const numberText = (value, digits = 1) => new Intl.NumberFormat("he-IL", {
+    maximumFractionDigits: digits
+  }).format(Number(value || 0));
 
   const dateText = (value) => {
     if (!value) return "—";
@@ -36,8 +37,17 @@
     return new Intl.DateTimeFormat("he-IL").format(date);
   };
 
+  const setText = (id, value, className = null) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.textContent = value;
+    element.classList.remove("pos", "neg", "warn");
+    if (className) element.classList.add(className);
+  };
+
   function setMetric(id, value, polarity = null) {
     const element = document.getElementById(id);
+    if (!element) return;
     element.textContent = money(value);
     element.classList.remove("pos", "neg");
     if (polarity === "balance") {
@@ -64,19 +74,15 @@
     const accounts = report.accounts || [];
     const daily = report.daily || [];
     const clearing = report.future_clearing || [];
-
     const checkingAccount = accounts.find((item) => item.name === "עו״ש עסק – הבינלאומי");
     let balance = Number(checkingAccount?.balance || 0);
-
     const eventsByDate = new Map();
+
     const addEvent = (date, event) => {
       if (!date) return;
       const key = String(date).slice(0, 10);
       const list = eventsByDate.get(key) || [];
-      list.push({
-        ...event,
-        type: normalizeEntryType(event.type)
-      });
+      list.push({ ...event, type: normalizeEntryType(event.type) });
       eventsByDate.set(key, list);
     };
 
@@ -108,23 +114,11 @@
       current.setDate(start.getDate() + i);
       const key = current.toISOString().slice(0, 10);
       const entries = eventsByDate.get(key) || [];
-      const income = entries
-        .filter((entry) => entry.type === "income")
-        .reduce((sum, entry) => sum + entry.amount, 0);
-      const expense = entries
-        .filter((entry) => entry.type === "expense")
-        .reduce((sum, entry) => sum + entry.amount, 0);
+      const income = entries.filter((entry) => entry.type === "income").reduce((sum, entry) => sum + entry.amount, 0);
+      const expense = entries.filter((entry) => entry.type === "expense").reduce((sum, entry) => sum + entry.amount, 0);
       const net = income - expense;
       balance += net;
-
-      days.push({
-        date: key,
-        entries,
-        income,
-        expense,
-        net,
-        projectedBalance: balance
-      });
+      days.push({ date: key, entries, income, expense, net, projectedBalance: balance });
     }
 
     return days;
@@ -132,10 +126,7 @@
 
   function renderEntries(entries, type) {
     const filtered = entries.filter((entry) => entry.type === type);
-    if (!filtered.length) {
-      return '<li class="empty">אין תנועות</li>';
-    }
-
+    if (!filtered.length) return '<li class="empty">אין תנועות</li>';
     return filtered.map((entry) => `
       <li>
         <span>${escapeHtml(entry.description)}</span>
@@ -163,9 +154,7 @@
   }
 
   function setAllCards(open) {
-    document.querySelectorAll("[data-day-card]").forEach((card) => {
-      setCardOpen(card, open);
-    });
+    document.querySelectorAll("[data-day-card]").forEach((card) => setCardOpen(card, open));
   }
 
   function renderDays(days) {
@@ -174,10 +163,7 @@
         <button class="day-toggle" type="button" aria-expanded="false" aria-controls="day-panel-${index}">
           <div class="summary-date">
             <span class="chevron">⌄</span>
-            <div>
-              <h3>${dateText(day.date)}</h3>
-              <small>${day.entries.length} תנועות</small>
-            </div>
+            <div><h3>${dateText(day.date)}</h3><small>${day.entries.length} תנועות</small></div>
           </div>
           <div class="day-kpis">
             <div><span>הכנסות</span><strong class="pos">${money(day.income)}</strong></div>
@@ -188,14 +174,8 @@
         </button>
         <div id="day-panel-${index}" hidden>
           <div class="day-body">
-            <section>
-              <h4>הכנסות</h4>
-              <ul>${renderEntries(day.entries, "income")}</ul>
-            </section>
-            <section>
-              <h4>הוצאות</h4>
-              <ul>${renderEntries(day.entries, "expense")}</ul>
-            </section>
+            <section><h4>הכנסות</h4><ul>${renderEntries(day.entries, "income")}</ul></section>
+            <section><h4>הוצאות</h4><ul>${renderEntries(day.entries, "expense")}</ul></section>
           </div>
         </div>
       </article>
@@ -210,23 +190,69 @@
     });
   }
 
+  function renderSalesInsights(report) {
+    const sales = Number(report.sales?.income || 0);
+    const target = Number(report.settings?.monthly_sales_target || report.sales?.target || 0);
+    const latestDate = report.sales?.latest ? new Date(`${String(report.sales.latest).slice(0, 10)}T00:00:00`) : new Date();
+    const dayOfMonth = Math.max(1, latestDate.getDate());
+    const monthEnd = new Date(latestDate.getFullYear(), latestDate.getMonth() + 1, 0).getDate();
+    const dailyRate = sales / dayOfMonth;
+    const forecast = dailyRate * monthEnd;
+    const progress = target > 0 ? (sales / target) * 100 : 0;
+    const gap = target - sales;
+
+    setText("sales-progress", `${numberText(progress, 1)}%`, progress >= 100 ? "pos" : progress >= 80 ? "warn" : null);
+    setText("sales-progress-note", progress >= 100 ? "היעד החודשי הושג" : `נותרו ${money(Math.max(gap, 0))} ליעד`);
+    setText("sales-daily-rate", money(dailyRate));
+    setText("sales-daily-rate-note", `ממוצע לפי ${dayOfMonth} ימים בחודש`);
+    setText("sales-forecast", money(forecast), forecast >= target ? "pos" : "warn");
+    setText("sales-forecast-note", forecast >= target ? "בקצב הנוכחי היעד צפוי להישבר" : "בקצב הנוכחי צפוי חוסר מול היעד");
+    setText("sales-gap", money(Math.abs(gap)), gap <= 0 ? "pos" : "neg");
+    setText("sales-gap-note", gap <= 0 ? `מעל היעד ב־${money(Math.abs(gap))}` : `נדרש קצב של ${money(gap / Math.max(monthEnd - dayOfMonth, 1))} ליום עד סוף החודש`);
+  }
+
+  function renderCashflowInsights(days, checkingBalance) {
+    const totalIncome = days.reduce((sum, day) => sum + day.income, 0);
+    const totalExpense = days.reduce((sum, day) => sum + day.expense, 0);
+    const net = totalIncome - totalExpense;
+    const endingBalance = days.at(-1)?.projectedBalance ?? checkingBalance;
+    const lowDay = days.reduce((lowest, day) => !lowest || day.projectedBalance < lowest.projectedBalance ? day : lowest, null);
+    const largestExpenseDay = days.reduce((largest, day) => !largest || day.expense > largest.expense ? day : largest, null);
+    const coverage = totalExpense > 0 ? totalIncome / totalExpense : 0;
+
+    setText("forecast-income", money(totalIncome), "pos");
+    setText("forecast-expense", money(totalExpense), totalExpense > 0 ? "neg" : null);
+    setText("forecast-net", money(net), net >= 0 ? "pos" : "neg");
+    setText("forecast-ending-balance", money(endingBalance), endingBalance >= 0 ? "pos" : "neg");
+
+    setText("forecast-low-day", lowDay ? dateText(lowDay.date) : "—", lowDay?.projectedBalance >= 0 ? "pos" : "neg");
+    setText("forecast-low-note", lowDay ? `יתרה חזויה: ${money(lowDay.projectedBalance)}` : "אין נתונים");
+    setText("forecast-largest-expense-day", largestExpenseDay && largestExpenseDay.expense > 0 ? dateText(largestExpenseDay.date) : "—");
+    setText("forecast-largest-expense-note", largestExpenseDay && largestExpenseDay.expense > 0 ? `הוצאה צפויה: ${money(largestExpenseDay.expense)}` : "אין הוצאות מתוזמנות");
+    setText("forecast-coverage", `${numberText(coverage * 100, 0)}%`, coverage >= 1 ? "pos" : "neg");
+    setText("forecast-coverage-note", coverage >= 1 ? "ההכנסות הצפויות מכסות את ההוצאות" : `חסר כיסוי של ${money(Math.max(totalExpense - totalIncome, 0))}`);
+  }
+
   function renderReport(report) {
     const accounts = report.accounts || [];
     const checkingAccount = accounts.find((item) => item.name === "עו״ש עסק – הבינלאומי");
-    const futureClearing = (report.future_clearing || [])
-      .filter((item) => item.status === "expected")
-      .reduce((sum, item) => sum + Number(item.net || 0), 0);
+    const checkingBalance = Number(checkingAccount?.balance || 0);
+    const futureClearing = (report.future_clearing || []).filter((item) => item.status === "expected").reduce((sum, item) => sum + Number(item.net || 0), 0);
 
     setMetric("sales", report.sales?.income || 0);
     setMetric("sales-target", report.settings?.monthly_sales_target || 0);
-    setMetric("checking", checkingAccount?.balance || 0, "balance");
+    setMetric("checking", checkingBalance, "balance");
     setMetric("future-clearing", futureClearing);
     setMetric("output-vat", report.tax?.output_vat_exact || 0);
     setMetric("input-vat", report.tax?.input_vat_estimate || 0);
     setMetric("vat-payable", report.tax?.vat_payable_estimate || 0);
     setMetric("tax-reserve", report.tax?.total_tax_reserve || 0);
 
-    renderDays(buildForecast(report));
+    const days = buildForecast(report);
+    renderSalesInsights(report);
+    renderCashflowInsights(days, checkingBalance);
+    renderDays(days);
+
     lastUpdated.textContent = `עודכן מהמסד: ${new Intl.DateTimeFormat("he-IL", {
       dateStyle: "short",
       timeStyle: "medium"
@@ -239,11 +265,8 @@
     reportError.hidden = true;
     refreshBtn.disabled = true;
     refreshBtn.textContent = "מרענן...";
-
     try {
-      const { data, error } = await client.rpc(config.reportRpc, {
-        _cache_bust: Date.now()
-      });
+      const { data, error } = await client.rpc(config.reportRpc, { _cache_bust: Date.now() });
       if (error && error.code === "PGRST202") {
         const fallback = await client.rpc(config.reportRpc);
         if (fallback.error) throw fallback.error;
@@ -301,10 +324,7 @@
     showLogin();
   });
 
-  refreshBtn.addEventListener("click", async () => {
-    await loadReport();
-  });
-
+  refreshBtn.addEventListener("click", loadReport);
   expandAllBtn.addEventListener("click", () => setAllCards(true));
   collapseAllBtn.addEventListener("click", () => setAllCards(false));
 
