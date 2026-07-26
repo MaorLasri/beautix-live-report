@@ -28,7 +28,8 @@
 
   const dateText = (value) => {
     if (!value) return "—";
-    const date = new Date(`${value}T00:00:00`);
+    const normalized = String(value).slice(0, 10);
+    const date = new Date(`${normalized}T00:00:00`);
     return new Intl.DateTimeFormat("he-IL").format(date);
   };
 
@@ -49,9 +50,16 @@
     return payload;
   }
 
+  function normalizeEntryType(type) {
+    const normalized = String(type || "").toLowerCase();
+    if (["income", "receipt", "credit"].includes(normalized)) return "income";
+    if (["expense", "loan_payment", "debit"].includes(normalized)) return "expense";
+    return normalized;
+  }
+
   function buildForecast(report) {
     const accounts = report.accounts || [];
-    const scheduled = report.scheduled || [];
+    const daily = report.daily || [];
     const clearing = report.future_clearing || [];
 
     const checkingAccount = accounts.find((item) => item.name === "עו״ש עסק – הבינלאומי");
@@ -60,32 +68,22 @@
     const eventsByDate = new Map();
     const addEvent = (date, event) => {
       if (!date) return;
-      const list = eventsByDate.get(date) || [];
-      list.push(event);
-      eventsByDate.set(date, list);
+      const key = String(date).slice(0, 10);
+      const list = eventsByDate.get(key) || [];
+      list.push({
+        ...event,
+        type: normalizeEntryType(event.type)
+      });
+      eventsByDate.set(key, list);
     };
 
-    scheduled.forEach((item) => {
-      if (item.scope !== "business") return;
-      const breakdown = Array.isArray(item.metadata?.breakdown)
-        ? item.metadata.breakdown
-        : null;
-
-      if (breakdown?.length) {
-        breakdown.forEach((line) => addEvent(item.date, {
-          type: "expense",
-          description: line.item,
-          amount: Number(line.amount || 0),
-          source: item.description || "התחייבות מתוזמנת"
-        }));
-      } else {
-        addEvent(item.date, {
-          type: "expense",
-          description: item.description || "הוצאה",
-          amount: Number(item.amount || 0),
-          source: item.source_reference || "Supabase"
-        });
-      }
+    daily.forEach((day) => {
+      (day.entries || []).forEach((entry) => addEvent(day.date, {
+        type: entry.type,
+        description: entry.description || "תנועה",
+        amount: Math.abs(Number(entry.amount || 0)),
+        source: entry.source || "Supabase"
+      }));
     });
 
     clearing.forEach((item) => {
@@ -93,7 +91,7 @@
       addEvent(item.date, {
         type: "income",
         description: "זיכוי סליקה עתידי",
-        amount: Number(item.net || 0),
+        amount: Math.abs(Number(item.net || 0)),
         source: item.source_reference || "Supabase"
       });
     });
