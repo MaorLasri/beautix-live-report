@@ -7,13 +7,13 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>BeautiX Test Dashboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260727-0340" />
+  <link rel="stylesheet" href="styles.css?v=20260727-0345" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <main class="app-shell">
     <section id="login-view" class="auth-card">
-      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-0340" alt="BeautiX" /></div>
+      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-0345" alt="BeautiX" /></div>
       <p>כניסה לדו״ח הבדיקה</p>
       <form id="login-form">
         <label>אימייל<input id="email" type="email" autocomplete="email" required /></label>
@@ -26,8 +26,8 @@
     <section id="report-view" hidden>
       <header class="topbar">
         <div class="brand-block">
-          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-0340" alt="BeautiX" /></div>
-          <div><p class="report-title">דשבורד בדיקה</p><p id="last-updated">טוען נתונים...</p></div>
+          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-0345" alt="BeautiX" /></div>
+          <div><p class="report-title">דשבורד בדיקה <strong style="display:inline-block;margin-right:8px;padding:4px 10px;border-radius:999px;background:#fff;color:#d71873;font-size:13px;letter-spacing:.08em;">TEST</strong></p><p id="last-updated">טוען נתונים...</p></div>
         </div>
         <div class="actions"><button id="refresh-btn" type="button">רענון</button><button id="logout-btn" type="button" class="secondary">יציאה</button></div>
       </header>
@@ -105,14 +105,16 @@
       </section>
 
       <section class="dashboard-section cashflow-section">
-        <div class="section-heading-row"><div class="section-title-block"><span class="section-kicker">תזרים מזומנים</span><h2>30 הימים הבאים</h2><p>המבנה היומי נשאר כפי שהוא</p></div><div class="bulk-actions"><button id="expand-all-btn" type="button">הרחב הכל</button><button id="collapse-all-btn" type="button" class="secondary">כווץ הכל</button></div></div>
+        <div class="section-heading-row"><div class="section-title-block"><span class="section-kicker">תזרים מזומנים</span><h2>30 הימים הבאים</h2><p>המבנה היומי נשאר כפי שהוא</p></div><div class="bulk-actions" aria-label="שליטה בכרטיסי הימים"><button id="expand-all-btn" type="button">הרחב הכל</button><button id="collapse-all-btn" type="button" class="secondary">כווץ הכל</button></div></div>
         <div class="cashflow-summary-grid"><article class="summary-card"><span>הכנסות צפויות</span><strong id="forecast-income">—</strong></article><article class="summary-card"><span>הוצאות צפויות</span><strong id="forecast-expense">—</strong></article><article class="summary-card"><span>תזרים נטו</span><strong id="forecast-net">—</strong></article><article class="summary-card"><span>יתרה חזויה בסוף התקופה</span><strong id="forecast-ending-balance">—</strong></article></div>
         <div id="days" class="day-stack"></div>
       </section>
+
       <section id="report-error" class="error-box" hidden></section>
     </section>
   </main>
-  <script src="config.js?v=20260727-0340"></script>
-  <script src="app.js?v=20260727-0340"></script>
+
+  <script src="config.js?v=20260727-0345"></script>
+  <script src="app.js?v=20260727-0345"></script>
 </body>
 </html>
