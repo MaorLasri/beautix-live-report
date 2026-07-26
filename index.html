@@ -7,13 +7,15 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>BeautiX Live Report</title>
-  <link rel="stylesheet" href="styles.css?v=20260726-2205" />
+  <link rel="stylesheet" href="styles.css?v=20260726-2235" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <main class="app-shell">
     <section id="login-view" class="auth-card">
-      <h1>BeautiX</h1>
+      <div class="login-brand">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKACAYAAAB/cZl+AAAA" alt="BeautiX" />
+      </div>
       <p>כניסה לדו״ח החי</p>
       <form id="login-form">
         <label>
@@ -31,9 +33,12 @@
 
     <section id="report-view" hidden>
       <header class="topbar">
-        <div>
-          <h1>BeautiX — דו״ח חי</h1>
-          <p id="last-updated">טוען נתונים...</p>
+        <div class="brand-block">
+          <img class="brand-logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKACAYAAAB/cZl+AAAA" alt="BeautiX" />
+          <div>
+            <p class="report-title">דו״ח חי</p>
+            <p id="last-updated">טוען נתונים...</p>
+          </div>
         </div>
         <div class="actions">
           <button id="refresh-btn" type="button">רענון</button>
@@ -46,6 +51,31 @@
         <article class="card"><span>יעד חודשי</span><strong id="sales-target">—</strong></article>
         <article class="card"><span>עו״ש עסקי</span><strong id="checking">—</strong></article>
         <article class="card"><span>זיכויים עתידיים</span><strong id="future-clearing">—</strong></article>
+      </section>
+
+      <section class="section">
+        <div class="insight-grid">
+          <article class="insight-card">
+            <span>התקדמות ליעד</span>
+            <strong id="sales-progress">—</strong>
+            <p id="sales-progress-note">—</p>
+          </article>
+          <article class="insight-card">
+            <span>קצב מכירות יומי</span>
+            <strong id="sales-daily-rate">—</strong>
+            <p id="sales-daily-rate-note">—</p>
+          </article>
+          <article class="insight-card">
+            <span>תחזית סוף חודש</span>
+            <strong id="sales-forecast">—</strong>
+            <p id="sales-forecast-note">—</p>
+          </article>
+          <article class="insight-card">
+            <span>פער מהיעד</span>
+            <strong id="sales-gap">—</strong>
+            <p id="sales-gap-note">—</p>
+          </article>
+        </div>
       </section>
 
       <section class="section">
@@ -66,6 +96,20 @@
             <button id="collapse-all-btn" type="button" class="secondary">כווץ הכל</button>
           </div>
         </div>
+
+        <div class="cashflow-summary-grid">
+          <article class="summary-card"><span>הכנסות צפויות</span><strong id="forecast-income">—</strong></article>
+          <article class="summary-card"><span>הוצאות צפויות</span><strong id="forecast-expense">—</strong></article>
+          <article class="summary-card"><span>תזרים נטו</span><strong id="forecast-net">—</strong></article>
+          <article class="summary-card"><span>יתרה חזויה בסוף התקופה</span><strong id="forecast-ending-balance">—</strong></article>
+        </div>
+
+        <div class="insight-strip">
+          <article><span>יום השפל החזוי</span><strong id="forecast-low-day">—</strong><p id="forecast-low-note">—</p></article>
+          <article><span>היום עם ההוצאה הגבוהה ביותר</span><strong id="forecast-largest-expense-day">—</strong><p id="forecast-largest-expense-note">—</p></article>
+          <article><span>כיסוי התחייבויות</span><strong id="forecast-coverage">—</strong><p id="forecast-coverage-note">—</p></article>
+        </div>
+
         <div id="days" class="day-stack"></div>
       </section>
 
@@ -73,7 +117,7 @@
     </section>
   </main>
 
-  <script src="config.js?v=20260726-2205"></script>
-  <script src="app.js?v=20260726-2205"></script>
+  <script src="config.js?v=20260726-2235"></script>
+  <script src="app.js?v=20260726-2235"></script>
 </body>
 </html>
