@@ -8,13 +8,35 @@
   const loginView = document.getElementById("login-view");
   const appView = document.getElementById("app-view");
   const reportView = document.getElementById("report-view");
+  const loginPanel = document.getElementById("login-panel");
+  const forgotPanel = document.getElementById("forgot-panel");
+  const recoveryPanel = document.getElementById("recovery-panel");
   const loginForm = document.getElementById("login-form");
   const loginSubmit = document.getElementById("login-submit");
   const loginError = document.getElementById("login-error");
+  const forgotPasswordAction = document.getElementById("forgot-password-action");
+  const forgotForm = document.getElementById("forgot-form");
+  const forgotEmail = document.getElementById("forgot-email");
+  const forgotSubmit = document.getElementById("forgot-submit");
+  const forgotBack = document.getElementById("forgot-back");
+  const forgotStatus = document.getElementById("forgot-status");
+  const recoveryForm = document.getElementById("recovery-form");
+  const recoverySubmit = document.getElementById("recovery-submit");
+  const recoveryStatus = document.getElementById("recovery-status");
+  const newPassword = document.getElementById("new-password");
+  const confirmPassword = document.getElementById("confirm-password");
   const reportError = document.getElementById("report-error");
   const refreshBtn = document.getElementById("refresh-btn");
   const authAction = document.getElementById("auth-action");
   const activeUser = document.getElementById("active-user");
+  const profileRole = document.getElementById("profile-role");
+  const profileMenuButton = document.getElementById("profile-menu-button");
+  const profileMenu = document.getElementById("profile-menu");
+  const profileAvatar = document.getElementById("profile-avatar");
+  const profileAvatarFallback = document.getElementById("profile-avatar-fallback");
+  const editProfileAction = document.getElementById("edit-profile-action");
+  const changePasswordAction = document.getElementById("change-password-action");
+  const sessionAction = document.getElementById("session-action");
   const rememberDevice = document.getElementById("remember-device");
   const passwordInput = document.getElementById("password");
   const togglePassword = document.getElementById("toggle-password");
@@ -38,23 +60,62 @@
   const normalizeEntryType = (type) => { const t = String(type || "").toLowerCase(); if (["income","receipt","credit"].includes(t)) return "income"; if (["expense","loan_payment","debit"].includes(t)) return "expense"; return t; };
   const escapeHtml = (value) => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 
-  async function resolveDisplayName(session){
-    const fallback=session?.user?.email||"משתמש מחובר";
+  function setAuthPanel(name){
+    loginPanel.hidden=name!=="login";
+    forgotPanel.hidden=name!=="forgot";
+    recoveryPanel.hidden=name!=="recovery";
+    loginError.hidden=true;
+    forgotStatus.hidden=true;
+    recoveryStatus.hidden=true;
+  }
+
+  function closeProfileMenu(){
+    profileMenu.hidden=true;
+    profileMenuButton.setAttribute("aria-expanded","false");
+  }
+
+  function openProfileMenu(){
+    profileMenu.hidden=false;
+    profileMenuButton.setAttribute("aria-expanded","true");
+  }
+
+  function toggleProfileMenu(){
+    profileMenu.hidden?openProfileMenu():closeProfileMenu();
+  }
+
+  async function loadProfile(session){
+    const fallbackName=session?.user?.email||"משתמש מחובר";
     const userId=session?.user?.id;
-    if(!userId) return fallback;
+    const profile={display_name:fallbackName,role:"viewer",avatar_path:null,is_active:true};
+    if(!userId) return profile;
     try{
-      const {data,error}=await client.from("app_users").select("display_name,is_active").eq("auth_user_id",userId).maybeSingle();
+      const {data,error}=await client.from("app_users").select("display_name,role,avatar_path,is_active").eq("auth_user_id",userId).maybeSingle();
       if(error) throw error;
-      if(data?.is_active===false) return "משתמש לא פעיל";
-      return data?.display_name?.trim()||fallback;
+      if(data) Object.assign(profile,data);
+      return profile;
     }catch(error){
       console.warn("Unable to load user profile",error);
-      return fallback;
+      return profile;
     }
   }
 
   async function updateActiveUser(session){
-    activeUser.textContent=await resolveDisplayName(session);
+    const profile=await loadProfile(session);
+    activeUser.textContent=profile.is_active===false?"משתמש לא פעיל":profile.display_name?.trim()||session?.user?.email||"משתמש מחובר";
+    profileRole.textContent=profile.role||"viewer";
+    profileAvatar.hidden=true;
+    profileAvatarFallback.hidden=false;
+    if(profile.avatar_path){
+      try{
+        const {data,error}=await client.storage.from("avatars").createSignedUrl(profile.avatar_path,3600);
+        if(error) throw error;
+        profileAvatar.src=data.signedUrl;
+        profileAvatar.hidden=false;
+        profileAvatarFallback.hidden=true;
+      }catch(error){
+        console.warn("Unable to load avatar",error);
+      }
+    }
   }
 
   function buildForecast(report) {
@@ -125,7 +186,7 @@
     assetContainer.querySelectorAll(".asset-toggle").forEach((button)=>button.addEventListener("click",()=>{const panel=button.nextElementSibling;const open=button.getAttribute("aria-expanded")!=="true";button.setAttribute("aria-expanded",String(open));button.textContent=open?"הסתר פירוט":"הצג פירוט";panel.hidden=!open;}));
   }
 
-  function renderManagementOverview(report,cashflow){ const sales=Number(report.sales?.income||0),target=Number(report.settings?.monthly_sales_target||report.sales?.target||0),checking=Number((report.accounts||[]).find((x)=>x.name==="עו״ש עסק – הבינלאומי")?.balance||0),tax=Number(report.tax?.total_tax_reserve||0),salesScore=target>0?Math.min(sales/target,1):0,cashScore=checking>=0?1:0,taxScore=tax>0?1:.5,coverageScore=Math.min(cashflow.coverage,1),score=Math.round((salesScore*.35+cashScore*.25+taxScore*.15+coverageScore*.25)*100); setText("health-score",`${score}/100`,score>=80?"pos":score>=60?"warn":"neg");setText("health-score-note",score>=80?"העסק מציג תמונה חזקה ברוב המדדים":score>=60?"מצב ביניים: יש חוזקות לצד פערים":"נדרשת פעולה ממוקדת בנזילות ובכיסוי"); if(checking<0){setText("primary-risk","עו״ש שלילי","neg");setText("primary-risk-note",`יתרה נוכחית ${money(checking)}`);}else if(cashflow.coverage<1){setText("primary-risk","כיסוי תזרימי חלקי","warn");setText("primary-risk-note",`כיסוי של ${numberText(cashflow.coverage*100,0)}% בלבד`);}else{setText("primary-risk","אין סיכון מיידי","pos");setText("primary-risk-note","המדדים המרכזיים אינם מצביעים על חריגה מיידית");} setText("health-improvement",checking<10000?"לחזק יתרת עו״ש":salesScore<1?"להאיץ מכירות":"לשמור על הקצב",checking<10000?"warn":salesScore<1?"warn":"pos"); setText("health-improvement-note",checking<10000?"יעד עו״ש פעיל: ₪10,000":salesScore<1?`נותרו ${money(Math.max(target-sales,0))} ליעד`:"להמשיך לעקוב אחר גבייה והוצאות"); if(cashflow.endingBalance<0){setText("primary-insight","פער תזרימי צפוי","neg");setText("primary-insight-note",`היתרה החזויה בסוף התקופה היא ${money(cashflow.endingBalance)}`);}else if(salesScore<1){setText("primary-insight","יעד המכירות עדיין פעיל","warn");setText("primary-insight-note",`נותרו ${money(Math.max(target-sales,0))} ליעד`);}else{setText("primary-insight","יעד המכירות הושג","pos");setText("primary-insight-note",`המכירות מעל היעד ב־${money(sales-target)}`);} }
+  function renderManagementOverview(report,cashflow){ const sales=Number(report.sales?.income||0),target=Number(report.settings?.monthly_sales_target||report.sales?.target||0),checking=Number((report.accounts||[]).find((x)=>x.name==="עו״ש עסק – הבינלאומי")?.balance||0),tax=Number(report.tax?.total_tax_reserve||0),salesScore=target>0?Math.min(sales/target,1):0,cashScore=checking>=0?1:0,taxScore=tax>0?1:.5,coverageScore=Math.min(cashflow.coverage,1),score=Math.round((salesScore*.35+cashScore*.25+taxScore*.15+coverageScore*.25)*100); setText("health-score",`${score}/100`,score>=80?"pos":score>=60?"warn":"neg");setText("health-score-note",score>=80?"העסק מציג תמונה חזקה ברוב המדדים":score>=60?"מצב ביניים: יש חוזקות לצד פערים":"נדרשת פעולה ממוקדת בנזילות ובכיסוי"); if(checking<0){setText("primary-risk","עו״ש שלילי","neg");setText("primary-risk-note",`יתרה נוכחית ${money(checking)}`);}else if(cashflow.coverage<1){setText("primary-risk","כיסוי תזרימי חלקי","warn");setText("primary-risk-note",`כיסוי של ${numberText(cashflow.coverage*100,0)}% בלבד`);}else{setText("primary-risk","אין סיכון מיידי","pos");setText("primary-risk-note","המדדים המרכזיים אינם מצביעים על חריגה מיידית");} const improvementText=checking<10000?"לחזק יתרת עו״ש":salesScore<1?"להאיץ מכירות":"לשמור על הקצב"; const improvementClass=checking<10000||salesScore<1?"warn":"pos"; const improvementNote=checking<10000?"יעד עו״ש פעיל: ₪10,000":salesScore<1?`נותרו ${money(Math.max(target-sales,0))} ליעד`:"להמשיך לעקוב אחר גבייה והוצאות"; setText("health-improvement",improvementText,improvementClass);setText("health-improvement-note",improvementNote); if(cashflow.endingBalance<0){setText("primary-insight","פער תזרימי צפוי","neg");setText("primary-insight-note",`היתרה החזויה בסוף התקופה היא ${money(cashflow.endingBalance)}`);}else if(salesScore<1){setText("primary-insight","יעד המכירות עדיין פעיל","warn");setText("primary-insight-note",`נותרו ${money(Math.max(target-sales,0))} ליעד`);}else{setText("primary-insight","יעד המכירות הושג","pos");setText("primary-insight-note",`המכירות מעל היעד ב־${money(sales-target)}`);} }
 
   function renderReport(report){
     const accounts=report.accounts||[],checkingAccount=accounts.find((x)=>x.name==="עו״ש עסק – הבינלאומי"),deposit=accounts.find((x)=>x.name==="פיקדון בבינלאומי"),fx=accounts.find((x)=>x.name==="יתרות מט״ח"),checking=Number(checkingAccount?.balance||0),future=(report.future_clearing||[]).filter((x)=>x.status==="expected").reduce((s,x)=>s+Number(x.net||0),0);
@@ -134,10 +195,10 @@
     lastUpdated.textContent=`עודכן מהמסד: ${new Intl.DateTimeFormat("he-IL",{dateStyle:"short",timeStyle:"medium"}).format(new Date())}`;
   }
 
-  async function loadReport(){ if(isLoading)return; isLoading=true; reportError.hidden=true; refreshBtn.disabled=true; refreshBtn.textContent="מרענן..."; try{ const {data,error}=await client.rpc(config.reportRpc,{_cache_bust:Date.now()}); if(error&&error.code==="PGRST202"){const fallback=await client.rpc(config.reportRpc); if(fallback.error) throw fallback.error; const report=normalizeReport(fallback.data); if(!report) throw new Error("לא התקבלו נתונים מהשרת"); renderReport(report);}else{if(error)throw error;const report=normalizeReport(data);if(!report)throw new Error("לא התקבלו נתונים מהשרת");renderReport(report);}}catch(error){console.error(error);reportError.textContent=`שגיאה בטעינת הדו״ח: ${error.message}`;reportError.hidden=false;}finally{refreshBtn.disabled=false;refreshBtn.textContent="רענון";isLoading=false;} }
+  async function loadReport(){ if(isLoading)return; isLoading=true; reportError.hidden=true; refreshBtn.disabled=true; refreshBtn.textContent="⟳"; try{ const {data,error}=await client.rpc(config.reportRpc,{_cache_bust:Date.now()}); if(error&&error.code==="PGRST202"){const fallback=await client.rpc(config.reportRpc); if(fallback.error) throw fallback.error; const report=normalizeReport(fallback.data); if(!report) throw new Error("לא התקבלו נתונים מהשרת"); renderReport(report);}else{if(error)throw error;const report=normalizeReport(data);if(!report)throw new Error("לא התקבלו נתונים מהשרת");renderReport(report);}}catch(error){console.error(error);reportError.textContent=`שגיאה בטעינת הדו״ח: ${error.message}`;reportError.hidden=false;}finally{refreshBtn.disabled=false;refreshBtn.textContent="↻";isLoading=false;} }
 
   function stopRefresh(){ if(refreshTimer)clearInterval(refreshTimer); refreshTimer=null; }
-  function showLogin(){ stopRefresh(); appView.hidden=true; loginView.hidden=false; reportView.hidden=false; loginSubmit.disabled=false; loginSubmit.textContent="כניסה"; activeUser.textContent="—"; }
+  function showLogin(){ stopRefresh(); closeProfileMenu(); appView.hidden=true; loginView.hidden=false; reportView.hidden=false; loginSubmit.disabled=false; loginSubmit.textContent="כניסה"; activeUser.textContent="—"; setAuthPanel("login"); }
   async function showReport(session){ loginView.hidden=true; appView.hidden=false; reportView.hidden=false; await updateActiveUser(session); await loadReport(); stopRefresh(); refreshTimer=setInterval(loadReport,config.refreshIntervalMs||30000); }
   function friendlyAuthError(error){ if(!error) return "לא ניתן להתחבר כרגע."; if(error.message?.toLowerCase().includes("invalid login credentials")) return "האימייל או הסיסמה אינם נכונים."; if(error.message?.toLowerCase().includes("email not confirmed")) return "כתובת האימייל עדיין לא אושרה."; return `ההתחברות נכשלה: ${error.message}`; }
 
@@ -164,11 +225,69 @@
     }
   });
 
+  forgotPasswordAction.addEventListener("click",()=>{
+    forgotEmail.value=document.getElementById("email").value.trim();
+    setAuthPanel("forgot");
+  });
+  forgotBack.addEventListener("click",()=>setAuthPanel("login"));
+  forgotForm.addEventListener("submit",async(event)=>{
+    event.preventDefault();
+    forgotSubmit.disabled=true;
+    forgotStatus.hidden=true;
+    try{
+      const redirectTo=new URL("./",window.location.href).href;
+      const {error}=await client.auth.resetPasswordForEmail(forgotEmail.value.trim(),{redirectTo});
+      if(error) throw error;
+      forgotStatus.textContent="קישור לאיפוס סיסמה נשלח. בדוק את תיבת האימייל שלך.";
+      forgotStatus.className="auth-status success";
+      forgotStatus.hidden=false;
+    }catch(error){
+      forgotStatus.textContent=`שליחת הקישור נכשלה: ${error.message}`;
+      forgotStatus.className="auth-status error";
+      forgotStatus.hidden=false;
+    }finally{
+      forgotSubmit.disabled=false;
+    }
+  });
+
+  recoveryForm.addEventListener("submit",async(event)=>{
+    event.preventDefault();
+    recoveryStatus.hidden=true;
+    if(newPassword.value!==confirmPassword.value){
+      recoveryStatus.textContent="הסיסמאות אינן תואמות.";
+      recoveryStatus.className="auth-status error";
+      recoveryStatus.hidden=false;
+      return;
+    }
+    recoverySubmit.disabled=true;
+    try{
+      const {error}=await client.auth.updateUser({password:newPassword.value});
+      if(error) throw error;
+      recoveryStatus.textContent="הסיסמה עודכנה בהצלחה. ניתן להמשיך למערכת.";
+      recoveryStatus.className="auth-status success";
+      recoveryStatus.hidden=false;
+      const {data}=await client.auth.getSession();
+      if(data.session) setTimeout(()=>showReport(data.session),700);
+    }catch(error){
+      recoveryStatus.textContent=`עדכון הסיסמה נכשל: ${error.message}`;
+      recoveryStatus.className="auth-status error";
+      recoveryStatus.hidden=false;
+    }finally{
+      recoverySubmit.disabled=false;
+    }
+  });
+
   togglePassword.addEventListener("click",()=>{const visible=passwordInput.type==="text";passwordInput.type=visible?"password":"text";togglePassword.textContent=visible?"הצג סיסמה":"הסתר סיסמה";togglePassword.setAttribute("aria-pressed",String(!visible));});
-  authAction.addEventListener("click",async()=>{ await client.auth.signOut(); showLogin(); });
+  authAction.addEventListener("click",async()=>{ closeProfileMenu(); await client.auth.signOut(); showLogin(); });
   refreshBtn.addEventListener("click",loadReport);
   expandAllBtn.addEventListener("click",()=>setAllCards(true));
   collapseAllBtn.addEventListener("click",()=>setAllCards(false));
+  profileMenuButton.addEventListener("click",toggleProfileMenu);
+  document.addEventListener("click",(event)=>{ if(!event.target.closest(".profile-menu-wrap")) closeProfileMenu(); });
+  document.addEventListener("keydown",(event)=>{ if(event.key==="Escape") closeProfileMenu(); });
+  editProfileAction.addEventListener("click",()=>{ closeProfileMenu(); alert("עריכת פרופיל תתווסף במסך נפרד בשלב הבא."); });
+  changePasswordAction.addEventListener("click",()=>{ closeProfileMenu(); loginView.hidden=false; appView.hidden=true; setAuthPanel("recovery"); });
+  sessionAction.addEventListener("click",async()=>{ sessionAction.disabled=true; try{ const {data,error}=await client.auth.refreshSession(); if(error) throw error; if(data.session) await updateActiveUser(data.session); closeProfileMenu(); }catch(error){ alert(`רענון ההתחברות נכשל: ${error.message}`); }finally{ sessionAction.disabled=false; } });
 
   client.auth.getSession().then(({data,error})=>{
     if(error){ console.error(error); showLogin(); return; }
@@ -176,7 +295,14 @@
   }).catch((error)=>{ console.error(error); showLogin(); });
 
   client.auth.onAuthStateChange((event,session)=>{
+    if(event==="PASSWORD_RECOVERY"){
+      stopRefresh();
+      appView.hidden=true;
+      loginView.hidden=false;
+      setAuthPanel("recovery");
+      return;
+    }
     if(event==="SIGNED_OUT"||!session) showLogin();
-    else if(event==="SIGNED_IN"||event==="TOKEN_REFRESHED") updateActiveUser(session);
+    else if(event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="USER_UPDATED") updateActiveUser(session);
   });
 })();
