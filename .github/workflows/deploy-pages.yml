@@ -132,11 +132,12 @@ jobs:
 
           checks=(
             '_site/test/index.html|id="forgot-password-action"'
-            '_site/test/index.html|id="profile-menu-button"'
+            '_site/test/index.html|id="site-profile-button"'
+            '_site/test/index.html|id="site-profile-modal"'
             '_site/test/index.html|site-shell.js'
+            '_site/test/detailed-analytics.html|id="site-profile-button"'
+            '_site/test/detailed-analytics.html|id="site-profile-modal"'
             '_site/test/detailed-analytics.html|site-shell.js'
-            '_site/test/index.html|id="profile-modal"'
-            '_site/test/detailed-analytics.html|id="profile-modal"'
             '_site/test/site-shell.js|openProfileEditor'
             '_site/test/site-shell.js|storage.from("avatars")'
             '_site/test/version.json|"source_branch": "test-dashboard"'
@@ -191,10 +192,12 @@ jobs:
             SHELL_JS="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/site-shell.js?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
 
             if printf '%s' "$VERSION_JSON" | grep -Fq "\"commit\": \"$EXPECTED_SHA\"" \
+              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="site-profile-button"' \
+              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="site-profile-modal"' \
               && printf '%s' "$INDEX_HTML" | grep -Fq 'site-shell.js' \
+              && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'id="site-profile-button"' \
+              && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'id="site-profile-modal"' \
               && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'site-shell.js' \
-              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="profile-modal"' \
-              && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'id="profile-modal"' \
               && printf '%s' "$SHELL_JS" | grep -Fq 'openProfileEditor'; then
               echo "Published test site matches $EXPECTED_SHA and includes shared profile shell"
               exit 0
