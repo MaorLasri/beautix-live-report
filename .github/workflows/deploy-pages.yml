@@ -1,0 +1,114 @@
+name: Deploy BeautiX test dashboard
+
+on:
+  push:
+    branches:
+      - test-dashboard
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: beautix-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      test_sha: ${{ steps.version.outputs.test_sha }}
+      test_version: ${{ steps.version.outputs.test_version }}
+    steps:
+      - name: Checkout test dashboard
+        uses: actions/checkout@v4
+        with:
+          ref: test-dashboard
+          fetch-depth: 0
+
+      - name: Resolve test version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          TEST_SHA="$(git rev-parse HEAD)"
+          TIMESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
+          echo "test_sha=$TEST_SHA" >> "$GITHUB_OUTPUT"
+          echo "test_version=test-v${TIMESTAMP}-${TEST_SHA:0:8}" >> "$GITHUB_OUTPUT"
+
+      - name: Build test site
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          rsync -a --delete --exclude='.git' --exclude='.github' ./ _site/
+          PUBLISHED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          cat > _site/version.json <<EOF
+          {
+            "environment": "test",
+            "version": "${{ steps.version.outputs.test_version }}",
+            "source_branch": "test-dashboard",
+            "commit": "${{ steps.version.outputs.test_sha }}",
+            "published_at_utc": "${PUBLISHED_AT}"
+          }
+          EOF
+          cat > _site/deployment-marker.json <<EOF
+          {
+            "dashboard": "test",
+            "branch": "test-dashboard",
+            "commit": "${{ steps.version.outputs.test_sha }}",
+            "version": "${{ steps.version.outputs.test_version }}",
+            "published_at_utc": "${PUBLISHED_AT}"
+          }
+          EOF
+          touch _site/.nojekyll
+
+      - name: Validate login gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'id="login-view"' _site/index.html
+          grep -q 'id="remember-me"' _site/index.html
+          grep -q 'id="toggle-password"' _site/index.html
+
+      - name: Validate navigation and user controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '>דשבורד<' _site/index.html
+          grep -q '>ניתוחים מפורטים<' _site/index.html
+          grep -q 'id="active-user-email"' _site/index.html
+          grep -q 'id="refresh-btn"' _site/index.html
+          ! grep -q 'הלוואות ונכסים</span></a>' _site/index.html
+          ! grep -q 'תזרים 30 יום</span></a>' _site/index.html
+          ! grep -q 'id="work-queue"' _site/detailed-analytics.html
+
+      - name: Validate deployment metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '"source_branch": "test-dashboard"' _site/version.json
+          grep -q '"commit": "${{ steps.version.outputs.test_sha }}"' _site/version.json
+          test -s _site/deployment-marker.json
+
+      - name: Upload test artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy test dashboard
+        id: deployment
+        uses: actions/deploy-pages@v4
