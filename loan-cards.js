@@ -62,14 +62,4 @@
   }
 
   window.addEventListener("beautix:report-loaded", event => render(event.detail));
-  const originalRpc = window.supabase?.SupabaseClient?.prototype?.rpc;
-  if (originalRpc && !window.__beautixLoanRpcPatched) {
-    window.__beautixLoanRpcPatched = true;
-  }
-  const observer = new MutationObserver(() => {
-    const source = window.__beautixLastReport;
-    if (source) render(source);
-  });
-  const target = document.getElementById("loan-asset-cards");
-  if (target) observer.observe(target, { childList: true });
 })();
