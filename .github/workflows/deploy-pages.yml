@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      - test-dashboard
-      - live
   workflow_dispatch:
 
 permissions:
@@ -39,7 +37,7 @@ jobs:
             +refs/heads/live:refs/remotes/origin/live \
             +refs/heads/test-dashboard:refs/remotes/origin/test-dashboard
 
-      - name: Resolve and verify source commits
+      - name: Resolve source commits
         id: versions
         shell: bash
         run: |
@@ -47,17 +45,6 @@ jobs:
           LIVE_SHA="$(git rev-parse refs/remotes/origin/live^{commit})"
           TEST_SHA="$(git rev-parse refs/remotes/origin/test-dashboard^{commit})"
           TIMESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
-
-          if [ "${GITHUB_REF_NAME}" = "test-dashboard" ] && [ "${GITHUB_SHA}" != "${TEST_SHA}" ]; then
-            echo "Expected pushed test commit ${GITHUB_SHA}, but fetched ${TEST_SHA}" >&2
-            exit 1
-          fi
-
-          if [ "${GITHUB_REF_NAME}" = "live" ] && [ "${GITHUB_SHA}" != "${LIVE_SHA}" ]; then
-            echo "Expected pushed live commit ${GITHUB_SHA}, but fetched ${LIVE_SHA}" >&2
-            exit 1
-          fi
-
           {
             echo "live_sha=$LIVE_SHA"
             echo "test_sha=$TEST_SHA"
