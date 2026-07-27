@@ -30,7 +30,7 @@ jobs:
           test -s index.html
           test -s detailed-analytics.html
           test -s app.js
-          test -s analytics.js
+          test -s analytics-auth.js
           test -s styles.css
           test -s config.js
 
@@ -96,5 +96,5 @@ jobs:
         run: |
           set -euo pipefail
           node --check app.js
-          node --check analytics.js
+          node --check analytics-auth.js
           node --check config.js
