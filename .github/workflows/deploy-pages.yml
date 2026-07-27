@@ -35,16 +35,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin live test-dashboard --force
+          git fetch --no-tags origin \
+            +refs/heads/live:refs/remotes/origin/live \
+            +refs/heads/test-dashboard:refs/remotes/origin/test-dashboard
 
-      - name: Resolve source commits
+      - name: Resolve and verify source commits
         id: versions
         shell: bash
         run: |
           set -euo pipefail
-          LIVE_SHA="$(git rev-parse origin/live)"
-          TEST_SHA="$(git rev-parse origin/test-dashboard)"
+          LIVE_SHA="$(git rev-parse refs/remotes/origin/live^{commit})"
+          TEST_SHA="$(git rev-parse refs/remotes/origin/test-dashboard^{commit})"
           TIMESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
+
+          if [ "${GITHUB_REF_NAME}" = "test-dashboard" ] && [ "${GITHUB_SHA}" != "${TEST_SHA}" ]; then
+            echo "Expected pushed test commit ${GITHUB_SHA}, but fetched ${TEST_SHA}" >&2
+            exit 1
+          fi
+
+          if [ "${GITHUB_REF_NAME}" = "live" ] && [ "${GITHUB_SHA}" != "${LIVE_SHA}" ]; then
+            echo "Expected pushed live commit ${GITHUB_SHA}, but fetched ${LIVE_SHA}" >&2
+            exit 1
+          fi
+
           {
             echo "live_sha=$LIVE_SHA"
             echo "test_sha=$TEST_SHA"
@@ -92,9 +105,26 @@ jobs:
             "dashboard": "test",
             "branch": "test-dashboard",
             "commit": "${{ steps.versions.outputs.test_sha }}",
-            "version": "${{ steps.versions.outputs.test_version }}"
+            "version": "${{ steps.versions.outputs.test_version }}",
+            "published_at_utc": "${PUBLISHED_AT}"
           }
           EOF
+
+          grep -q 'id="login-view"' _site/test/index.html
+          grep -q '>דשבורד<' _site/test/index.html
+          grep -q '>ניתוחים מפורטים<' _site/test/index.html
+          if grep -q 'הלוואות ונכסים</span></a>' _site/test/index.html; then
+            echo "Unexpected extra navigation item in test dashboard" >&2
+            exit 1
+          fi
+          if grep -q 'תזרים 30 יום</span></a>' _site/test/index.html; then
+            echo "Unexpected extra navigation item in test dashboard" >&2
+            exit 1
+          fi
+          if grep -q 'id="work-queue"' _site/test/detailed-analytics.html; then
+            echo "Internal work queue leaked into the test site" >&2
+            exit 1
+          fi
 
           touch _site/.nojekyll
 
