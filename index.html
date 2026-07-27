@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-profileedit1" />
+  <link rel="stylesheet" href="styles.css?v=20260727-siteshell1" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -20,9 +20,7 @@
         <p>יש להתחבר לפני הצגת נתוני העסק.</p>
         <form id="login-form">
           <label>אימייל<input id="email" type="email" autocomplete="email" required /></label>
-          <label>סיסמה
-            <span class="password-field"><input id="password" type="password" autocomplete="current-password" required /><button id="toggle-password" type="button" class="input-action" aria-pressed="false">הצג סיסמה</button></span>
-          </label>
+          <label>סיסמה<span class="password-field"><input id="password" type="password" autocomplete="current-password" required /><button id="toggle-password" type="button" class="input-action" aria-pressed="false">הצג סיסמה</button></span></label>
           <button id="forgot-password-action" type="button" class="auth-link-button">שכחתי סיסמה</button>
           <label class="remember-row"><input id="remember-device" type="checkbox" /> זכור אותי במכשיר הזה</label>
           <button id="login-submit" type="submit">כניסה</button>
@@ -30,24 +28,12 @@
         </form>
       </div>
       <div id="forgot-panel" hidden>
-        <h1>איפוס סיסמה</h1>
-        <p>נשלח קישור מאובטח לכתובת האימייל שלך.</p>
-        <form id="forgot-form">
-          <label>אימייל<input id="forgot-email" type="email" autocomplete="email" required /></label>
-          <button id="forgot-submit" type="submit">שליחת קישור איפוס</button>
-          <button id="forgot-back" type="button" class="auth-link-button">חזרה לכניסה</button>
-          <p id="forgot-status" class="auth-status" role="status" hidden></p>
-        </form>
+        <h1>איפוס סיסמה</h1><p>נשלח קישור מאובטח לכתובת האימייל שלך.</p>
+        <form id="forgot-form"><label>אימייל<input id="forgot-email" type="email" autocomplete="email" required /></label><button id="forgot-submit" type="submit">שליחת קישור איפוס</button><button id="forgot-back" type="button" class="auth-link-button">חזרה לכניסה</button><p id="forgot-status" class="auth-status" role="status" hidden></p></form>
       </div>
       <div id="recovery-panel" hidden>
-        <h1>בחירת סיסמה חדשה</h1>
-        <p>הזן סיסמה חדשה לחשבון שלך.</p>
-        <form id="recovery-form">
-          <label>סיסמה חדשה<input id="new-password" type="password" autocomplete="new-password" minlength="8" required /></label>
-          <label>אימות סיסמה<input id="confirm-password" type="password" autocomplete="new-password" minlength="8" required /></label>
-          <button id="recovery-submit" type="submit">עדכון סיסמה</button>
-          <p id="recovery-status" class="auth-status" role="status" hidden></p>
-        </form>
+        <h1>בחירת סיסמה חדשה</h1><p>הזן סיסמה חדשה לחשבון שלך.</p>
+        <form id="recovery-form"><label>סיסמה חדשה<input id="new-password" type="password" autocomplete="new-password" minlength="8" required /></label><label>אימות סיסמה<input id="confirm-password" type="password" autocomplete="new-password" minlength="8" required /></label><button id="recovery-submit" type="submit">עדכון סיסמה</button><p id="recovery-status" class="auth-status" role="status" hidden></p></form>
       </div>
     </div>
   </section>
@@ -55,23 +41,17 @@
   <div id="app-view" hidden>
     <aside class="site-sidebar" aria-label="ניווט ראשי">
       <div class="profile-menu-wrap">
-        <button id="profile-menu-button" class="profile-avatar-button" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="profile-menu" title="תפריט משתמש">
-          <img id="profile-avatar" alt="תמונת משתמש" hidden />
-          <span id="profile-avatar-fallback" aria-hidden="true">👤</span>
-        </button>
-        <div id="profile-menu" class="profile-menu" hidden>
-          <div class="profile-menu-head"><strong id="active-user">—</strong><span id="profile-role">—</span></div>
-          <button id="edit-profile-action" type="button" class="profile-menu-item">עריכת פרופיל</button>
-          <button id="change-password-action" type="button" class="profile-menu-item">שינוי סיסמה</button>
-          <button id="session-action" type="button" class="profile-menu-item">רענון התחברות</button>
-          <button id="auth-action" type="button" class="profile-menu-item danger">התנתקות</button>
+        <button id="site-profile-button" class="profile-avatar-button" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="site-profile-menu" title="תפריט משתמש"><img id="site-profile-avatar" alt="תמונת משתמש" hidden /><span id="site-profile-fallback" aria-hidden="true">👤</span></button>
+        <div id="site-profile-menu" class="profile-menu" hidden>
+          <div class="profile-menu-head"><strong id="site-profile-name">—</strong><span id="site-profile-role">—</span></div>
+          <button id="site-edit-profile" type="button" class="profile-menu-item">עריכת פרופיל</button>
+          <button id="site-change-password" type="button" class="profile-menu-item">שינוי סיסמה</button>
+          <button id="site-refresh-session" type="button" class="profile-menu-item">רענון התחברות</button>
+          <button id="site-logout" type="button" class="profile-menu-item danger">התנתקות</button>
         </div>
       </div>
-      <nav class="sidebar-nav">
-        <a class="active" href="./"><span>דשבורד</span></a>
-        <a href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a>
-      </nav>
-      <div class="nav-utilities"><button id="refresh-btn" type="button" class="icon-control" aria-label="רענון" title="רענון">↻</button></div>
+      <nav class="sidebar-nav"><a class="active" href="./"><span>דשבורד</span></a><a href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a></nav>
+      <div class="nav-utilities"><button id="site-refresh-button" type="button" class="icon-control" aria-label="רענון" title="רענון">↻</button></div>
       <div class="sidebar-test">TEST</div>
     </aside>
 
@@ -91,21 +71,16 @@
     </main>
   </div>
 
-  <div id="profile-modal" class="modal-backdrop" hidden>
-    <section class="profile-editor" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
-      <button id="profile-modal-close" type="button" class="modal-close" aria-label="סגירה">×</button>
-      <h2 id="profile-modal-title">עריכת פרופיל</h2>
-      <form id="profile-form">
-        <label>שם לתצוגה<input id="profile-display-name" type="text" maxlength="80" required /></label>
-        <label>תמונת פרופיל<input id="profile-avatar-file" type="file" accept="image/png,image/jpeg,image/webp" /></label>
-        <p class="profile-help">PNG, JPG או WebP עד 3MB.</p>
-        <button id="profile-save" type="submit">שמירת שינויים</button>
-        <p id="profile-status" class="auth-status" role="status" hidden></p>
-      </form>
+  <div id="site-profile-modal" class="modal-backdrop" hidden>
+    <section class="profile-editor" role="dialog" aria-modal="true" aria-labelledby="site-profile-modal-title">
+      <button id="site-profile-close" type="button" class="modal-close" aria-label="סגירה">×</button>
+      <h2 id="site-profile-modal-title">עריכת פרופיל</h2>
+      <form id="site-profile-form"><label>שם לתצוגה<input id="site-profile-display-name" type="text" maxlength="80" required /></label><label>תמונת פרופיל<input id="site-profile-avatar-file" type="file" accept="image/png,image/jpeg,image/webp" /></label><p class="profile-help">PNG, JPG או WebP עד 3MB.</p><button id="site-profile-save" type="submit">שמירת שינויים</button><p id="site-profile-status" class="auth-status" role="status" hidden></p></form>
     </section>
   </div>
 
   <script src="config.js?v=20260727-authcontrols1"></script>
-  <script src="app.js?v=20260727-profileedit1"></script>
+  <script src="site-shell.js?v=20260727-siteshell1"></script>
+  <script src="app.js?v=20260727-siteshell1"></script>
 </body>
 </html>
