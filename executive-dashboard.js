@@ -1,6 +1,7 @@
 (() => {
   const reportView = document.getElementById("report-view");
   if (!reportView) return;
+
   const executive = document.createElement("section");
   executive.id = "executive-overview";
   executive.className = "executive-overview";
@@ -9,35 +10,9 @@
   const legend = reportView.querySelector(".status-legend");
   legend ? legend.insertAdjacentElement("afterend", executive) : reportView.prepend(executive);
 
-  const parseMoney = value => {
-    const normalized = String(value || "").replace(/[^0-9,.-]/g, "").replace(/,/g, "");
-    const number = Number(normalized);
-    return Number.isFinite(number) ? number : 0;
-  };
-  const parsePercent = value => {
-    const number = Number(String(value || "").replace(/[^0-9.-]/g, ""));
-    return Number.isFinite(number) ? number : 0;
-  };
   const money = value => new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(Number(value || 0));
-  const text = id => document.getElementById(id)?.textContent?.trim() || "—";
-  const numeric = id => parseMoney(text(id));
   const escapeHtml = value => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
-
-  function renderKpis() {
-    const sales = numeric("sales");
-    const target = numeric("sales-target");
-    const forecast = numeric("sales-forecast");
-    const ending = numeric("forecast-ending-balance");
-    const monthlyLoan = [...document.querySelectorAll("#loan-asset-cards .debt-total-card dd")].map(el => parseMoney(el.textContent)).find(value => value > 0) || 0;
-    const cards = [
-      ["◎", "עמידה צפויה ביעד", target > 0 ? `${((forecast / target) * 100).toFixed(1)}%` : "—", target > 0 ? `${money(forecast)} תחזית / ${money(target)} יעד` : "ממתין ליעד מכירות"],
-      ["₪", "מכירות החודש", money(sales), text("sales-note")],
-      ["↗", "תחזית סוף חודש", money(forecast), text("sales-forecast-note")],
-      ["◈", "יתרה חזויה ל־30 יום", money(ending), text("forecast-low-note")],
-      ["⌁", "החזרי הלוואות חודשיים", monthlyLoan ? money(monthlyLoan) : "—", monthlyLoan ? "לפי פירוט ההלוואות הפעילות" : "אין נתון החזר חודשי זמין"]
-    ];
-    document.getElementById("executive-kpis").innerHTML = cards.map(([icon, label, value, note]) => `<article class="executive-kpi"><div class="executive-kpi-icon">${icon}</div><div class="executive-kpi-copy"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></div></article>`).join("");
-  }
+  const dateOnly = value => value ? new Date(`${String(value).slice(0,10)}T00:00:00`) : new Date();
 
   function salesChartSvg(sales, target, forecast, day, monthEnd) {
     const width = 760, height = 290, left = 48, right = 730, top = 24, bottom = 250;
@@ -57,15 +32,37 @@
     return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="מגמת מכירות חודשית, יעד ותחזית">${grid}<polygon class="chart-area" points="${area}"/><line class="target-line" x1="${left}" y1="${bottom}" x2="${right}" y2="${y(target)}"/><polyline class="actual-line" points="${actualPoints.join(" ")}"/><polyline class="forecast-line" points="${forecastPoints}"/><circle cx="${x(day)}" cy="${y(sales)}" r="6" fill="#fff" stroke="currentColor" stroke-width="4"/>${labels}</svg>`;
   }
 
-  function renderSalesPanel() {
-    const sales = numeric("sales"), target = numeric("sales-target"), forecast = numeric("sales-forecast"), daily = numeric("sales-daily-rate"), gap = numeric("sales-gap"), immediate = numeric("immediate-receipts");
-    const progress = parsePercent(text("sales-progress"));
-    const dayMatch = text("sales-daily-rate-note").match(/(\d+)/);
-    const day = dayMatch ? Math.max(1, Number(dayMatch[1])) : Math.max(1, new Date().getDate());
-    const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-    document.getElementById("executive-sales-summary").innerHTML = [["בפועל", money(sales)], ["יעד", money(target)], ["תחזית", money(forecast)], ["קצב יומי", money(daily)], ["פער מהיעד", money(gap)], ["תקבולים מיידיים", money(immediate)]].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("");
+  function render(report) {
+    const sales = Number(report?.sales?.income || 0);
+    const target = Number(report?.settings?.monthly_sales_target ?? report?.sales?.target ?? 0);
+    const latest = dateOnly(report?.sales?.latest);
+    const day = Math.max(1, latest.getDate());
+    const monthEnd = new Date(latest.getFullYear(), latest.getMonth() + 1, 0).getDate();
+    const daily = sales / day;
+    const forecast = daily * monthEnd;
+    const gap = target - sales;
+    const progress = target > 0 ? sales / target * 100 : 0;
+    const immediate = Number(report?.monthly?.immediate_receipts || report?.monthly?.bank_receipts || 0);
+    const checking = Number((report?.accounts || []).find(x => x.name === "עו״ש עסק – הבינלאומי")?.balance || 0);
+    const forecastEntries = Array.isArray(report?.daily) ? report.daily : [];
+    const forecastEnding = forecastEntries.length ? checking + forecastEntries.reduce((sum, d) => sum + Number(d.net || 0), 0) : checking;
+    const loans = Array.isArray(report?.loan_items) ? report.loan_items : Array.isArray(report?.loans?.items) ? report.loans.items : [];
+    const loanTotal = Number(report?.loans?.balance || loans.reduce((s, l) => s + Number(l.current_balance || l.balance || 0), 0));
+    const loanMonthly = Number(report?.loans?.monthly || loans.reduce((s, l) => s + Number(l.monthly_payment || 0), 0));
+
+    const cards = [
+      ["◎", "עמידה צפויה ביעד", target > 0 ? `${((forecast / target) * 100).toFixed(1)}%` : "—", target > 0 ? `${money(forecast)} תחזית / ${money(target)} יעד` : "ממתין ליעד מכירות"],
+      ["₪", "מכירות החודש", money(sales), target > 0 ? `${progress.toFixed(1)}% מהיעד הפעיל` : "יעד לא זמין"],
+      ["↗", "תחזית סוף חודש", money(forecast), target > 0 ? (forecast >= target ? `מעל היעד ב־${money(forecast-target)}` : `מתחת ליעד ב־${money(target-forecast)}`) : ""],
+      ["◈", "יתרה חזויה ל־30 יום", money(forecastEnding), `יתרת פתיחה ${money(checking)}`],
+      ["⌁", "החזרי הלוואות חודשיים", money(loanMonthly), `${loans.length} הלוואות פעילות`]
+    ];
+    document.getElementById("executive-kpis").innerHTML = cards.map(([icon, label, value, note]) => `<article class="executive-kpi"><div class="executive-kpi-icon">${icon}</div><div class="executive-kpi-copy"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></div></article>`).join("");
+
+    document.getElementById("executive-sales-summary").innerHTML = [["בפועל", money(sales)], ["יעד", money(target)], ["תחזית", money(forecast)], ["קצב יומי", money(daily)], ["פער מהיעד", money(Math.abs(gap))], ["תקבולים מיידיים", money(immediate)]].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("");
     document.getElementById("executive-sales-chart").innerHTML = salesChartSvg(sales, target, forecast, day, monthEnd);
-    document.getElementById("executive-sales-progress").innerHTML = `<div class="executive-progress-row"><span>התקדמות מול היעד</span><b>${progress.toFixed(1)}%</b></div><div class="executive-progress-track"><i style="width:${Math.max(0, Math.min(progress, 100))}%"></i></div><small>${escapeHtml(text("sales-progress-note"))}</small>`;
+    document.getElementById("executive-sales-progress").innerHTML = `<div class="executive-progress-row"><span>התקדמות מול היעד</span><b>${progress.toFixed(1)}%</b></div><div class="executive-progress-track"><i style="width:${Math.max(0, Math.min(progress, 100))}%"></i></div><small>${target > 0 ? (gap <= 0 ? `היעד הושג ונחצה ב־${money(Math.abs(gap))}` : `נותרו ${money(gap)} ליעד`) : "יעד מכירות לא זמין"}</small>`;
+
     const actualRate = day > 0 ? sales / day : 0;
     const targetRate = monthEnd > 0 ? target / monthEnd : 0;
     const currentWeek = Math.min(4, Math.max(1, Math.ceil(day / 7)));
@@ -76,38 +73,17 @@
     const max = Math.max(1, ...rows.flatMap(row => [row.actual, row.target]));
     document.getElementById("executive-weekly-bars").innerHTML = rows.map(row => `<div class="week-col"><div class="week-bar actual" style="height:${Math.max(2, row.actual / max * 88)}%"><span class="week-value">${money(row.actual)}</span></div><div class="week-bar target" style="height:${Math.max(2, row.target / max * 88)}%"></div><span class="week-label">${row.label}${row.active ? " · נוכחי" : ""}</span></div>`).join("");
     document.getElementById("executive-weekly-note").textContent = "ההשוואה השבועית משתמשת בקצב המכירות היומי וביעד החודשי הקיימים; היא אינה מחליפה נתוני עסקאות שבועיים מפורטים.";
+
+    document.getElementById("executive-loans-total").textContent = loanTotal ? money(loanTotal) : "—";
+    const maxLoan = Math.max(1, ...loans.map(l => Number(l.current_balance || l.balance || 0)));
+    document.getElementById("executive-loan-list").innerHTML = loans.length ? loans.map(loan => {
+      const balance = Number(loan.current_balance || loan.balance || 0);
+      const installment = loan.current_installment && loan.total_installments ? `${loan.current_installment} / ${loan.total_installments}` : "—";
+      const type = loan.interest_type === "interest_free" ? "ללא ריבית" : loan.interest_type === "variable" ? "ריבית משתנה" : "הלוואה";
+      return `<div class="executive-loan-row"><span>${escapeHtml(type)}</span><strong>${money(balance)}</strong><div class="executive-loan-bar"><i style="width:${Math.max(4, balance / maxLoan * 100)}%"></i></div><small class="executive-loan-meta">${escapeHtml(`${loan.name || loan.lender || "הלוואה"} · ${installment} · ${loan.start_date ? new Intl.DateTimeFormat("he-IL").format(dateOnly(loan.start_date)) : "ללא תאריך"}`)}</small></div>`;
+    }).join("") : `<div class="executive-loans-empty">אין כרגע פירוט הלוואות פעיל להצגה.</div>`;
   }
 
-  function renderLoans() {
-    const source = document.getElementById("loan-asset-cards");
-    const totalCard = source?.querySelector(".debt-total-card");
-    const total = totalCard ? parseMoney(totalCard.querySelector("strong")?.textContent) : 0;
-    const loanCards = [...(source?.querySelectorAll(".liability-card:not(.debt-total-card)") || [])];
-    const max = Math.max(1, ...loanCards.map(card => parseMoney(card.querySelector("strong")?.textContent)));
-    document.getElementById("executive-loans-total").textContent = total ? money(total) : "—";
-    const list = document.getElementById("executive-loan-list");
-    if (!loanCards.length) {
-      list.innerHTML = `<div class="executive-loans-empty">אין כרגע פירוט הלוואות פעיל להצגה. הכרטיסים הקיימים נשארים ללא שינוי בהמשך הדוח.</div>`;
-      return;
-    }
-    list.innerHTML = loanCards.map(card => {
-      const name = card.querySelector("span")?.textContent?.trim() || "הלוואה";
-      const balance = parseMoney(card.querySelector("strong")?.textContent);
-      const details = [...card.querySelectorAll("dd")].map(el => el.textContent.trim());
-      return `<div class="executive-loan-row"><span>${escapeHtml(name)}</span><strong>${money(balance)}</strong><div class="executive-loan-bar"><i style="width:${Math.max(4, balance / max * 100)}%"></i></div><small class="executive-loan-meta">${escapeHtml(details.slice(1, 3).join(" · ") || "הפירוט המלא נשמר בכרטיס המקורי")}</small></div>`;
-    }).join("");
-  }
-
-  function renderAll() {
-    if (text("sales") === "—") return;
-    renderKpis();
-    renderSalesPanel();
-    renderLoans();
-  }
-  const observer = new MutationObserver(() => window.requestAnimationFrame(renderAll));
-  ["sales", "sales-target", "sales-forecast", "sales-progress", "forecast-ending-balance", "loan-asset-cards"].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) observer.observe(element, { childList: true, subtree: true, characterData: true });
-  });
-  renderAll();
+  window.addEventListener("beautix:report-loaded", event => render(event.detail));
+  if (window.__beautixLastReport) render(window.__beautixLastReport);
 })();
