@@ -111,25 +111,46 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -s _site/index.html
-          test -s _site/test/index.html
-          test -s _site/test/detailed-analytics.html
-          test -s _site/test/styles.css
-          test -s _site/test/app.js
-          test -s _site/test/analytics-auth.js
-          test -s _site/test/site-shell.js
-          test -s _site/test/version.json
-          test -s _site/test/deployment-marker.json
-          grep -q 'id="forgot-password-action"' _site/test/index.html
-          grep -q 'id="profile-menu-button"' _site/test/index.html
-          grep -q 'site-shell.js' _site/test/index.html
-          grep -q 'site-shell.js' _site/test/detailed-analytics.html
-          grep -q 'id="profile-modal"' _site/test/index.html
-          grep -q 'id="profile-modal"' _site/test/detailed-analytics.html
-          grep -q 'openProfileEditor' _site/test/site-shell.js
-          grep -q 'client.storage.from("avatars")' _site/test/site-shell.js
-          grep -q '"source_branch": "test-dashboard"' _site/test/version.json
-          grep -q '"commit": "${{ steps.versions.outputs.test_sha }}"' _site/test/version.json
+          required_files=(
+            _site/index.html
+            _site/test/index.html
+            _site/test/detailed-analytics.html
+            _site/test/styles.css
+            _site/test/app.js
+            _site/test/analytics-auth.js
+            _site/test/site-shell.js
+            _site/test/version.json
+            _site/test/deployment-marker.json
+          )
+
+          for file in "${required_files[@]}"; do
+            if [[ ! -s "$file" ]]; then
+              echo "Missing or empty required file: $file"
+              exit 1
+            fi
+          done
+
+          checks=(
+            '_site/test/index.html|id="forgot-password-action"'
+            '_site/test/index.html|id="profile-menu-button"'
+            '_site/test/index.html|site-shell.js'
+            '_site/test/detailed-analytics.html|site-shell.js'
+            '_site/test/index.html|id="profile-modal"'
+            '_site/test/detailed-analytics.html|id="profile-modal"'
+            '_site/test/site-shell.js|openProfileEditor'
+            '_site/test/site-shell.js|storage.from("avatars")'
+            '_site/test/version.json|"source_branch": "test-dashboard"'
+            '_site/test/version.json|"commit": "${{ steps.versions.outputs.test_sha }}"'
+          )
+
+          for check in "${checks[@]}"; do
+            file="${check%%|*}"
+            pattern="${check#*|}"
+            if ! grep -Fq "$pattern" "$file"; then
+              echo "Validation failed: '$pattern' not found in $file"
+              exit 1
+            fi
+          done
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -169,12 +190,12 @@ jobs:
             ANALYTICS_HTML="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/detailed-analytics.html?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
             SHELL_JS="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/site-shell.js?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
 
-            if printf '%s' "$VERSION_JSON" | grep -q "\"commit\": \"$EXPECTED_SHA\"" \
-              && printf '%s' "$INDEX_HTML" | grep -q 'site-shell.js' \
-              && printf '%s' "$ANALYTICS_HTML" | grep -q 'site-shell.js' \
-              && printf '%s' "$INDEX_HTML" | grep -q 'id="profile-modal"' \
-              && printf '%s' "$ANALYTICS_HTML" | grep -q 'id="profile-modal"' \
-              && printf '%s' "$SHELL_JS" | grep -q 'openProfileEditor'; then
+            if printf '%s' "$VERSION_JSON" | grep -Fq "\"commit\": \"$EXPECTED_SHA\"" \
+              && printf '%s' "$INDEX_HTML" | grep -Fq 'site-shell.js' \
+              && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'site-shell.js' \
+              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="profile-modal"' \
+              && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'id="profile-modal"' \
+              && printf '%s' "$SHELL_JS" | grep -Fq 'openProfileEditor'; then
               echo "Published test site matches $EXPECTED_SHA and includes shared profile shell"
               exit 0
             fi
