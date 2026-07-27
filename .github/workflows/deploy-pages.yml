@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - live
       - test-dashboard
   workflow_dispatch:
 
@@ -11,6 +12,9 @@ permissions:
   contents: read
   pages: write
   id-token: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: beautix-pages
@@ -113,16 +117,19 @@ jobs:
           test -s _site/test/styles.css
           test -s _site/test/app.js
           test -s _site/test/analytics-auth.js
+          test -s _site/test/site-shell.js
           test -s _site/test/version.json
           test -s _site/test/deployment-marker.json
-          grep -q 'styles.css?v=20260727-authflow2' _site/test/index.html
-          grep -q 'app.js?v=20260727-authflow2' _site/test/index.html
           grep -q 'id="forgot-password-action"' _site/test/index.html
           grep -q 'id="profile-menu-button"' _site/test/index.html
-          grep -q 'id="analytics-profile-menu-button"' _site/test/detailed-analytics.html
+          grep -q 'site-shell.js' _site/test/index.html
+          grep -q 'site-shell.js' _site/test/detailed-analytics.html
+          grep -q 'id="profile-modal"' _site/test/index.html
+          grep -q 'id="profile-modal"' _site/test/detailed-analytics.html
+          grep -q 'openProfileEditor' _site/test/site-shell.js
+          grep -q 'client.storage.from("avatars")' _site/test/site-shell.js
           grep -q '"source_branch": "test-dashboard"' _site/test/version.json
           grep -q '"commit": "${{ steps.versions.outputs.test_sha }}"' _site/test/version.json
-          ! grep -q 'id="work-queue"' _site/test/detailed-analytics.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -149,22 +156,26 @@ jobs:
       - deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify published test revision
+      - name: Verify published test revision and shared shell
         shell: bash
         run: |
           set -euo pipefail
           EXPECTED_SHA="${{ needs.build.outputs.test_sha }}"
-          VERSION_URL="https://maorlasri.github.io/beautix-live-report/test/version.json?verify=${GITHUB_RUN_ID}"
-          INDEX_URL="https://maorlasri.github.io/beautix-live-report/test/?verify=${GITHUB_RUN_ID}"
+          BASE_URL="https://maorlasri.github.io/beautix-live-report/test"
 
-          for attempt in $(seq 1 18); do
-            VERSION_JSON="$(curl -fsSL -H 'Cache-Control: no-cache' "$VERSION_URL" || true)"
-            INDEX_HTML="$(curl -fsSL -H 'Cache-Control: no-cache' "$INDEX_URL" || true)"
+          for attempt in $(seq 1 30); do
+            VERSION_JSON="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/version.json?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
+            INDEX_HTML="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
+            ANALYTICS_HTML="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/detailed-analytics.html?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
+            SHELL_JS="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/site-shell.js?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
 
             if printf '%s' "$VERSION_JSON" | grep -q "\"commit\": \"$EXPECTED_SHA\"" \
-              && printf '%s' "$INDEX_HTML" | grep -q 'id="forgot-password-action"' \
-              && printf '%s' "$INDEX_HTML" | grep -q 'id="profile-menu-button"'; then
-              echo "Published test site matches $EXPECTED_SHA"
+              && printf '%s' "$INDEX_HTML" | grep -q 'site-shell.js' \
+              && printf '%s' "$ANALYTICS_HTML" | grep -q 'site-shell.js' \
+              && printf '%s' "$INDEX_HTML" | grep -q 'id="profile-modal"' \
+              && printf '%s' "$ANALYTICS_HTML" | grep -q 'id="profile-modal"' \
+              && printf '%s' "$SHELL_JS" | grep -q 'openProfileEditor'; then
+              echo "Published test site matches $EXPECTED_SHA and includes shared profile shell"
               exit 0
             fi
 
