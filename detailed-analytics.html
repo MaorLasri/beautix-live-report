@@ -8,96 +8,105 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-1930" />
+  <link rel="stylesheet" href="styles.css?v=20260727-authfix1" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <aside class="site-sidebar" aria-label="ניווט ראשי">
-    <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-1930" alt="BeautiX" /></a>
-    <nav class="sidebar-nav">
-      <a href="./"><span>דשבורד ראשי</span></a>
-      <a class="active" href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a>
-      <a href="#reconciliation"><span>התאמת נתונים</span></a>
-      <a href="#subscriptions"><span>מנויים וחידושים</span></a>
-    </nav>
-    <div class="sidebar-test">TEST</div>
-  </aside>
+  <section id="analytics-auth-check" class="auth-screen">
+    <div class="auth-card"><p>בודק הרשאת כניסה...</p></div>
+  </section>
 
-  <main class="app-shell site-content">
-    <header class="topbar analytics-header">
-      <div class="brand-block">
-        <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-1930" alt="BeautiX" /></div>
-        <div><p class="report-title">ניתוחים מפורטים <strong class="test-badge">TEST</strong></p><p>EasyBizy מול Supabase · יולי 2026</p></div>
-      </div>
-    </header>
+  <div id="analytics-app" hidden>
+    <aside class="site-sidebar" aria-label="ניווט ראשי">
+      <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-authfix1" alt="BeautiX" /></a>
+      <nav class="sidebar-nav">
+        <a href="./"><span>דשבורד</span></a>
+        <a class="active" href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a>
+      </nav>
+      <div class="sidebar-test">TEST</div>
+    </aside>
 
-    <section id="reconciliation" class="dashboard-section">
-      <div class="section-title-block"><span class="section-kicker">התאמת מקורות</span><h2>מכירות, תקבולים ואיכות נתונים</h2><p>המספרים מוצגים בנפרד כדי למנוע ערבוב בין מכירה, תקבול, חוב ושימוש במנוי.</p></div>
-      <div class="grid analytics-grid">
-        <article class="card"><span>EasyBizy — סה״כ מכירות</span><strong>₪84,603</strong><p>מקור: TotalSales ו־Payments</p></article>
-        <article class="card"><span>Supabase — sales.income</span><strong class="warn">₪86,103</strong><p>פער של ₪1,500 מול EasyBizy; דורש התאמה ברמת חשבונית</p></article>
-        <article class="card"><span>Supabase — monthly.sales</span><strong class="neg">₪76,033</strong><p>מספר היסטורי שונה ממכירות EasyBizy</p></article>
-        <article class="card"><span>עסקאות תשלום</span><strong>45</strong><p>רשומות תשלום בדוח Payments</p></article>
-        <article class="card"><span>רשומות מכירה</span><strong>68</strong><p>כולל שימושים במנויים ורשומות בסכום אפס</p></article>
-        <article class="card"><span>עסקאות חיוביות</span><strong>38</strong><p>רשומות עם סכום מכירה חיובי</p></article>
-        <article class="card"><span>רשומות שימוש במנוי</span><strong>29</strong><p>פעילות שירותית ללא מכירה חדשה</p></article>
-        <article class="card"><span>רשומה שלילית</span><strong class="warn">1</strong><p>ביטול או זיכוי שדורש התאמה לחשבונית המקורית</p></article>
-      </div>
-    </section>
+    <main class="app-shell site-content">
+      <header class="topbar analytics-header">
+        <div class="brand-block">
+          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-authfix1" alt="BeautiX" /></div>
+          <div><p class="report-title">ניתוחים מפורטים <strong class="test-badge">TEST</strong></p><p>EasyBizy מול Supabase · יולי 2026</p></div>
+        </div>
+        <div class="actions"><button id="analytics-logout" type="button" class="secondary">יציאה</button></div>
+      </header>
 
-    <section class="dashboard-section">
-      <div class="section-title-block"><span class="section-kicker">אמצעי תשלום</span><h2>תמהיל תקבולים</h2><p>החלוקה מבוססת על Payments.</p></div>
-      <div class="grid analytics-grid">
-        <article class="card"><span>אשראי</span><strong>₪59,400</strong><p>70.2% מהתקבולים</p></article>
-        <article class="card"><span>Bit</span><strong>₪12,736</strong><p>15.1% מהתקבולים</p></article>
-        <article class="card"><span>מזומן</span><strong>₪7,407</strong><p>8.8% מהתקבולים</p></article>
-        <article class="card"><span>PayBox</span><strong>₪2,860</strong><p>3.4% מהתקבולים</p></article>
-        <article class="card"><span>העברה בנקאית</span><strong>₪2,200</strong><p>2.6% מהתקבולים</p></article>
-      </div>
-    </section>
+      <section id="reconciliation" class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">התאמת מקורות</span><h2>מכירות, תקבולים ואיכות נתונים</h2><p>המספרים מוצגים בנפרד כדי למנוע ערבוב בין מכירה, תקבול, חוב ושימוש במנוי.</p></div>
+        <div class="grid analytics-grid">
+          <article class="card"><span>EasyBizy — סה״כ מכירות</span><strong>₪84,603</strong><p>מקור: TotalSales ו־Payments</p></article>
+          <article class="card"><span>Supabase — sales.income</span><strong class="warn">₪86,103</strong><p>פער של ₪1,500 מול EasyBizy; דורש התאמה ברמת חשבונית</p></article>
+          <article class="card"><span>Supabase — monthly.sales</span><strong class="neg">₪76,033</strong><p>מספר היסטורי שונה ממכירות EasyBizy</p></article>
+          <article class="card"><span>עסקאות תשלום</span><strong>45</strong><p>רשומות תשלום בדוח Payments</p></article>
+          <article class="card"><span>רשומות מכירה</span><strong>68</strong><p>כולל שימושים במנויים ורשומות בסכום אפס</p></article>
+          <article class="card"><span>עסקאות חיוביות</span><strong>38</strong><p>רשומות עם סכום מכירה חיובי</p></article>
+          <article class="card"><span>רשומות שימוש במנוי</span><strong>29</strong><p>פעילות שירותית ללא מכירה חדשה</p></article>
+          <article class="card"><span>רשומה שלילית</span><strong class="warn">1</strong><p>ביטול או זיכוי שדורש התאמה לחשבונית המקורית</p></article>
+        </div>
+      </section>
 
-    <section class="dashboard-section">
-      <div class="section-title-block"><span class="section-kicker">מוצרים ושירותים</span><h2>ביצועים מסחריים</h2><p>SalesTree הוא מקור הניתוח העיקרי; סכומי שימוש במנויים אינם מחזור חדש.</p></div>
-      <div class="grid analytics-grid">
-        <article class="card"><span>מכירת מנויים</span><strong>₪72,004</strong><p>32 מנויים שנמכרו נטו</p></article>
-        <article class="card"><span>שירותים רגילים</span><strong>₪17,134.39</strong><p>25 שורות שירות</p></article>
-        <article class="card"><span>מכירת מוצרים</span><strong>₪4,062</strong><p>11 יחידות מוצרים</p></article>
-        <article class="card"><span>ערך שימושים במנויים</span><strong>₪49,999.67</strong><p>אינדיקציה לעומס שירות, לא הכנסה חדשה</p></article>
-        <article class="card"><span>תשלומי חוב</span><strong>₪13,821</strong><p>גביית חובות לפי SalesTree</p></article>
-        <article class="card"><span>חוב שנרשם</span><strong class="neg">-₪18,712</strong><p>תנועות חוב; לא יתרת חוב פתוחה</p></article>
-      </div>
-      <div class="analytics-table-wrap">
-        <table class="analytics-table"><thead><tr><th>קטגוריה מובילה</th><th>סכום</th></tr></thead><tbody><tr><td>HIFU מיני ליפט</td><td>₪56,517</td></tr><tr><td>REVIVER</td><td>₪33,722.39</td></tr><tr><td>HIFU</td><td>₪17,524</td></tr><tr><td>טיפולי פנים</td><td>₪9,814.67</td></tr><tr><td>לימודים</td><td>₪8,870</td></tr></tbody></table>
-      </div>
-    </section>
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">אמצעי תשלום</span><h2>תמהיל תקבולים</h2><p>החלוקה מבוססת על Payments.</p></div>
+        <div class="grid analytics-grid">
+          <article class="card"><span>אשראי</span><strong>₪59,400</strong><p>70.2% מהתקבולים</p></article>
+          <article class="card"><span>Bit</span><strong>₪12,736</strong><p>15.1% מהתקבולים</p></article>
+          <article class="card"><span>מזומן</span><strong>₪7,407</strong><p>8.8% מהתקבולים</p></article>
+          <article class="card"><span>PayBox</span><strong>₪2,860</strong><p>3.4% מהתקבולים</p></article>
+          <article class="card"><span>העברה בנקאית</span><strong>₪2,200</strong><p>2.6% מהתקבולים</p></article>
+        </div>
+      </section>
 
-    <section id="subscriptions" class="dashboard-section">
-      <div class="section-title-block"><span class="section-kicker">מנויים</span><h2>התחייבות שירות והזדמנויות חידוש</h2><p>מנוי שנמכר בעבר מייצר עבודה עתידית ללא תקבול חדש בכל טיפול.</p></div>
-      <div class="grid analytics-grid">
-        <article class="card"><span>מנויים עם יתרה</span><strong>165</strong><p>לפי Subscriptions</p></article>
-        <article class="card"><span>טיפולים שנותרו</span><strong>306</strong><p>התחייבות שירות עתידית</p></article>
-        <article class="card"><span>מחיר היסטורי כולל</span><strong>₪318,297</strong><p>אינו שווי נזיל נוכחי</p></article>
-        <article class="card"><span>מנויים שפגו עם יתרה</span><strong class="warn">55</strong><p>93 טיפולים עדיין לא נוצלו</p></article>
-      </div>
-      <div class="analytics-table-wrap">
-        <table class="analytics-table"><thead><tr><th>סוג מנוי</th><th>טיפולים שנותרו</th></tr></thead><tbody><tr><td>REVIVER</td><td>44</td></tr><tr><td>HIFU קו לסת</td><td>42</td></tr><tr><td>לחיים וקו מריונטה</td><td>38</td></tr><tr><td>HIFU פנים וצוואר</td><td>29</td></tr><tr><td>HIFU צוואר</td><td>19</td></tr><tr><td>גלי רדיו</td><td>19</td></tr></tbody></table>
-      </div>
-    </section>
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">מוצרים ושירותים</span><h2>ביצועים מסחריים</h2><p>SalesTree הוא מקור הניתוח העיקרי; סכומי שימוש במנויים אינם מחזור חדש.</p></div>
+        <div class="grid analytics-grid">
+          <article class="card"><span>מכירת מנויים</span><strong>₪72,004</strong><p>32 מנויים שנמכרו נטו</p></article>
+          <article class="card"><span>שירותים רגילים</span><strong>₪17,134.39</strong><p>25 שורות שירות</p></article>
+          <article class="card"><span>מכירת מוצרים</span><strong>₪4,062</strong><p>11 יחידות מוצרים</p></article>
+          <article class="card"><span>ערך שימושים במנויים</span><strong>₪49,999.67</strong><p>אינדיקציה לעומס שירות, לא הכנסה חדשה</p></article>
+          <article class="card"><span>תשלומי חוב</span><strong>₪13,821</strong><p>גביית חובות לפי SalesTree</p></article>
+          <article class="card"><span>חוב שנרשם</span><strong class="neg">-₪18,712</strong><p>תנועות חוב; לא יתרת חוב פתוחה</p></article>
+        </div>
+        <div class="analytics-table-wrap">
+          <table class="analytics-table"><thead><tr><th>קטגוריה מובילה</th><th>סכום</th></tr></thead><tbody><tr><td>HIFU מיני ליפט</td><td>₪56,517</td></tr><tr><td>REVIVER</td><td>₪33,722.39</td></tr><tr><td>HIFU</td><td>₪17,524</td></tr><tr><td>טיפולי פנים</td><td>₪9,814.67</td></tr><tr><td>לימודים</td><td>₪8,870</td></tr></tbody></table>
+        </div>
+      </section>
 
-    <section class="dashboard-section">
-      <div class="section-title-block"><span class="section-kicker">לקוחות וחובות</span><h2>גבייה ושימור</h2><p>יש להפריד בין חוב פתוח, חוב שנוצר, גביית חובות וזיכויים.</p></div>
-      <div class="grid analytics-grid">
-        <article class="card"><span>חוב נטו בדוח TotalSales</span><strong class="warn">₪4,891</strong><p>לא תואם ל־₪9,797 שנשמר ב־Supabase</p></article>
-        <article class="card"><span>חובות לקוחות ב־Supabase</span><strong class="warn">₪9,797</strong><p>נדרש בירור הגדרת המדד ומקורו</p></article>
-        <article class="card"><span>פער בין מכירות לתקבולים מיידיים</span><strong class="warn">₪59,262</strong><p>כולל אשראי עתידי, חובות והבדלי הגדרה</p></article>
-      </div>
-    </section>
+      <section id="subscriptions" class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">מנויים</span><h2>התחייבות שירות והזדמנויות חידוש</h2><p>מנוי שנמכר בעבר מייצר עבודה עתידית ללא תקבול חדש בכל טיפול.</p></div>
+        <div class="grid analytics-grid">
+          <article class="card"><span>מנויים עם יתרה</span><strong>165</strong><p>לפי Subscriptions</p></article>
+          <article class="card"><span>טיפולים שנותרו</span><strong>306</strong><p>התחייבות שירות עתידית</p></article>
+          <article class="card"><span>מחיר היסטורי כולל</span><strong>₪318,297</strong><p>אינו שווי נזיל נוכחי</p></article>
+          <article class="card"><span>מנויים שפגו עם יתרה</span><strong class="warn">55</strong><p>93 טיפולים עדיין לא נוצלו</p></article>
+        </div>
+        <div class="analytics-table-wrap">
+          <table class="analytics-table"><thead><tr><th>סוג מנוי</th><th>טיפולים שנותרו</th></tr></thead><tbody><tr><td>REVIVER</td><td>44</td></tr><tr><td>HIFU קו לסת</td><td>42</td></tr><tr><td>לחיים וקו מריונטה</td><td>38</td></tr><tr><td>HIFU פנים וצוואר</td><td>29</td></tr><tr><td>HIFU צוואר</td><td>19</td></tr><tr><td>גלי רדיו</td><td>19</td></tr></tbody></table>
+        </div>
+      </section>
 
-    <section class="dashboard-section">
-      <div class="section-title-block"><span class="section-kicker">מוצרים</span><h2>מוצרים מובילים ואיכות עלויות</h2><p>רווחיות אמיתית אפשרית רק כאשר עלות המוצר מלאה.</p></div>
-      <div class="analytics-table-wrap">
-        <table class="analytics-table"><thead><tr><th>מוצר</th><th>יחידות</th><th>מכירות</th><th>הערה</th></tr></thead><tbody><tr><td>דיילי מיקרו־פוליאנט</td><td>4</td><td>₪1,304</td><td class="warn">עלות חסרה</td></tr><tr><td>מדכא מלנין SR</td><td>3</td><td>₪1,026</td><td class="warn">עלות חסרה</td></tr><tr><td>Pro-Collagen Serum</td><td>2</td><td>₪876</td><td>עלות קיימת</td></tr><tr><td>Pro-Collagen Water Cream</td><td>1</td><td>₪468</td><td>עלות קיימת</td></tr><tr><td>Biolumin C SPF 50</td><td>1</td><td>₪388</td><td>עלות קיימת</td></tr></tbody></table>
-      </div>
-    </section>
-  </main>
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">לקוחות וחובות</span><h2>גבייה ושימור</h2><p>יש להפריד בין חוב פתוח, חוב שנוצר, גביית חובות וזיכויים.</p></div>
+        <div class="grid analytics-grid">
+          <article class="card"><span>חוב נטו בדוח TotalSales</span><strong class="warn">₪4,891</strong><p>לא תואם ל־₪9,797 שנשמר ב־Supabase</p></article>
+          <article class="card"><span>חובות לקוחות ב־Supabase</span><strong class="warn">₪9,797</strong><p>נדרש בירור הגדרת המדד ומקורו</p></article>
+          <article class="card"><span>פער בין מכירות לתקבולים מיידיים</span><strong class="warn">₪59,262</strong><p>כולל אשראי עתידי, חובות והבדלי הגדרה</p></article>
+        </div>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">מוצרים</span><h2>מוצרים מובילים ואיכות עלויות</h2><p>רווחיות אמיתית אפשרית רק כאשר עלות המוצר מלאה.</p></div>
+        <div class="analytics-table-wrap">
+          <table class="analytics-table"><thead><tr><th>מוצר</th><th>יחידות</th><th>מכירות</th><th>הערה</th></tr></thead><tbody><tr><td>דיילי מיקרו־פוליאנט</td><td>4</td><td>₪1,304</td><td class="warn">עלות חסרה</td></tr><tr><td>מדכא מלנין SR</td><td>3</td><td>₪1,026</td><td class="warn">עלות חסרה</td></tr><tr><td>Pro-Collagen Serum</td><td>2</td><td>₪876</td><td>עלות קיימת</td></tr><tr><td>Pro-Collagen Water Cream</td><td>1</td><td>₪468</td><td>עלות קיימת</td></tr><tr><td>Biolumin C SPF 50</td><td>1</td><td>₪388</td><td>עלות קיימת</td></tr></tbody></table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="config.js?v=20260727-authfix1"></script>
+  <script src="analytics-auth.js?v=20260727-authfix1"></script>
 </body>
 </html>
