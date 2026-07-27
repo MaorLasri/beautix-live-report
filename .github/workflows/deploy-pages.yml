@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -33,41 +33,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin live test-dashboard --tags --force
+          git fetch origin live test-dashboard --force
 
-      - name: Resolve versions and create backups
+      - name: Resolve source commits
         id: versions
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           LIVE_SHA="$(git rev-parse origin/live)"
           TEST_SHA="$(git rev-parse origin/test-dashboard)"
           TIMESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
-          LIVE_VERSION="live-v${TIMESTAMP}-${LIVE_SHA:0:8}"
-          TEST_VERSION="test-v${TIMESTAMP}-${TEST_SHA:0:8}"
-          LIVE_TAG="backup/live/${LIVE_VERSION}"
-          TEST_TAG="backup/test-dashboard/${TEST_VERSION}"
-
-          if ! git rev-parse "$LIVE_TAG" >/dev/null 2>&1; then
-            git tag -a "$LIVE_TAG" "$LIVE_SHA" -m "Automated live backup ${LIVE_VERSION}"
-            git push origin "$LIVE_TAG"
-          fi
-
-          if ! git rev-parse "$TEST_TAG" >/dev/null 2>&1; then
-            git tag -a "$TEST_TAG" "$TEST_SHA" -m "Automated test backup ${TEST_VERSION}"
-            git push origin "$TEST_TAG"
-          fi
-
           {
             echo "live_sha=$LIVE_SHA"
             echo "test_sha=$TEST_SHA"
-            echo "live_version=$LIVE_VERSION"
-            echo "test_version=$TEST_VERSION"
-            echo "live_tag=$LIVE_TAG"
-            echo "test_tag=$TEST_TAG"
+            echo "live_version=live-v${TIMESTAMP}-${LIVE_SHA:0:8}"
+            echo "test_version=test-v${TIMESTAMP}-${TEST_SHA:0:8}"
           } >> "$GITHUB_OUTPUT"
 
       - name: Build combined Pages site
@@ -89,7 +69,6 @@ jobs:
           {
             "environment": "live",
             "version": "${{ steps.versions.outputs.live_version }}",
-            "backup_tag": "${{ steps.versions.outputs.live_tag }}",
             "source_branch": "live",
             "commit": "${{ steps.versions.outputs.live_sha }}",
             "published_at_utc": "${PUBLISHED_AT}"
@@ -100,7 +79,6 @@ jobs:
           {
             "environment": "test",
             "version": "${{ steps.versions.outputs.test_version }}",
-            "backup_tag": "${{ steps.versions.outputs.test_tag }}",
             "source_branch": "test-dashboard",
             "commit": "${{ steps.versions.outputs.test_sha }}",
             "published_at_utc": "${PUBLISHED_AT}"
