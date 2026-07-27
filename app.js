@@ -38,6 +38,25 @@
   const normalizeEntryType = (type) => { const t = String(type || "").toLowerCase(); if (["income","receipt","credit"].includes(t)) return "income"; if (["expense","loan_payment","debit"].includes(t)) return "expense"; return t; };
   const escapeHtml = (value) => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 
+  async function resolveDisplayName(session){
+    const fallback=session?.user?.email||"משתמש מחובר";
+    const userId=session?.user?.id;
+    if(!userId) return fallback;
+    try{
+      const {data,error}=await client.from("app_users").select("display_name,is_active").eq("auth_user_id",userId).maybeSingle();
+      if(error) throw error;
+      if(data?.is_active===false) return "משתמש לא פעיל";
+      return data?.display_name?.trim()||fallback;
+    }catch(error){
+      console.warn("Unable to load user profile",error);
+      return fallback;
+    }
+  }
+
+  async function updateActiveUser(session){
+    activeUser.textContent=await resolveDisplayName(session);
+  }
+
   function buildForecast(report) {
     const accounts = report.accounts || [], daily = report.daily || [], clearing = report.future_clearing || [];
     const checking = accounts.find((x) => x.name === "עו״ש עסק – הבינלאומי");
@@ -119,7 +138,7 @@
 
   function stopRefresh(){ if(refreshTimer)clearInterval(refreshTimer); refreshTimer=null; }
   function showLogin(){ stopRefresh(); appView.hidden=true; loginView.hidden=false; reportView.hidden=false; loginSubmit.disabled=false; loginSubmit.textContent="כניסה"; activeUser.textContent="—"; }
-  async function showReport(session){ loginView.hidden=true; appView.hidden=false; reportView.hidden=false; activeUser.textContent=session?.user?.email||"משתמש מחובר"; await loadReport(); stopRefresh(); refreshTimer=setInterval(loadReport,config.refreshIntervalMs||30000); }
+  async function showReport(session){ loginView.hidden=true; appView.hidden=false; reportView.hidden=false; await updateActiveUser(session); await loadReport(); stopRefresh(); refreshTimer=setInterval(loadReport,config.refreshIntervalMs||30000); }
   function friendlyAuthError(error){ if(!error) return "לא ניתן להתחבר כרגע."; if(error.message?.toLowerCase().includes("invalid login credentials")) return "האימייל או הסיסמה אינם נכונים."; if(error.message?.toLowerCase().includes("email not confirmed")) return "כתובת האימייל עדיין לא אושרה."; return `ההתחברות נכשלה: ${error.message}`; }
 
   loginForm.addEventListener("submit",async(event)=>{
@@ -158,6 +177,6 @@
 
   client.auth.onAuthStateChange((event,session)=>{
     if(event==="SIGNED_OUT"||!session) showLogin();
-    else if(event==="SIGNED_IN") activeUser.textContent=session.user?.email||"משתמש מחובר";
+    else if(event==="SIGNED_IN"||event==="TOKEN_REFRESHED") updateActiveUser(session);
   });
 })();
