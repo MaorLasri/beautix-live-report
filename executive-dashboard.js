@@ -1,4 +1,14 @@
 (() => {
+  const reportView = document.getElementById("report-view");
+  if (!reportView) return;
+  const executive = document.createElement("section");
+  executive.id = "executive-overview";
+  executive.className = "executive-overview";
+  executive.setAttribute("aria-label", "סקירה ניהולית מורחבת");
+  executive.innerHTML = `<div id="executive-kpis" class="executive-kpis"></div><div class="executive-report-grid"><article class="executive-panel"><div class="executive-panel-head"><div><span class="executive-eyebrow">מכירות ויעדים</span><h3>מגמת מכירות חודשית</h3></div><div class="executive-legend"><span><i class="executive-dot actual"></i>בפועל</span><span><i class="executive-dot target"></i>יעד</span><span><i class="executive-dot forecast"></i>תחזית</span></div></div><div id="executive-sales-summary" class="executive-sales-summary"></div><div id="executive-sales-chart" class="executive-chart"></div><div id="executive-sales-progress" class="executive-progress"></div></article><article class="executive-panel"><div class="executive-panel-head"><div><span class="executive-eyebrow">קצב שבועי</span><h3>שבוע מול שבוע</h3></div></div><div id="executive-weekly-bars" class="weekly-bars"></div><p id="executive-weekly-note" class="weekly-note"></p></article></div><article class="executive-panel executive-loans-panel"><div class="executive-panel-head"><div><span class="executive-eyebrow">התחייבויות</span><h3>הלוואות פעילות</h3></div><p class="executive-source-note">סיכום חזותי נוסף; כל הכרטיסים והפירוט הקיימים נשמרים בהמשך הדוח.</p></div><div class="executive-loans-summary"><span>סך החוב הכולל</span><strong id="executive-loans-total">—</strong></div><div id="executive-loan-list" class="executive-loan-list"></div></article>`;
+  const legend = reportView.querySelector(".status-legend");
+  legend ? legend.insertAdjacentElement("afterend", executive) : reportView.prepend(executive);
+
   const parseMoney = value => {
     const normalized = String(value || "").replace(/[^0-9,.-]/g, "").replace(/,/g, "");
     const number = Number(normalized);
@@ -12,11 +22,8 @@
   const text = id => document.getElementById(id)?.textContent?.trim() || "—";
   const numeric = id => parseMoney(text(id));
   const escapeHtml = value => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
-  const executive = document.getElementById("executive-overview");
-  if (!executive) return;
 
   function renderKpis() {
-    const progress = parsePercent(text("sales-progress"));
     const sales = numeric("sales");
     const target = numeric("sales-target");
     const forecast = numeric("sales-forecast");
@@ -53,25 +60,17 @@
   function renderSalesPanel() {
     const sales = numeric("sales"), target = numeric("sales-target"), forecast = numeric("sales-forecast"), daily = numeric("sales-daily-rate"), gap = numeric("sales-gap"), immediate = numeric("immediate-receipts");
     const progress = parsePercent(text("sales-progress"));
-    const latestRaw = text("sales-daily-rate-note");
-    const dayMatch = latestRaw.match(/(\d+)/);
+    const dayMatch = text("sales-daily-rate-note").match(/(\d+)/);
     const day = dayMatch ? Math.max(1, Number(dayMatch[1])) : Math.max(1, new Date().getDate());
     const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-    document.getElementById("executive-sales-summary").innerHTML = [
-      ["בפועל", money(sales)], ["יעד", money(target)], ["תחזית", money(forecast)], ["קצב יומי", money(daily)], ["פער מהיעד", money(gap)], ["תקבולים מיידיים", money(immediate)]
-    ].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("");
+    document.getElementById("executive-sales-summary").innerHTML = [["בפועל", money(sales)], ["יעד", money(target)], ["תחזית", money(forecast)], ["קצב יומי", money(daily)], ["פער מהיעד", money(gap)], ["תקבולים מיידיים", money(immediate)]].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("");
     document.getElementById("executive-sales-chart").innerHTML = salesChartSvg(sales, target, forecast, day, monthEnd);
     document.getElementById("executive-sales-progress").innerHTML = `<div class="executive-progress-row"><span>התקדמות מול היעד</span><b>${progress.toFixed(1)}%</b></div><div class="executive-progress-track"><i style="width:${Math.max(0, Math.min(progress, 100))}%"></i></div><small>${escapeHtml(text("sales-progress-note"))}</small>`;
-
-    const weeks = 4;
     const actualRate = day > 0 ? sales / day : 0;
     const targetRate = monthEnd > 0 ? target / monthEnd : 0;
-    const currentWeek = Math.min(weeks, Math.max(1, Math.ceil(day / 7)));
-    const rows = Array.from({ length: weeks }, (_, index) => {
-      const start = index * 7 + 1;
-      const end = Math.min(monthEnd, start + 6);
-      const daysInWeek = Math.max(1, end - start + 1);
-      const elapsed = Math.max(0, Math.min(day, end) - start + 1);
+    const currentWeek = Math.min(4, Math.max(1, Math.ceil(day / 7)));
+    const rows = Array.from({ length: 4 }, (_, index) => {
+      const start = index * 7 + 1, end = Math.min(monthEnd, start + 6), daysInWeek = Math.max(1, end - start + 1), elapsed = Math.max(0, Math.min(day, end) - start + 1);
       return { label: `שבוע ${index + 1}`, actual: actualRate * elapsed, target: targetRate * daysInWeek, active: index + 1 === currentWeek };
     });
     const max = Math.max(1, ...rows.flatMap(row => [row.actual, row.target]));
@@ -105,10 +104,8 @@
     renderSalesPanel();
     renderLoans();
   }
-
-  const watchedIds = ["sales", "sales-target", "sales-forecast", "sales-progress", "forecast-ending-balance", "loan-asset-cards"];
   const observer = new MutationObserver(() => window.requestAnimationFrame(renderAll));
-  watchedIds.forEach(id => {
+  ["sales", "sales-target", "sales-forecast", "sales-progress", "forecast-ending-balance", "loan-asset-cards"].forEach(id => {
     const element = document.getElementById(id);
     if (element) observer.observe(element, { childList: true, subtree: true, characterData: true });
   });
