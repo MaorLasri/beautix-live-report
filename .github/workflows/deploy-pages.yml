@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: beautix-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin \
+          git fetch --no-tags --prune origin \
             +refs/heads/live:refs/remotes/origin/live \
             +refs/heads/test-dashboard:refs/remotes/origin/test-dashboard
 
@@ -110,8 +110,16 @@ jobs:
           test -s _site/index.html
           test -s _site/test/index.html
           test -s _site/test/detailed-analytics.html
+          test -s _site/test/styles.css
+          test -s _site/test/app.js
+          test -s _site/test/analytics-auth.js
           test -s _site/test/version.json
           test -s _site/test/deployment-marker.json
+          grep -q 'styles.css?v=20260727-authflow2' _site/test/index.html
+          grep -q 'app.js?v=20260727-authflow2' _site/test/index.html
+          grep -q 'id="forgot-password-action"' _site/test/index.html
+          grep -q 'id="profile-menu-button"' _site/test/index.html
+          grep -q 'id="analytics-profile-menu-button"' _site/test/detailed-analytics.html
           grep -q '"source_branch": "test-dashboard"' _site/test/version.json
           grep -q '"commit": "${{ steps.versions.outputs.test_sha }}"' _site/test/version.json
           ! grep -q 'id="work-queue"' _site/test/detailed-analytics.html
@@ -134,3 +142,35 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  verify:
+    needs:
+      - build
+      - deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify published test revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SHA="${{ needs.build.outputs.test_sha }}"
+          VERSION_URL="https://maorlasri.github.io/beautix-live-report/test/version.json?verify=${GITHUB_RUN_ID}"
+          INDEX_URL="https://maorlasri.github.io/beautix-live-report/test/?verify=${GITHUB_RUN_ID}"
+
+          for attempt in $(seq 1 18); do
+            VERSION_JSON="$(curl -fsSL -H 'Cache-Control: no-cache' "$VERSION_URL" || true)"
+            INDEX_HTML="$(curl -fsSL -H 'Cache-Control: no-cache' "$INDEX_URL" || true)"
+
+            if printf '%s' "$VERSION_JSON" | grep -q "\"commit\": \"$EXPECTED_SHA\"" \
+              && printf '%s' "$INDEX_HTML" | grep -q 'id="forgot-password-action"' \
+              && printf '%s' "$INDEX_HTML" | grep -q 'id="profile-menu-button"'; then
+              echo "Published test site matches $EXPECTED_SHA"
+              exit 0
+            fi
+
+            echo "Attempt $attempt: published site not updated yet"
+            sleep 10
+          done
+
+          echo "Published test site did not reach expected revision $EXPECTED_SHA"
+          exit 1
