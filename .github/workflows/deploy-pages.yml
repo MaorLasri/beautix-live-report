@@ -138,8 +138,9 @@ jobs:
             '_site/test/detailed-analytics.html|id="site-profile-button"'
             '_site/test/detailed-analytics.html|id="site-profile-modal"'
             '_site/test/detailed-analytics.html|site-shell.js'
-            '_site/test/site-shell.js|openProfileEditor'
+            '_site/test/site-shell.js|const openEditor=async()=>'
             '_site/test/site-shell.js|storage.from("avatars")'
+            '_site/test/site-shell.js|window.BeautiXSiteShell={create:createShell}'
             '_site/test/version.json|"source_branch": "test-dashboard"'
             '_site/test/version.json|"commit": "${{ steps.versions.outputs.test_sha }}"'
           )
@@ -198,7 +199,8 @@ jobs:
               && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'id="site-profile-button"' \
               && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'id="site-profile-modal"' \
               && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'site-shell.js' \
-              && printf '%s' "$SHELL_JS" | grep -Fq 'openProfileEditor'; then
+              && printf '%s' "$SHELL_JS" | grep -Fq 'const openEditor=async()=>' \
+              && printf '%s' "$SHELL_JS" | grep -Fq 'window.BeautiXSiteShell={create:createShell}'; then
               echo "Published test site matches $EXPECTED_SHA and includes shared profile shell"
               exit 0
             fi
