@@ -95,7 +95,7 @@ jobs:
           set -euo pipefail
           test -s _site/test/index.html
           grep -q 'id="login-view"' _site/test/index.html
-          grep -q 'id="remember-me"' _site/test/index.html
+          grep -q 'id="remember-device"' _site/test/index.html
           grep -q 'id="toggle-password"' _site/test/index.html
 
       - name: Validate navigation and user controls
