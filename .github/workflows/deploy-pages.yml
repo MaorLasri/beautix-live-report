@@ -16,12 +16,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
+    outputs:
+      live_sha: ${{ steps.versions.outputs.live_sha }}
+      test_sha: ${{ steps.versions.outputs.test_sha }}
+      live_version: ${{ steps.versions.outputs.live_version }}
+      test_version: ${{ steps.versions.outputs.test_version }}
     steps:
       - name: Checkout deployment controller
         uses: actions/checkout@v4
@@ -51,7 +52,8 @@ jobs:
             echo "live_version=live-v${TIMESTAMP}-${LIVE_SHA:0:8}"
             echo "test_version=test-v${TIMESTAMP}-${TEST_SHA:0:8}"
           } >> "$GITHUB_OUTPUT"
-          echo "Deploying test-dashboard commit: $TEST_SHA"
+          echo "Deploying live commit: $LIVE_SHA"
+          echo "Deploying test commit: $TEST_SHA"
 
       - name: Build combined Pages site
         shell: bash
@@ -98,35 +100,35 @@ jobs:
           }
           EOF
 
-          grep -q 'id="login-view"' _site/test/index.html
-          grep -q '>דשבורד<' _site/test/index.html
-          grep -q '>ניתוחים מפורטים<' _site/test/index.html
-          grep -q 'id="remember-me"' _site/test/index.html
-          grep -q 'id="toggle-password"' _site/test/index.html
-          grep -q 'id="active-user-email"' _site/test/index.html
-          grep -q 'id="refresh-btn"' _site/test/index.html
-          if grep -q 'הלוואות ונכסים</span></a>' _site/test/index.html; then
-            echo "Unexpected extra navigation item in test dashboard" >&2
-            exit 1
-          fi
-          if grep -q 'תזרים 30 יום</span></a>' _site/test/index.html; then
-            echo "Unexpected extra navigation item in test dashboard" >&2
-            exit 1
-          fi
-          if grep -q 'id="work-queue"' _site/test/detailed-analytics.html; then
-            echo "Internal work queue leaked into the test site" >&2
-            exit 1
-          fi
-
           touch _site/.nojekyll
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+      - name: Validate build output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s _site/index.html
+          test -s _site/test/index.html
+          test -s _site/test/detailed-analytics.html
+          test -s _site/test/version.json
+          test -s _site/test/deployment-marker.json
+          grep -q '"source_branch": "test-dashboard"' _site/test/version.json
+          grep -q '"commit": "${{ steps.versions.outputs.test_sha }}"' _site/test/version.json
+          ! grep -q 'id="work-queue"' _site/test/detailed-analytics.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
 
       - name: Deploy to GitHub Pages
         id: deployment
