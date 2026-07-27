@@ -10,18 +10,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-authfix1" />
+  <link rel="stylesheet" href="styles.css?v=20260727-authcontrols1" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <section id="login-view" class="auth-screen">
     <div class="auth-card">
-      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-authfix1" alt="BeautiX" /></div>
+      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-authcontrols1" alt="BeautiX" /></div>
       <h1>כניסה למערכת BeautiX</h1>
       <p>יש להתחבר לפני הצגת נתוני העסק.</p>
       <form id="login-form">
         <label>אימייל<input id="email" type="email" autocomplete="email" required /></label>
-        <label>סיסמה<input id="password" type="password" autocomplete="current-password" required /></label>
+        <label>סיסמה
+          <span class="password-field"><input id="password" type="password" autocomplete="current-password" required /><button id="toggle-password" type="button" class="input-action" aria-pressed="false">הצג סיסמה</button></span>
+        </label>
+        <label class="remember-row"><input id="remember-device" type="checkbox" /> זכור אותי במכשיר הזה</label>
         <button id="login-submit" type="submit">כניסה</button>
         <p id="login-error" class="error" role="alert" hidden></p>
       </form>
@@ -30,11 +33,15 @@
 
   <div id="app-view" hidden>
     <aside class="site-sidebar" aria-label="ניווט ראשי">
-      <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-authfix1" alt="BeautiX" /></a>
+      <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-authcontrols1" alt="BeautiX" /></a>
       <nav class="sidebar-nav">
         <a class="active" href="./"><span>דשבורד</span></a>
         <a href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a>
       </nav>
+      <div class="nav-utilities">
+        <button id="refresh-btn" type="button" class="nav-control">רענון</button>
+        <div class="user-control"><span class="user-label">משתמש פעיל</span><strong id="active-user">—</strong><button id="auth-action" type="button" class="nav-control secondary">התנתקות</button></div>
+      </div>
       <div class="sidebar-test">TEST</div>
     </aside>
 
@@ -42,10 +49,9 @@
       <section id="report-view">
         <header class="topbar">
           <div class="brand-block">
-            <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-authfix1" alt="BeautiX" /></div>
+            <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-authcontrols1" alt="BeautiX" /></div>
             <div><p class="report-title">דשבורד בדיקה <strong class="test-badge">TEST</strong></p><p id="last-updated">טוען נתונים...</p></div>
           </div>
-          <div class="actions"><button id="refresh-btn" type="button">רענון</button><button id="logout-btn" type="button" class="secondary">יציאה</button></div>
         </header>
 
         <div class="status-legend" aria-label="מקרא צבעים">
@@ -131,7 +137,7 @@
     </main>
   </div>
 
-  <script src="config.js?v=20260727-authfix1"></script>
-  <script src="app.js?v=20260727-authfix1"></script>
+  <script src="config.js?v=20260727-authcontrols1"></script>
+  <script src="app.js?v=20260727-authcontrols1"></script>
 </body>
 </html>
