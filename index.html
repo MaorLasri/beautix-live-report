@@ -10,13 +10,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-1815" />
+  <link rel="stylesheet" href="styles.css?v=20260727-1930" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <main class="app-shell">
+  <aside class="site-sidebar" aria-label="ניווט ראשי">
+    <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-1930" alt="BeautiX" /></a>
+    <nav class="sidebar-nav">
+      <a class="active" href="./"><span>דשבורד ראשי</span></a>
+      <a href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a>
+      <a href="#assets-section"><span>הלוואות ונכסים</span></a>
+      <a href="#cashflow-section"><span>תזרים 30 יום</span></a>
+    </nav>
+    <div class="sidebar-test">TEST</div>
+  </aside>
+
+  <main class="app-shell site-content">
     <section id="login-view" class="auth-card">
-      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-1815" alt="BeautiX" /></div>
+      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-1930" alt="BeautiX" /></div>
       <p>כניסה לדו״ח הבדיקה</p>
       <form id="login-form">
         <label>אימייל<input id="email" type="email" autocomplete="email" required /></label>
@@ -29,10 +40,10 @@
     <section id="report-view" hidden>
       <header class="topbar">
         <div class="brand-block">
-          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-1815" alt="BeautiX" /></div>
+          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-1930" alt="BeautiX" /></div>
           <div><p class="report-title">דשבורד בדיקה <strong class="test-badge">TEST</strong></p><p id="last-updated">טוען נתונים...</p></div>
         </div>
-        <div class="actions"><a class="nav-button active" href="./">דשבורד ראשי</a><a class="nav-button secondary" href="detailed-analytics.html">ניתוחים מפורטים</a><button id="refresh-btn" type="button">רענון</button><button id="logout-btn" type="button" class="secondary">יציאה</button></div>
+        <div class="actions"><button id="refresh-btn" type="button">רענון</button><button id="logout-btn" type="button" class="secondary">יציאה</button></div>
       </header>
 
       <div class="status-legend" aria-label="מקרא צבעים">
@@ -102,12 +113,12 @@
         </div>
       </section>
 
-      <section class="dashboard-section assets-section">
-        <div class="section-title-block"><span class="section-kicker">הלוואות ונכסים</span><h2>התחייבויות ונכסים חיוביים</h2><p>כרטיס נפרד לכל פריט חשוב עם אפשרות לפתיחת פרטים</p></div>
+      <section id="assets-section" class="dashboard-section assets-section">
+        <div class="section-title-block"><span class="section-kicker">הלוואות ונכסים</span><h2>התחייבויות ונכסים חיוביים</h2><p>כרטיס נפרד לכל הלוואה ולכל נכס, ועוד כרטיס סיכום חוב כולל</p></div>
         <div id="loan-asset-cards" class="grid asset-grid"></div>
       </section>
 
-      <section class="dashboard-section cashflow-section">
+      <section id="cashflow-section" class="dashboard-section cashflow-section">
         <div class="section-heading-row"><div class="section-title-block"><span class="section-kicker">תזרים מזומנים</span><h2>30 הימים הבאים</h2><p>המבנה היומי נשאר כפי שהוא</p></div><div class="bulk-actions" aria-label="שליטה בכרטיסי הימים"><button id="expand-all-btn" type="button">הרחב הכל</button><button id="collapse-all-btn" type="button" class="secondary">כווץ הכל</button></div></div>
         <div class="cashflow-summary-grid"><article class="summary-card"><span>הכנסות צפויות</span><strong id="forecast-income">—</strong></article><article class="summary-card"><span>הוצאות צפויות</span><strong id="forecast-expense">—</strong></article><article class="summary-card"><span>תזרים נטו</span><strong id="forecast-net">—</strong></article><article class="summary-card"><span>יתרה חזויה בסוף התקופה</span><strong id="forecast-ending-balance">—</strong></article></div>
         <div id="days" class="day-stack"></div>
@@ -117,7 +128,7 @@
     </section>
   </main>
 
-  <script src="config.js?v=20260727-1815"></script>
-  <script src="app.js?v=20260727-1815"></script>
+  <script src="config.js?v=20260727-1930"></script>
+  <script src="app.js?v=20260727-1930"></script>
 </body>
 </html>
