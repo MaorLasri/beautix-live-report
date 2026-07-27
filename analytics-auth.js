@@ -14,19 +14,42 @@
     window.location.replace("./");
   }
 
-  client.auth.getSession().then(({ data, error }) => {
+  async function resolveDisplayName(session) {
+    const fallback = session?.user?.email || "משתמש מחובר";
+    const userId = session?.user?.id;
+    if (!userId) return fallback;
+    try {
+      const { data, error } = await client
+        .from("app_users")
+        .select("display_name,is_active")
+        .eq("auth_user_id", userId)
+        .maybeSingle();
+      if (error) throw error;
+      if (data?.is_active === false) return "משתמש לא פעיל";
+      return data?.display_name?.trim() || fallback;
+    } catch (error) {
+      console.warn("Unable to load user profile", error);
+      return fallback;
+    }
+  }
+
+  async function updateActiveUser(session) {
+    activeUser.textContent = await resolveDisplayName(session);
+  }
+
+  client.auth.getSession().then(async ({ data, error }) => {
     if (error || !data.session) {
       redirectToLogin();
       return;
     }
-    activeUser.textContent = data.session.user?.email || "משתמש מחובר";
+    await updateActiveUser(data.session);
     checkView.hidden = true;
     appView.hidden = false;
   }).catch(redirectToLogin);
 
   client.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_OUT" || !session) redirectToLogin();
-    else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") activeUser.textContent = session.user?.email || "משתמש מחובר";
+    else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") updateActiveUser(session);
   });
 
   authAction.addEventListener("click", async () => {
