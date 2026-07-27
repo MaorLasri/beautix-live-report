@@ -4,23 +4,34 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>BeautiX Detailed Analytics TEST</title>
+  <title>BeautiX — ניתוחים מפורטים TEST</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-1815" />
+  <link rel="stylesheet" href="styles.css?v=20260727-1930" />
 </head>
 <body>
-  <main class="app-shell">
+  <aside class="site-sidebar" aria-label="ניווט ראשי">
+    <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-1930" alt="BeautiX" /></a>
+    <nav class="sidebar-nav">
+      <a href="./"><span>דשבורד ראשי</span></a>
+      <a class="active" href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a>
+      <a href="#reconciliation"><span>התאמת נתונים</span></a>
+      <a href="#subscriptions"><span>מנויים וחידושים</span></a>
+      <a href="#work-queue"><span>תור עבודה ובדיקות</span></a>
+    </nav>
+    <div class="sidebar-test">TEST</div>
+  </aside>
+
+  <main class="app-shell site-content">
     <header class="topbar analytics-header">
       <div class="brand-block">
-        <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-1815" alt="BeautiX" /></div>
+        <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-1930" alt="BeautiX" /></div>
         <div><p class="report-title">ניתוחים מפורטים <strong class="test-badge">TEST</strong></p><p>EasyBizy מול Supabase · יולי 2026</p></div>
       </div>
-      <nav class="actions" aria-label="ניווט דוחות"><a class="nav-button secondary" href="./">דשבורד ראשי</a><a class="nav-button active" href="detailed-analytics.html">ניתוחים מפורטים</a></nav>
     </header>
 
-    <section class="dashboard-section">
+    <section id="reconciliation" class="dashboard-section">
       <div class="section-title-block"><span class="section-kicker">התאמת מקורות</span><h2>מכירות, תקבולים ואיכות נתונים</h2><p>המספרים מוצגים בנפרד כדי למנוע ערבוב בין מכירה, תקבול, חוב ושימוש במנוי.</p></div>
       <div class="grid analytics-grid">
         <article class="card"><span>EasyBizy — סה״כ מכירות</span><strong>₪84,603</strong><p>מקור: TotalSales ו־Payments</p></article>
@@ -60,7 +71,7 @@
       </div>
     </section>
 
-    <section class="dashboard-section">
+    <section id="subscriptions" class="dashboard-section">
       <div class="section-title-block"><span class="section-kicker">מנויים</span><h2>התחייבות שירות והזדמנויות חידוש</h2><p>מנוי שנמכר בעבר מייצר עבודה עתידית ללא תקבול חדש בכל טיפול.</p></div>
       <div class="grid analytics-grid">
         <article class="card"><span>מנויים עם יתרה</span><strong>165</strong><p>לפי Subscriptions</p></article>
@@ -89,15 +100,15 @@
       </div>
     </section>
 
-    <section class="dashboard-section">
-      <div class="section-title-block"><span class="section-kicker">תור עבודה</span><h2>Work & Tasks Queue</h2><p>סטטוס ביצוע גלוי כדי שלא יאבדו משימות.</p></div>
+    <section id="work-queue" class="dashboard-section">
+      <div class="section-title-block"><span class="section-kicker">תור עבודה ובדיקות</span><h2>משימות בניית המערכת</h2><p>תקלות פריסה ונתונים מקבלות קדימות לפני שיפורי תצוגה.</p></div>
       <div class="task-board">
-        <article class="task-column"><h3>In progress</h3><div class="task-item"><strong>Detailed Analytics page</strong><span class="status-pill in-progress">In progress</span><p>נוסף דף נפרד; נדרש אימות פריסה וחידוד נתונים.</p></div></article>
-        <article class="task-column"><h3>Planned</h3><div class="task-item"><strong>Invoice-level reconciliation</strong><span class="status-pill planned">Planned</span><p>התאמת TotalSales, Payments ו־SalesTree לפי חשבונית.</p></div><div class="task-item"><strong>Customer return analysis</strong><span class="status-pill planned">Planned</span><p>לקוחות שלא חזרו ומנויים לקראת פקיעה.</p></div></article>
-        <article class="task-column"><h3>Blocked</h3><div class="task-item"><strong>True product profitability</strong><span class="status-pill blocked">Blocked</span><p>חסרות עלויות לשני מוצרי SR.</p></div><div class="task-item"><strong>Accurate monthly expenses</strong><span class="status-pill blocked">Blocked</span><p>ה־RPC אינו מחזיר הוצאות חודשיות בפועל.</p></div></article>
-        <article class="task-column"><h3>Ready for review</h3><div class="task-item"><strong>Navigation separation</strong><span class="status-pill review">Ready for review</span><p>דשבורד ראשי נשאר נקי, והניתוחים עברו לדף נפרד.</p></div></article>
+        <article class="task-column"><h3>בביצוע</h3><div class="task-item"><strong>סרגל ניווט קבוע</strong><span class="status-pill in-progress">בביצוע</span><p>ניווט צדדי קבוע בכל עמודי האתר.</p></div><div class="task-item"><strong>כרטיסי הלוואות ונכסים</strong><span class="status-pill in-progress">בביצוע</span><p>כרטיס נפרד לכל הלוואה ולכל נכס, בתוספת סיכום חוב.</p></div></article>
+        <article class="task-column"><h3>מתוכנן</h3><div class="task-item"><strong>התאמה ברמת חשבונית</strong><span class="status-pill planned">מתוכנן</span><p>התאמת TotalSales, Payments ו־SalesTree לפי חשבונית.</p></div><div class="task-item"><strong>ניתוח חזרת לקוחות</strong><span class="status-pill planned">מתוכנן</span><p>לקוחות שלא חזרו ומנויים לקראת פקיעה.</p></div></article>
+        <article class="task-column"><h3>חסום</h3><div class="task-item"><strong>רווחיות מוצר מלאה</strong><span class="status-pill blocked">חסום</span><p>חסרות עלויות לשני מוצרי SR.</p></div><div class="task-item"><strong>הוצאות חודשיות מדויקות</strong><span class="status-pill blocked">חסום</span><p>ה־RPC אינו מחזיר הוצאות חודשיות בפועל.</p></div></article>
+        <article class="task-column"><h3>מוכן לבדיקה</h3><div class="task-item"><strong>דף ניתוחים מפורטים</strong><span class="status-pill review">מוכן לבדיקה</span><p>הניתוחים נשמרים מחוץ לדשבורד הראשי.</p></div><div class="task-item"><strong>תג סביבת בדיקה</strong><span class="status-pill review">מוכן לבדיקה</span><p>TEST מוצג בכל עמודי סביבת הבדיקה.</p></div></article>
       </div>
-      <p class="queue-note">מקור המשימות המלא נשמר גם ב־GitHub Issue #1.</p>
+      <p class="queue-note">מקור האמת המלא למשימות נשמר ב־GitHub Issue #1.</p>
     </section>
   </main>
 </body>
