@@ -104,7 +104,8 @@ jobs:
           set -euo pipefail
           grep -q '>דשבורד<' _site/test/index.html
           grep -q '>ניתוחים מפורטים<' _site/test/index.html
-          grep -q 'id="active-user-email"' _site/test/index.html
+          grep -q 'id="active-user"' _site/test/index.html
+          grep -q 'id="auth-action"' _site/test/index.html
           grep -q 'id="refresh-btn"' _site/test/index.html
           ! grep -q 'הלוואות ונכסים</span></a>' _site/test/index.html
           ! grep -q 'תזרים 30 יום</span></a>' _site/test/index.html
