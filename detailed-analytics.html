@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-navsync1" />
+  <link rel="stylesheet" href="styles.css?v=20260727-authcontrols1" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -18,21 +18,23 @@
 
   <div id="analytics-app" hidden>
     <aside class="site-sidebar" aria-label="ניווט ראשי">
-      <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-navsync1" alt="BeautiX" /></a>
+      <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-authcontrols1" alt="BeautiX" /></a>
       <nav class="sidebar-nav">
         <a href="./"><span>דשבורד</span></a>
         <a class="active" href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a>
       </nav>
+      <div class="nav-utilities">
+        <div class="user-control"><span class="user-label">משתמש פעיל</span><strong id="analytics-active-user">—</strong><button id="analytics-auth-action" type="button" class="nav-control secondary">התנתקות</button></div>
+      </div>
       <div class="sidebar-test">TEST</div>
     </aside>
 
     <main class="app-shell site-content">
       <header class="topbar analytics-header">
         <div class="brand-block">
-          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-navsync1" alt="BeautiX" /></div>
+          <div class="logo-stage"><img class="brand-logo" src="assets/beautix-logo.png?v=20260727-authcontrols1" alt="BeautiX" /></div>
           <div><p class="report-title">ניתוחים מפורטים <strong class="test-badge">TEST</strong></p><p>EasyBizy מול Supabase · יולי 2026</p></div>
         </div>
-        <div class="actions"><button id="analytics-logout" type="button" class="secondary">יציאה</button></div>
       </header>
 
       <section id="reconciliation" class="dashboard-section">
@@ -106,7 +108,7 @@
     </main>
   </div>
 
-  <script src="config.js?v=20260727-navsync1"></script>
-  <script src="analytics-auth.js?v=20260727-navsync1"></script>
+  <script src="config.js?v=20260727-authcontrols1"></script>
+  <script src="analytics-auth.js?v=20260727-authcontrols1"></script>
 </body>
 </html>
