@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - test-dashboard
   workflow_dispatch:
 
 permissions:
