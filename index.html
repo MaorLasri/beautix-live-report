@@ -8,13 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-siteshell2" />
+  <link rel="stylesheet" href="styles.css?v=20260727-siteshell3" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <section id="login-view" class="auth-screen">
     <div class="auth-card">
-      <div class="login-brand"><img src="assets/beautix-logo.png?v=20260727-authcontrols1" alt="BeautiX" /></div>
       <div id="login-panel">
         <h1>כניסה למערכת BeautiX</h1>
         <p>יש להתחבר לפני הצגת נתוני העסק.</p>
@@ -66,6 +65,7 @@
         <section class="dashboard-section"><div class="section-heading-row"><div class="section-title-block"><span class="section-kicker">תזרים</span><h2>תחזית 30 יום</h2><p>תנועות צפויות לפי המידע הקיים במערכת</p></div><div class="bulk-actions"><button id="expand-all-btn" type="button">פתח הכל</button><button id="collapse-all-btn" type="button" class="secondary">סגור הכל</button></div></div><div class="cashflow-summary-grid"><article class="summary-card"><span>הכנסות צפויות</span><strong id="forecast-income">—</strong></article><article class="summary-card"><span>הוצאות צפויות</span><strong id="forecast-expense">—</strong></article><article class="summary-card"><span>נטו צפוי</span><strong id="forecast-net">—</strong></article><article class="summary-card"><span>יתרה חזויה בסוף התקופה</span><strong id="forecast-ending-balance">—</strong></article><article class="summary-card"><span>יום שפל חזוי</span><strong id="forecast-low-day">—</strong><p id="forecast-low-note">—</p></article><article class="summary-card"><span>יום ההוצאה הגדול ביותר</span><strong id="forecast-largest-expense-day">—</strong><p id="forecast-largest-expense-note">—</p></article><article class="summary-card"><span>כיסוי הכנסות מול הוצאות</span><strong id="forecast-coverage">—</strong><div class="progress-track"><i id="coverage-progress-bar"></i></div><p id="forecast-coverage-note">—</p></article></div><div id="days" class="day-stack"></div></section>
         <section class="dashboard-section"><div class="section-title-block"><span class="section-kicker">מאזן</span><h2>הלוואות ונכסים</h2><p>התחייבויות ונכסים עסקיים לפי הנתונים הזמינים</p></div><div id="loan-asset-cards" class="grid asset-grid"></div></section>
         <p id="report-error" class="error" role="alert" hidden></p>
+        <footer class="report-footer"><span id="last-updated">טוען נתונים...</span></footer>
       </section>
     </main>
   </div>
@@ -79,7 +79,7 @@
   </div>
 
   <script src="config.js?v=20260727-authcontrols1"></script>
-  <script src="site-shell.js?v=20260727-siteshell2"></script>
-  <script src="app.js?v=20260727-siteshell2"></script>
+  <script src="site-shell.js?v=20260727-siteshell3"></script>
+  <script src="app.js?v=20260727-siteshell3"></script>
 </body>
 </html>
