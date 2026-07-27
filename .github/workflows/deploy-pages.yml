@@ -51,6 +51,7 @@ jobs:
             echo "live_version=live-v${TIMESTAMP}-${LIVE_SHA:0:8}"
             echo "test_version=test-v${TIMESTAMP}-${TEST_SHA:0:8}"
           } >> "$GITHUB_OUTPUT"
+          echo "Deploying test-dashboard commit: $TEST_SHA"
 
       - name: Build combined Pages site
         shell: bash
@@ -100,6 +101,10 @@ jobs:
           grep -q 'id="login-view"' _site/test/index.html
           grep -q '>דשבורד<' _site/test/index.html
           grep -q '>ניתוחים מפורטים<' _site/test/index.html
+          grep -q 'id="remember-me"' _site/test/index.html
+          grep -q 'id="toggle-password"' _site/test/index.html
+          grep -q 'id="active-user-email"' _site/test/index.html
+          grep -q 'id="refresh-btn"' _site/test/index.html
           if grep -q 'הלוואות ונכסים</span></a>' _site/test/index.html; then
             echo "Unexpected extra navigation item in test dashboard" >&2
             exit 1
