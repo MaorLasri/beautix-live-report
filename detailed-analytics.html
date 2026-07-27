@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-authcontrols1" />
+  <link rel="stylesheet" href="styles.css?v=20260727-authflow2" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -18,13 +18,28 @@
 
   <div id="analytics-app" hidden>
     <aside class="site-sidebar" aria-label="ניווט ראשי">
-      <a class="sidebar-brand" href="./"><img src="assets/beautix-logo.png?v=20260727-authcontrols1" alt="BeautiX" /></a>
+      <div class="profile-menu-wrap">
+        <button id="analytics-profile-menu-button" class="profile-avatar-button" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="analytics-profile-menu" title="תפריט משתמש">
+          <img id="analytics-profile-avatar" alt="תמונת משתמש" hidden />
+          <span id="analytics-profile-avatar-fallback" aria-hidden="true">👤</span>
+        </button>
+        <div id="analytics-profile-menu" class="profile-menu" hidden>
+          <div class="profile-menu-head">
+            <strong id="analytics-active-user">—</strong>
+            <span id="analytics-profile-role">—</span>
+          </div>
+          <button id="analytics-edit-profile-action" type="button" class="profile-menu-item">עריכת פרופיל</button>
+          <button id="analytics-change-password-action" type="button" class="profile-menu-item">שינוי סיסמה</button>
+          <button id="analytics-session-action" type="button" class="profile-menu-item">רענון התחברות</button>
+          <button id="analytics-auth-action" type="button" class="profile-menu-item danger">התנתקות</button>
+        </div>
+      </div>
       <nav class="sidebar-nav">
         <a href="./"><span>דשבורד</span></a>
         <a class="active" href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a>
       </nav>
       <div class="nav-utilities">
-        <div class="user-control"><span class="user-label">משתמש פעיל</span><strong id="analytics-active-user">—</strong><button id="analytics-auth-action" type="button" class="nav-control secondary">התנתקות</button></div>
+        <button id="analytics-refresh-btn" type="button" class="icon-control" aria-label="רענון" title="רענון">↻</button>
       </div>
       <div class="sidebar-test">TEST</div>
     </aside>
@@ -102,13 +117,13 @@
       <section class="dashboard-section">
         <div class="section-title-block"><span class="section-kicker">מוצרים</span><h2>מוצרים מובילים ואיכות עלויות</h2><p>רווחיות אמיתית אפשרית רק כאשר עלות המוצר מלאה.</p></div>
         <div class="analytics-table-wrap">
-          <table class="analytics-table"><thead><tr><th>מוצר</th><th>יחידות</th><th>מכירות</th><th>הערה</th></tr></thead><tbody><tr><td>דיילי מיקרו־פוליאנט</td><td>4</td><td>₪1,304</td><td class="warn">עלות חסרה</td></tr><tr><td>מדכא מלנין SR</td><td>3</td><td>₪1,026</td><td class="warn">עלות חסרה</td></tr><tr><td>Pro-Collagen Serum</td><td>2</td><td>₪876</td><td>עלות קיימת</td></tr><tr><td>Pro-Collagen Water Cream</td><td>1</td><td>₪468</td><td>עלות קיימת</td></tr><tr><td>Biolumin C SPF 50</td><td>1</td><td>₪388</td><td>עלות קיימת</td></tr></tbody></table>
+          <table class="analytics-table"><thead><tr><th>מוצר</th><th>יחידות</th><th>מכירות</th><th>הערה</th></tr></thead><tbody><tr><td>אקטיבי קליניק</td><td>4</td><td>₪2,170</td><td>עלות חסרה</td></tr><tr><td>סבון פנים</td><td>3</td><td>₪897</td><td>עלות חסרה</td></tr><tr><td>קרם לחות</td><td>2</td><td>₪695</td><td>עלות חסרה</td></tr><tr><td>מסכת הזנה</td><td>2</td><td>₪300</td><td>עלות חסרה</td></tr></tbody></table>
         </div>
       </section>
     </main>
   </div>
 
   <script src="config.js?v=20260727-authcontrols1"></script>
-  <script src="analytics-auth.js?v=20260727-authcontrols1"></script>
+  <script src="analytics-auth.js?v=20260727-authflow2"></script>
 </body>
 </html>
