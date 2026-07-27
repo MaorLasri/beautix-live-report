@@ -1,16 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <title>BeautiX Test Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>BeautiX Dashboard - Test</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260727-authcontrols1" />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260727-grossprofit1" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -62,11 +60,11 @@
         </div>
 
         <section class="dashboard-section overview-section">
-          <div class="section-title-block"><span class="section-kicker">תמונת מצב</span><h2>שיפורים, תובנות ובריאות כללית</h2><p>הנושאים החשובים ביותר לניהול העסק עכשיו</p></div>
+          <div class="section-title-block"><span class="section-kicker">סקירה ניהולית</span><h2>תמונת מצב מיידית</h2><p>מדדים מרכזיים, תובנה מובילה ויעדי בריאות עסקית</p></div>
           <div class="grid overview-grid">
-            <article class="card"><span>הדבר החשוב ביותר עכשיו</span><strong id="primary-insight">—</strong><p id="primary-insight-note">—</p></article>
-            <article class="card"><span>בריאות עסקית</span><strong id="business-health-score">—</strong><div class="progress-track"><i id="business-health-bar"></i></div><p id="business-health-note">—</p></article>
-            <article class="card"><span>מגמת בריאות שבועית</span><strong id="health-weekly-trend">—</strong><div id="health-weekly-bars" class="mini-bars"></div><p id="health-weekly-note">—</p></article>
+            <article class="card"><span>ציון בריאות עסקית</span><strong id="health-score">—</strong><p id="health-score-note">—</p></article>
+            <article class="card"><span>תובנה מרכזית</span><strong id="primary-insight">—</strong><p id="primary-insight-note">—</p></article>
+            <article class="card"><span>סיכון מרכזי</span><strong id="primary-risk">—</strong><p id="primary-risk-note">—</p></article>
             <article class="card"><span>איך לשפר את הציון</span><strong id="health-improvement">—</strong><p id="health-improvement-note">—</p></article>
           </div>
         </section>
@@ -102,7 +100,7 @@
             <article class="card"><span>יתרות מט״ח</span><strong id="fx-balance">—</strong><p>נכס עסקי נוסף</p></article>
             <article class="card"><span>זיכויים עתידיים</span><strong id="future-clearing">—</strong><p>כל הזיכויים הצפויים במערכת</p></article>
             <article class="card"><span>יעד עו״ש</span><strong id="checking-target">—</strong><div class="progress-track"><i id="checking-target-progress-bar"></i></div><p id="checking-target-note">—</p></article>
-            <article class="card"><span>רווח נקי משוער</span><strong id="net-margin">—</strong><div class="metric-row sub"><small>יעד</small><b id="net-margin-target">30%</b></div><div class="progress-track"><i id="margin-progress-bar"></i></div><p id="net-margin-note">—</p></article>
+            <article class="card"><span>רווח גולמי לאחר מסים</span><strong id="gross-profit">—</strong><div class="metric-row sub"><small>שיעור מהמכירות</small><b id="gross-profit-margin">—</b></div><p id="gross-profit-note">מכירות פחות מע״מ עסקאות ופחות מס הכנסה משוער</p></article>
             <article class="card tax-total-card"><span>סה״כ לשמור לכל המסים החודש</span><strong id="all-tax-reserve">—</strong><p>מע״מ לאחר קיזוז + מס הכנסה משוער</p></article>
           </div>
         </section>
@@ -137,7 +135,7 @@
     </main>
   </div>
 
-  <script src="config.js?v=20260727-authcontrols1"></script>
-  <script src="app.js?v=20260727-authcontrols1"></script>
+  <script src="config.js?v=20260727-grossprofit1"></script>
+  <script src="app.js?v=20260727-grossprofit1"></script>
 </body>
 </html>
