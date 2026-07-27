@@ -1,4 +1,4 @@
-name: Deploy BeautiX test dashboard
+name: Test BeautiX dashboard
 
 on:
   push:
@@ -8,132 +8,93 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: beautix-pages
+  group: beautix-test-ci
   cancel-in-progress: true
 
 jobs:
-  build:
+  smoke-test:
     runs-on: ubuntu-latest
-    outputs:
-      test_sha: ${{ steps.version.outputs.test_sha }}
-      test_version: ${{ steps.version.outputs.test_version }}
     steps:
-      - name: Checkout deployment controller
+      - name: Checkout test dashboard
         uses: actions/checkout@v4
         with:
-          ref: main
-          fetch-depth: 0
+          ref: test-dashboard
+          fetch-depth: 1
 
-      - name: Fetch live and test branches
+      - name: Verify required files
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin \
-            +refs/heads/live:refs/remotes/origin/live \
-            +refs/heads/test-dashboard:refs/remotes/origin/test-dashboard
+          test -s index.html
+          test -s detailed-analytics.html
+          test -s app.js
+          test -s analytics.js
+          test -s styles.css
+          test -s config.js
 
-      - name: Resolve versions
-        id: version
+      - name: Verify local asset references
         shell: bash
         run: |
           set -euo pipefail
-          LIVE_SHA="$(git rev-parse refs/remotes/origin/live^{commit})"
-          TEST_SHA="$(git rev-parse refs/remotes/origin/test-dashboard^{commit})"
-          TIMESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
-          echo "live_sha=$LIVE_SHA" >> "$GITHUB_OUTPUT"
-          echo "test_sha=$TEST_SHA" >> "$GITHUB_OUTPUT"
-          echo "live_version=live-v${TIMESTAMP}-${LIVE_SHA:0:8}" >> "$GITHUB_OUTPUT"
-          echo "test_version=test-v${TIMESTAMP}-${TEST_SHA:0:8}" >> "$GITHUB_OUTPUT"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
 
-      - name: Build combined Pages site
+          pages = [Path('index.html'), Path('detailed-analytics.html')]
+          missing = []
+          for page in pages:
+              text = page.read_text(encoding='utf-8')
+              for attr in ('src', 'href'):
+                  for value in re.findall(rf'{attr}=["\']([^"\']+)["\']', text):
+                      clean = value.split('?', 1)[0].split('#', 1)[0]
+                      if not clean or clean.startswith(('http://', 'https://', 'mailto:', 'tel:', 'data:', '#')):
+                          continue
+                      if clean in ('./', '/'):
+                          continue
+                      target = (page.parent / clean).resolve()
+                      if not target.exists():
+                          missing.append(f'{page}: {value}')
+          if missing:
+              raise SystemExit('Missing local references:\n' + '\n'.join(missing))
+          PY
+
+      - name: Verify stable application structure
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf _site live-src test-src
-          mkdir -p _site/test
-          git worktree add --detach live-src "${{ steps.version.outputs.live_sha }}"
-          git worktree add --detach test-src "${{ steps.version.outputs.test_sha }}"
-          rsync -a --delete --exclude='.git' --exclude='.github' live-src/ _site/
-          rsync -a --delete --exclude='.git' --exclude='.github' test-src/ _site/test/
-          PUBLISHED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          cat > _site/version.json <<EOF
-          {
-            "environment": "live",
-            "version": "${{ steps.version.outputs.live_version }}",
-            "source_branch": "live",
-            "commit": "${{ steps.version.outputs.live_sha }}",
-            "published_at_utc": "${PUBLISHED_AT}"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          index = Path('index.html').read_text(encoding='utf-8')
+          analytics = Path('detailed-analytics.html').read_text(encoding='utf-8')
+
+          checks = {
+              'login view': 'id="login-view"' in index,
+              'app view': 'id="app-view"' in index,
+              'dashboard link': 'href="./"' in index,
+              'analytics link': 'href="detailed-analytics.html"' in index,
+              'analytics protected view': 'id="analytics-app"' in analytics,
+              'internal work queue removed': 'id="work-queue"' not in analytics,
           }
-          EOF
-          cat > _site/test/version.json <<EOF
-          {
-            "environment": "test",
-            "version": "${{ steps.version.outputs.test_version }}",
-            "source_branch": "test-dashboard",
-            "commit": "${{ steps.version.outputs.test_sha }}",
-            "published_at_utc": "${PUBLISHED_AT}"
-          }
-          EOF
-          cat > _site/test/deployment-marker.json <<EOF
-          {
-            "dashboard": "test",
-            "branch": "test-dashboard",
-            "commit": "${{ steps.version.outputs.test_sha }}",
-            "version": "${{ steps.version.outputs.test_version }}",
-            "published_at_utc": "${PUBLISHED_AT}"
-          }
-          EOF
-          touch _site/.nojekyll
+          failed = [name for name, ok in checks.items() if not ok]
+          if failed:
+              raise SystemExit('Failed structural checks: ' + ', '.join(failed))
 
-      - name: Validate login gate
+          nav_links = re.findall(r'<nav class="sidebar-nav">(.*?)</nav>', index, flags=re.S)
+          if not nav_links:
+              raise SystemExit('Sidebar navigation block not found')
+          hrefs = re.findall(r'href="([^"]+)"', nav_links[0])
+          if hrefs != ['./', 'detailed-analytics.html']:
+              raise SystemExit(f'Unexpected navigation links: {hrefs}')
+          PY
+
+      - name: Check JavaScript syntax
         shell: bash
         run: |
           set -euo pipefail
-          test -s _site/test/index.html
-          grep -q 'id="login-view"' _site/test/index.html
-          grep -q 'id="remember-device"' _site/test/index.html
-          grep -q 'id="toggle-password"' _site/test/index.html
-
-      - name: Validate navigation and user controls
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -q '>דשבורד<' _site/test/index.html
-          grep -q '>ניתוחים מפורטים<' _site/test/index.html
-          grep -q 'id="active-user"' _site/test/index.html
-          grep -q 'id="auth-action"' _site/test/index.html
-          grep -q 'id="refresh-btn"' _site/test/index.html
-          ! grep -q 'הלוואות ונכסים</span></a>' _site/test/index.html
-          ! grep -q 'תזרים 30 יום</span></a>' _site/test/index.html
-          ! grep -q 'id="work-queue"' _site/test/detailed-analytics.html
-
-      - name: Validate deployment metadata
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -q '"source_branch": "test-dashboard"' _site/test/version.json
-          grep -q '"commit": "${{ steps.version.outputs.test_sha }}"' _site/test/version.json
-          test -s _site/test/deployment-marker.json
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Deploy combined Pages site
-        id: deployment
-        uses: actions/deploy-pages@v4
+          node --check app.js
+          node --check analytics.js
+          node --check config.js
