@@ -1,6 +1,10 @@
 (() => {
   const config = window.BEAUTIX_CONFIG;
-  const client = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey);
+  const rememberPreference = localStorage.getItem("beautix-remember-device") === "true";
+  const storage = rememberPreference ? window.localStorage : window.sessionStorage;
+  const client = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, {
+    auth: { persistSession: true, storage, autoRefreshToken: true, detectSessionInUrl: true }
+  });
   const loginView = document.getElementById("login-view");
   const appView = document.getElementById("app-view");
   const reportView = document.getElementById("report-view");
@@ -9,7 +13,11 @@
   const loginError = document.getElementById("login-error");
   const reportError = document.getElementById("report-error");
   const refreshBtn = document.getElementById("refresh-btn");
-  const logoutBtn = document.getElementById("logout-btn");
+  const authAction = document.getElementById("auth-action");
+  const activeUser = document.getElementById("active-user");
+  const rememberDevice = document.getElementById("remember-device");
+  const passwordInput = document.getElementById("password");
+  const togglePassword = document.getElementById("toggle-password");
   const expandAllBtn = document.getElementById("expand-all-btn");
   const collapseAllBtn = document.getElementById("collapse-all-btn");
   const daysContainer = document.getElementById("days");
@@ -17,6 +25,8 @@
   const lastUpdated = document.getElementById("last-updated");
   let refreshTimer = null;
   let isLoading = false;
+
+  rememberDevice.checked = rememberPreference;
 
   const money = (value) => new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 2 }).format(Number(value || 0));
   const numberText = (value, digits = 1) => new Intl.NumberFormat("he-IL", { maximumFractionDigits: digits }).format(Number(value || 0));
@@ -68,7 +78,7 @@
 
   function renderCashflowInsights(days,checkingBalance){ const totalIncome=days.reduce((s,d)=>s+d.income,0),totalExpense=days.reduce((s,d)=>s+d.expense,0),net=totalIncome-totalExpense,ending=days.at(-1)?.projectedBalance??checkingBalance,low=days.reduce((a,d)=>!a||d.projectedBalance<a.projectedBalance?d:a,null),largest=days.reduce((a,d)=>!a||d.expense>a.expense?d:a,null),coverage=totalExpense>0?totalIncome/totalExpense:0; setText("forecast-income",money(totalIncome),"pos"); setText("forecast-expense",money(totalExpense),totalExpense>0?"neg":null); setText("forecast-net",money(net),net>=0?"pos":"neg"); setText("forecast-ending-balance",money(ending),ending>=0?"pos":"neg"); setText("forecast-low-day",low?dateText(low.date):"—",low?.projectedBalance>=0?"pos":"neg"); setText("forecast-low-note",low?`יתרה חזויה: ${money(low.projectedBalance)}`:"אין נתונים"); setText("forecast-largest-expense-day",largest&&largest.expense>0?dateText(largest.date):"—"); setText("forecast-largest-expense-note",largest&&largest.expense>0?`הוצאה צפויה: ${money(largest.expense)}`:"אין הוצאות מתוזמנות"); setText("forecast-coverage",`${numberText(coverage*100,0)}%`,coverage>=1?"pos":"neg"); setText("forecast-coverage-note",coverage>=1?"ההכנסות הצפויות מכסות את ההוצאות":`חסר כיסוי של ${money(Math.max(totalExpense-totalIncome,0))}`); setProgress("coverage-progress-bar",coverage*100,coverage>=1?"green":coverage>=.75?"amber":"red"); return{totalIncome,totalExpense,net,endingBalance:ending,coverage}; }
 
-  function renderOpportunities(report){ const sales=Number(report.sales?.income||0),immediate=Number(report.monthly?.immediate_receipts||0),debts=Number(report.monthly?.customer_debts||0),uncollected=Math.max(sales-immediate,0); setText("customer-debts",money(debts),debts>0?"warn":null); setText("uncollected-sales",money(uncollected),uncollected>0?"warn":null); setText("uncollected-sales-note",uncollected>0?"כולל אשראי עתידי, חובות והפרשי עיתוי":"כל המכירות הפכו לתקבול מיידי"); }
+  function renderOpportunities(report){ const monthly=report.monthly||{},sales=Number(report.sales?.income||monthly.sales||0),immediate=Number(monthly.immediate_receipts||0),debts=Number(monthly.customer_debts||report.debts?.customers||0),gap=Math.max(sales-immediate,0); setMetric("customer-debts",debts); setMetric("uncollected-sales",gap); setText("uncollected-sales-note",gap>0?"כולל אשראי עתידי, חוב והפרשי תזמון":"כל המכירות תורגמו לתקבול מיידי"); }
 
   function renderAssets(report){
     const positiveAccounts=(report.accounts||[]).filter((x)=>x.scope==="business"&&Number(x.balance||0)>0);
@@ -77,12 +87,8 @@
     const cards=[];
     const totalDebt=Number(loans.balance||loanItems.reduce((sum,item)=>sum+Number(item.balance||item.current_balance||0),0));
     if(totalDebt>0){ cards.push(`<article class="asset-card liability-card debt-total-card"><span>סך החוב הכולל</span><strong class="neg">${money(totalDebt)}</strong><dl><div><dt>מספר הלוואות</dt><dd>${loanItems.length||loans.count||0}</dd></div><div><dt>החזר חודשי כולל</dt><dd>${money(loans.monthly||loanItems.reduce((sum,item)=>sum+Number(item.monthly_payment||item.monthly||0),0))}</dd></div><div><dt>התשלום הקרוב</dt><dd>${dateText(loans.next_payment)}</dd></div></dl></article>`); }
-    if(loanItems.length){
-      loanItems.forEach((loan,index)=>cards.push(`<article class="asset-card liability-card"><span>${escapeHtml(loan.name||loan.lender||`הלוואה ${index+1}`)}</span><strong class="neg">${money(loan.balance||loan.current_balance||0)}</strong><button class="asset-toggle" type="button" aria-expanded="false">הצג פירוט</button><div class="asset-details" hidden><dl><div><dt>יתרה נוכחית</dt><dd>${money(loan.balance||loan.current_balance||0)}</dd></div><div><dt>יתרה מקורית</dt><dd>${loan.original_balance?money(loan.original_balance):"לא זמין"}</dd></div><div><dt>החזר חודשי</dt><dd>${money(loan.monthly_payment||loan.monthly||0)}</dd></div><div><dt>ריבית</dt><dd>${loan.interest_rate?`${numberText(loan.interest_rate,2)}%`:"לא זמין"}</dd></div><div><dt>תשלום הבא</dt><dd>${dateText(loan.next_payment||loan.next_payment_date)}</dd></div></dl></div></article>`));
-    } else if(totalDebt>0){
-      const count=Math.max(1,Number(loans.count||1));
-      for(let index=0;index<count;index+=1){ cards.push(`<article class="asset-card liability-card data-missing-card"><span>הלוואה ${index+1}</span><strong>פירוט חסר</strong><p>ה־RPC מחזיר כרגע סיכום חוב בלבד. הכרטיס נשמר נפרד כדי להתמלא אוטומטית כאשר יוחזרו פרטי ההלוואה.</p><dl><div><dt>חלק יחסי משוער</dt><dd>${money(totalDebt/count)}</dd></div><div><dt>החזר חודשי משוער</dt><dd>${money(Number(loans.monthly||0)/count)}</dd></div><div><dt>מועד תשלום הבא</dt><dd>${dateText(loans.next_payment)}</dd></div></dl></article>`); }
-    }
+    if(loanItems.length){ loanItems.forEach((loan,index)=>cards.push(`<article class="asset-card liability-card"><span>${escapeHtml(loan.name||loan.lender||`הלוואה ${index+1}`)}</span><strong class="neg">${money(loan.balance||loan.current_balance||0)}</strong><button class="asset-toggle" type="button" aria-expanded="false">הצג פירוט</button><div class="asset-details" hidden><dl><div><dt>יתרה נוכחית</dt><dd>${money(loan.balance||loan.current_balance||0)}</dd></div><div><dt>יתרה מקורית</dt><dd>${loan.original_balance?money(loan.original_balance):"לא זמין"}</dd></div><div><dt>החזר חודשי</dt><dd>${money(loan.monthly_payment||loan.monthly||0)}</dd></div><div><dt>ריבית</dt><dd>${loan.interest_rate?`${numberText(loan.interest_rate,2)}%`:"לא זמין"}</dd></div><div><dt>תשלום הבא</dt><dd>${dateText(loan.next_payment||loan.next_payment_date)}</dd></div></dl></div></article>`)); }
+    else if(totalDebt>0){ const count=Math.max(1,Number(loans.count||1)); for(let index=0;index<count;index+=1){ cards.push(`<article class="asset-card liability-card data-missing-card"><span>הלוואה ${index+1}</span><strong>פירוט חסר</strong><p>ה־RPC מחזיר כרגע סיכום חוב בלבד. הכרטיס נשמר נפרד כדי להתמלא אוטומטית כאשר יוחזרו פרטי ההלוואה.</p><dl><div><dt>חלק יחסי משוער</dt><dd>${money(totalDebt/count)}</dd></div><div><dt>החזר חודשי משוער</dt><dd>${money(Number(loans.monthly||0)/count)}</dd></div><div><dt>מועד תשלום הבא</dt><dd>${dateText(loans.next_payment)}</dd></div></dl></article>`); } }
     positiveAccounts.forEach((item)=>cards.push(`<article class="asset-card positive-asset-card"><span>${escapeHtml(item.name)}</span><strong>${money(item.balance)}</strong><button class="asset-toggle" type="button" aria-expanded="false">הצג פירוט</button><div class="asset-details" hidden><dl><div><dt>סוג</dt><dd>${escapeHtml(item.type||"נכס")}</dd></div><div><dt>נכון לתאריך</dt><dd>${dateText(item.as_of)}</dd></div><div><dt>יתרה נוכחית</dt><dd>${money(item.balance)}</dd></div><div><dt>יתרה מקורית</dt><dd>${item.original_balance?money(item.original_balance):"לא רלוונטי / לא זמין"}</dd></div></dl></div></article>`));
     assetContainer.innerHTML=cards.join("")||'<article class="asset-card"><span>הלוואות ונכסים</span><strong>אין נתונים</strong></article>';
     assetContainer.querySelectorAll(".asset-toggle").forEach((button)=>button.addEventListener("click",()=>{const details=button.nextElementSibling;const open=button.getAttribute("aria-expanded")==="true";button.setAttribute("aria-expanded",String(!open));button.textContent=open?"הצג פירוט":"הסתר פירוט";details.hidden=open;}));
@@ -110,9 +116,11 @@
   async function loadReport(){ if(isLoading)return; isLoading=true; reportError.hidden=true; refreshBtn.disabled=true; refreshBtn.textContent="מרענן..."; try{ const {data,error}=await client.rpc(config.reportRpc,{_cache_bust:Date.now()}); if(error&&error.code==="PGRST202"){const fallback=await client.rpc(config.reportRpc); if(fallback.error) throw fallback.error; const report=normalizeReport(fallback.data); if(!report) throw new Error("לא התקבלו נתונים מהשרת"); renderReport(report);}else{if(error)throw error;const report=normalizeReport(data);if(!report)throw new Error("לא התקבלו נתונים מהשרת");renderReport(report);}}catch(error){console.error(error);reportError.textContent=`שגיאה בטעינת הדו״ח: ${error.message}`;reportError.hidden=false;}finally{refreshBtn.disabled=false;refreshBtn.textContent="רענון";isLoading=false;} }
 
   function stopRefresh(){ if(refreshTimer)clearInterval(refreshTimer); refreshTimer=null; }
-  function showLogin(){ stopRefresh(); appView.hidden=true; loginView.hidden=false; reportView.hidden=false; loginSubmit.disabled=false; loginSubmit.textContent="כניסה"; }
-  async function showReport(){ loginView.hidden=true; appView.hidden=false; reportView.hidden=false; await loadReport(); stopRefresh(); refreshTimer=setInterval(loadReport,config.refreshIntervalMs||30000); }
+  function showLogin(){ stopRefresh(); appView.hidden=true; loginView.hidden=false; reportView.hidden=false; loginSubmit.disabled=false; loginSubmit.textContent="כניסה"; activeUser.textContent="—"; }
+  async function showReport(session){ loginView.hidden=true; appView.hidden=false; reportView.hidden=false; activeUser.textContent=session?.user?.email||"משתמש מחובר"; await loadReport(); stopRefresh(); refreshTimer=setInterval(loadReport,config.refreshIntervalMs||30000); }
   function friendlyAuthError(error){ if(!error) return "לא ניתן להתחבר כרגע."; if(error.message?.toLowerCase().includes("invalid login credentials")) return "האימייל או הסיסמה אינם נכונים."; if(error.message?.toLowerCase().includes("email not confirmed")) return "כתובת האימייל עדיין לא אושרה."; return `ההתחברות נכשלה: ${error.message}`; }
+
+  togglePassword.addEventListener("click",()=>{ const showing=passwordInput.type==="text"; passwordInput.type=showing?"password":"text"; togglePassword.textContent=showing?"הצג סיסמה":"הסתר סיסמה"; togglePassword.setAttribute("aria-pressed",String(!showing)); });
 
   loginForm.addEventListener("submit",async(event)=>{
     event.preventDefault();
@@ -121,11 +129,14 @@
     loginSubmit.textContent="מתחבר...";
     try{
       const email=document.getElementById("email").value.trim();
-      const password=document.getElementById("password").value;
+      const password=passwordInput.value;
+      localStorage.setItem("beautix-remember-device",String(rememberDevice.checked));
       const {data,error}=await client.auth.signInWithPassword({email,password});
       if(error) throw error;
       if(!data.session) throw new Error("לא נוצרה התחברות פעילה");
-      await showReport();
+      if(rememberDevice.checked){ localStorage.setItem("beautix-persisted-session",JSON.stringify(data.session)); }
+      else { localStorage.removeItem("beautix-persisted-session"); }
+      await showReport(data.session);
     }catch(error){
       console.error(error);
       loginError.textContent=friendlyAuthError(error);
@@ -135,17 +146,18 @@
     }
   });
 
-  logoutBtn.addEventListener("click",async()=>{ await client.auth.signOut(); showLogin(); });
+  authAction.addEventListener("click",async()=>{ await client.auth.signOut(); localStorage.removeItem("beautix-persisted-session"); showLogin(); });
   refreshBtn.addEventListener("click",loadReport);
   expandAllBtn.addEventListener("click",()=>setAllCards(true));
   collapseAllBtn.addEventListener("click",()=>setAllCards(false));
 
   client.auth.getSession().then(({data,error})=>{
     if(error){ console.error(error); showLogin(); return; }
-    data.session?showReport():showLogin();
+    data.session?showReport(data.session):showLogin();
   }).catch((error)=>{ console.error(error); showLogin(); });
 
   client.auth.onAuthStateChange((event,session)=>{
     if(event==="SIGNED_OUT"||!session) showLogin();
+    else if(event==="SIGNED_IN"||event==="TOKEN_REFRESHED") activeUser.textContent=session.user?.email||"משתמש מחובר";
   });
 })();
