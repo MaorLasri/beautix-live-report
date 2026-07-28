@@ -16,7 +16,18 @@
     if (value instanceof Date) return new Date(value.getFullYear(), value.getMonth(), value.getDate());
     return value ? new Date(`${String(value).slice(0,10)}T00:00:00`) : new Date();
   };
-  const shortDate = value => value ? new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit" }).format(dateOnly(value)) : "—";
+  const isoDate = value => {
+    const date = dateOnly(value);
+    if (Number.isNaN(date.getTime())) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  const shortDate = value => {
+    const date = dateOnly(value);
+    return Number.isNaN(date.getTime()) ? "—" : new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit" }).format(date);
+  };
 
   function salesChartSvg(sales, target, forecast, day, monthEnd) {
     const width = 760, height = 290, left = 48, right = 730, top = 24, bottom = 250;
@@ -34,6 +45,79 @@
     const grid = [0, .25, .5, .75, 1].map(p => `<line class="grid-line" x1="${left}" x2="${right}" y1="${top + (bottom - top) * p}" y2="${top + (bottom - top) * p}"/>`).join("");
     const labels = [1, 7, 14, 21, monthEnd].filter((v, i, a) => a.indexOf(v) === i && v <= monthEnd).map(v => `<text x="${x(v)}" y="278" text-anchor="middle">${v}</text>`).join("");
     return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="מגמת מכירות חודשית, יעד ותחזית">${grid}<polygon class="chart-area" points="${area}"/><line class="target-line" x1="${left}" y1="${bottom}" x2="${right}" y2="${y(target)}"/><polyline class="actual-line" points="${actualPoints.join(" ")}"/><polyline class="forecast-line" points="${forecastPoints}"/><circle cx="${x(day)}" cy="${y(sales)}" r="6" fill="#fff" stroke="currentColor" stroke-width="4"/>${labels}</svg>`;
+  }
+
+  function renderWeeklySales(report, latest) {
+    const weeklyContainer = document.getElementById("executive-weekly-bars");
+    const weeklyNote = document.getElementById("executive-weekly-note");
+    if (!weeklyContainer || !weeklyNote) return;
+
+    try {
+      const weeklyRows = Array.isArray(report?.weekly_sales) ? report.weekly_sales : [];
+      const monthStart = new Date(latest.getFullYear(), latest.getMonth(), 1);
+      const monthEndDate = new Date(latest.getFullYear(), latest.getMonth() + 1, 0);
+      const monthlyRows = weeklyRows.map(row => {
+        const start = dateOnly(row.week_start);
+        const end = dateOnly(row.week_end);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < monthStart || start > monthEndDate) return null;
+        return {
+          sales: Number(row.sales || 0),
+          transaction_count: Number(row.transaction_count || 0),
+          week_start: start < monthStart ? new Date(monthStart) : start,
+          week_end: end > monthEndDate ? new Date(monthEndDate) : end
+        };
+      }).filter(Boolean);
+
+      while (monthlyRows.length > 4) {
+        const firstSpan = monthlyRows[0].week_end - monthlyRows[0].week_start;
+        const lastSpan = monthlyRows.at(-1).week_end - monthlyRows.at(-1).week_start;
+        if (firstSpan <= lastSpan) {
+          monthlyRows[1] = {
+            sales: monthlyRows[0].sales + monthlyRows[1].sales,
+            transaction_count: monthlyRows[0].transaction_count + monthlyRows[1].transaction_count,
+            week_start: monthlyRows[0].week_start,
+            week_end: monthlyRows[1].week_end
+          };
+          monthlyRows.shift();
+        } else {
+          const last = monthlyRows.pop();
+          const previous = monthlyRows.at(-1);
+          previous.sales += last.sales;
+          previous.transaction_count += last.transaction_count;
+          previous.week_end = last.week_end;
+        }
+      }
+
+      window.__beautixWeeklyDebug = {
+        raw: weeklyRows,
+        monthly: monthlyRows.map(row => ({
+          sales: row.sales,
+          transaction_count: row.transaction_count,
+          week_start: isoDate(row.week_start),
+          week_end: isoDate(row.week_end)
+        }))
+      };
+
+      if (!monthlyRows.length) {
+        weeklyContainer.innerHTML = `<div class="executive-loans-empty">אין כרגע נתוני מכירות שבועיים להצגה.</div>`;
+        weeklyNote.textContent = "הדוח קיבל weekly_sales, אך לא נמצאו שורות בחודש הפעיל.";
+        return;
+      }
+
+      const latestWeekStart = monthlyRows.at(-1).week_start.getTime();
+      const maxWeeklySales = Math.max(1, ...monthlyRows.map(row => row.sales));
+      weeklyContainer.innerHTML = monthlyRows.map((row, index) => {
+        const active = row.week_start.getTime() === latestWeekStart;
+        const label = `שבוע ${index + 1} · ${shortDate(row.week_start)}–${shortDate(row.week_end)}`;
+        return `<div class="week-col"><div class="week-bar actual" style="height:${Math.max(2, row.sales / maxWeeklySales * 88)}%"><span class="week-value">${money(row.sales)}</span></div><span class="week-label">${escapeHtml(label)}${active ? " · נוכחי" : ""}</span><small>${row.transaction_count} עסקאות</small></div>`;
+      }).join("");
+      weeklyNote.textContent = "מוצגים עד ארבעה שבועות ורק נתונים מתוך החודש הנוכחי. שבוע חלקי בתחילת או בסוף החודש מאוחד עם השבוע הסמוך.";
+    } catch (error) {
+      console.error("BeautiX weekly sales render failed", error, report?.weekly_sales);
+      window.__beautixWeeklyDebug = { error: String(error?.message || error), raw: report?.weekly_sales || null };
+      weeklyContainer.innerHTML = `<div class="executive-loans-empty">שגיאה בהצגת המכירות השבועיות.</div>`;
+      weeklyNote.textContent = `פרטי שגיאה: ${error?.message || "שגיאה לא ידועה"}`;
+    }
   }
 
   function render(report) {
@@ -67,60 +151,7 @@
     document.getElementById("executive-sales-chart").innerHTML = salesChartSvg(sales, target, forecast, day, monthEnd);
     document.getElementById("executive-sales-progress").innerHTML = `<div class="executive-progress-row"><span>התקדמות מול היעד</span><b>${progress.toFixed(1)}%</b></div><div class="executive-progress-track"><i style="width:${Math.max(0, Math.min(progress, 100))}%"></i></div><small>${target > 0 ? (gap <= 0 ? `היעד הושג ונחצה ב־${money(Math.abs(gap))}` : `נותרו ${money(gap)} ליעד`) : "יעד מכירות לא זמין"}</small>`;
 
-    const weeklyRows = Array.isArray(report?.weekly_sales) ? report.weekly_sales : [];
-    const weeklyContainer = document.getElementById("executive-weekly-bars");
-    const weeklyNote = document.getElementById("executive-weekly-note");
-    if (weeklyRows.length) {
-      const monthStart = new Date(latest.getFullYear(), latest.getMonth(), 1);
-      const monthEndDate = new Date(latest.getFullYear(), latest.getMonth() + 1, 0);
-      const monthlyRows = weeklyRows
-        .map(row => {
-          const start = dateOnly(row.week_start);
-          const end = dateOnly(row.week_end);
-          if (end < monthStart || start > monthEndDate) return null;
-          const clippedStart = start < monthStart ? monthStart : start;
-          const clippedEnd = end > monthEndDate ? monthEndDate : end;
-          return {
-            sales: Number(row.sales || 0),
-            transaction_count: Number(row.transaction_count || 0),
-            week_start: clippedStart,
-            week_end: clippedEnd
-          };
-        })
-        .filter(Boolean);
-
-      while (monthlyRows.length > 4) {
-        const firstSpan = monthlyRows[0].week_end - monthlyRows[0].week_start;
-        const lastSpan = monthlyRows.at(-1).week_end - monthlyRows.at(-1).week_start;
-        if (firstSpan <= lastSpan) {
-          monthlyRows[1] = {
-            sales: monthlyRows[0].sales + monthlyRows[1].sales,
-            transaction_count: monthlyRows[0].transaction_count + monthlyRows[1].transaction_count,
-            week_start: monthlyRows[0].week_start,
-            week_end: monthlyRows[1].week_end
-          };
-          monthlyRows.shift();
-        } else {
-          const last = monthlyRows.pop();
-          const previous = monthlyRows.at(-1);
-          previous.sales += last.sales;
-          previous.transaction_count += last.transaction_count;
-          previous.week_end = last.week_end;
-        }
-      }
-
-      const latestWeekStart = monthlyRows.at(-1)?.week_start?.getTime();
-      const maxWeeklySales = Math.max(1, ...monthlyRows.map(row => Number(row.sales || 0)));
-      weeklyContainer.innerHTML = monthlyRows.map((row, index) => {
-        const active = row.week_start.getTime() === latestWeekStart;
-        const label = `שבוע ${index + 1} · ${shortDate(row.week_start)}–${shortDate(row.week_end)}`;
-        return `<div class="week-col"><div class="week-bar actual" style="height:${Math.max(2, row.sales / maxWeeklySales * 88)}%"><span class="week-value">${money(row.sales)}</span></div><span class="week-label">${escapeHtml(label)}${active ? " · נוכחי" : ""}</span><small>${row.transaction_count} עסקאות</small></div>`;
-      }).join("");
-      weeklyNote.textContent = "מוצגים עד ארבעה שבועות ורק נתונים מתוך החודש הנוכחי. שבוע חלקי בתחילת או בסוף החודש מאוחד עם השבוע הסמוך.";
-    } else {
-      weeklyContainer.innerHTML = `<div class="executive-loans-empty">אין כרגע נתוני מכירות שבועיים להצגה.</div>`;
-      weeklyNote.textContent = "הדוח ממתין לנתוני weekly_sales מ־Supabase.";
-    }
+    renderWeeklySales(report, latest);
 
     document.getElementById("executive-loans-total").textContent = loanTotal ? money(loanTotal) : "—";
     const maxLoan = Math.max(1, ...loans.map(l => Number(l.current_balance || l.balance || 0)));
