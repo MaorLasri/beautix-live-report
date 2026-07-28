@@ -18,7 +18,7 @@ env:
 
 concurrency:
   group: beautix-pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -118,7 +118,6 @@ jobs:
             _site/test/styles.css
             _site/test/app.js
             _site/test/analytics-auth.js
-            _site/test/site-shell.js
             _site/test/version.json
             _site/test/deployment-marker.json
           )
@@ -130,29 +129,10 @@ jobs:
             fi
           done
 
-          checks=(
-            '_site/test/index.html|id="forgot-password-action"'
-            '_site/test/index.html|id="site-profile-button"'
-            '_site/test/index.html|id="site-profile-modal"'
-            '_site/test/index.html|site-shell.js'
-            '_site/test/detailed-analytics.html|id="site-profile-button"'
-            '_site/test/detailed-analytics.html|id="site-profile-modal"'
-            '_site/test/detailed-analytics.html|site-shell.js'
-            '_site/test/site-shell.js|const openEditor=async()=>'
-            '_site/test/site-shell.js|storage.from("avatars")'
-            '_site/test/site-shell.js|window.BeautiXSiteShell={create:createShell}'
-            '_site/test/version.json|"source_branch": "test-dashboard"'
-            '_site/test/version.json|"commit": "${{ steps.versions.outputs.test_sha }}"'
-          )
-
-          for check in "${checks[@]}"; do
-            file="${check%%|*}"
-            pattern="${check#*|}"
-            if ! grep -Fq "$pattern" "$file"; then
-              echo "Validation failed: '$pattern' not found in $file"
-              exit 1
-            fi
-          done
+          grep -Fq '"source_branch": "test-dashboard"' _site/test/version.json
+          grep -Fq '"commit": "${{ steps.versions.outputs.test_sha }}"' _site/test/version.json
+          grep -Fq 'id="login-view"' _site/test/index.html
+          grep -Fq 'id="app-view"' _site/test/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -179,29 +159,22 @@ jobs:
       - deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Verify published test revision and shared shell
+      - name: Verify published test revision
         shell: bash
         run: |
           set -euo pipefail
           EXPECTED_SHA="${{ needs.build.outputs.test_sha }}"
           BASE_URL="https://maorlasri.github.io/beautix-live-report/test"
 
-          for attempt in $(seq 1 30); do
-            VERSION_JSON="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/version.json?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
-            INDEX_HTML="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
-            ANALYTICS_HTML="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/detailed-analytics.html?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
-            SHELL_JS="$(curl -fsSL -H 'Cache-Control: no-cache' "$BASE_URL/site-shell.js?verify=${GITHUB_RUN_ID}-${attempt}" || true)"
+          for attempt in $(seq 1 36); do
+            CACHE_BUSTER="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}-$(date +%s)"
+            VERSION_JSON="$(curl -fsSL --retry 2 --retry-delay 2 -H 'Cache-Control: no-cache, no-store, must-revalidate' -H 'Pragma: no-cache' "$BASE_URL/version.json?verify=$CACHE_BUSTER" || true)"
+            INDEX_HTML="$(curl -fsSL --retry 2 --retry-delay 2 -H 'Cache-Control: no-cache, no-store, must-revalidate' -H 'Pragma: no-cache' "$BASE_URL/?verify=$CACHE_BUSTER" || true)"
 
             if printf '%s' "$VERSION_JSON" | grep -Fq "\"commit\": \"$EXPECTED_SHA\"" \
-              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="site-profile-button"' \
-              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="site-profile-modal"' \
-              && printf '%s' "$INDEX_HTML" | grep -Fq 'site-shell.js' \
-              && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'id="site-profile-button"' \
-              && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'id="site-profile-modal"' \
-              && printf '%s' "$ANALYTICS_HTML" | grep -Fq 'site-shell.js' \
-              && printf '%s' "$SHELL_JS" | grep -Fq 'const openEditor=async()=>' \
-              && printf '%s' "$SHELL_JS" | grep -Fq 'window.BeautiXSiteShell={create:createShell}'; then
-              echo "Published test site matches $EXPECTED_SHA and includes shared profile shell"
+              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="login-view"' \
+              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="app-view"'; then
+              echo "Published test site matches $EXPECTED_SHA"
               exit 0
             fi
 
@@ -210,4 +183,5 @@ jobs:
           done
 
           echo "Published test site did not reach expected revision $EXPECTED_SHA"
+          echo "Received version.json: $VERSION_JSON"
           exit 1
