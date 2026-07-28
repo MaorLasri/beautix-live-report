@@ -12,7 +12,10 @@
 
   const money = value => new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(Number(value || 0));
   const escapeHtml = value => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
-  const dateOnly = value => value ? new Date(`${String(value).slice(0,10)}T00:00:00`) : new Date();
+  const dateOnly = value => {
+    if (value instanceof Date) return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+    return value ? new Date(`${String(value).slice(0,10)}T00:00:00`) : new Date();
+  };
   const shortDate = value => value ? new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit" }).format(dateOnly(value)) : "—";
 
   function salesChartSvg(sales, target, forecast, day, monthEnd) {
