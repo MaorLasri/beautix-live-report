@@ -13,6 +13,7 @@
   const money = value => new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(Number(value || 0));
   const escapeHtml = value => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
   const dateOnly = value => value ? new Date(`${String(value).slice(0,10)}T00:00:00`) : new Date();
+  const shortDate = value => value ? new Intl.DateTimeFormat("he-IL", { day: "2-digit", month: "2-digit" }).format(dateOnly(value)) : "—";
 
   function salesChartSvg(sales, target, forecast, day, monthEnd) {
     const width = 760, height = 290, left = 48, right = 730, top = 24, bottom = 250;
@@ -63,16 +64,24 @@
     document.getElementById("executive-sales-chart").innerHTML = salesChartSvg(sales, target, forecast, day, monthEnd);
     document.getElementById("executive-sales-progress").innerHTML = `<div class="executive-progress-row"><span>התקדמות מול היעד</span><b>${progress.toFixed(1)}%</b></div><div class="executive-progress-track"><i style="width:${Math.max(0, Math.min(progress, 100))}%"></i></div><small>${target > 0 ? (gap <= 0 ? `היעד הושג ונחצה ב־${money(Math.abs(gap))}` : `נותרו ${money(gap)} ליעד`) : "יעד מכירות לא זמין"}</small>`;
 
-    const actualRate = day > 0 ? sales / day : 0;
-    const targetRate = monthEnd > 0 ? target / monthEnd : 0;
-    const currentWeek = Math.min(4, Math.max(1, Math.ceil(day / 7)));
-    const rows = Array.from({ length: 4 }, (_, index) => {
-      const start = index * 7 + 1, end = Math.min(monthEnd, start + 6), daysInWeek = Math.max(1, end - start + 1), elapsed = Math.max(0, Math.min(day, end) - start + 1);
-      return { label: `שבוע ${index + 1}`, actual: actualRate * elapsed, target: targetRate * daysInWeek, active: index + 1 === currentWeek };
-    });
-    const max = Math.max(1, ...rows.flatMap(row => [row.actual, row.target]));
-    document.getElementById("executive-weekly-bars").innerHTML = rows.map(row => `<div class="week-col"><div class="week-bar actual" style="height:${Math.max(2, row.actual / max * 88)}%"><span class="week-value">${money(row.actual)}</span></div><div class="week-bar target" style="height:${Math.max(2, row.target / max * 88)}%"></div><span class="week-label">${row.label}${row.active ? " · נוכחי" : ""}</span></div>`).join("");
-    document.getElementById("executive-weekly-note").textContent = "ההשוואה השבועית משתמשת בקצב המכירות היומי וביעד החודשי הקיימים; היא אינה מחליפה נתוני עסקאות שבועיים מפורטים.";
+    const weeklyRows = Array.isArray(report?.weekly_sales) ? report.weekly_sales : [];
+    const weeklyContainer = document.getElementById("executive-weekly-bars");
+    const weeklyNote = document.getElementById("executive-weekly-note");
+    if (weeklyRows.length) {
+      const latestWeekStart = weeklyRows.at(-1)?.week_start;
+      const maxWeeklySales = Math.max(1, ...weeklyRows.map(row => Number(row.sales || 0)));
+      weeklyContainer.innerHTML = weeklyRows.map(row => {
+        const amount = Number(row.sales || 0);
+        const transactions = Number(row.transaction_count || 0);
+        const active = row.week_start === latestWeekStart;
+        const label = `${shortDate(row.week_start)}–${shortDate(row.week_end)}`;
+        return `<div class="week-col"><div class="week-bar actual" style="height:${Math.max(2, amount / maxWeeklySales * 88)}%"><span class="week-value">${money(amount)}</span></div><span class="week-label">${escapeHtml(label)}${active ? " · נוכחי" : ""}</span><small>${transactions} עסקאות</small></div>`;
+      }).join("");
+      weeklyNote.textContent = "מכירות בפועל לפי עסקאות EasyBusy, מיום ראשון עד יום שישי כולל. שבת אינה נכללת.";
+    } else {
+      weeklyContainer.innerHTML = `<div class="executive-loans-empty">אין כרגע נתוני מכירות שבועיים להצגה.</div>`;
+      weeklyNote.textContent = "הדוח ממתין לנתוני weekly_sales מ־Supabase.";
+    }
 
     document.getElementById("executive-loans-total").textContent = loanTotal ? money(loanTotal) : "—";
     const maxLoan = Math.max(1, ...loans.map(l => Number(l.current_balance || l.balance || 0)));
