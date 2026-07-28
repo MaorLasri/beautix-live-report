@@ -68,16 +68,52 @@
     const weeklyContainer = document.getElementById("executive-weekly-bars");
     const weeklyNote = document.getElementById("executive-weekly-note");
     if (weeklyRows.length) {
-      const latestWeekStart = weeklyRows.at(-1)?.week_start;
-      const maxWeeklySales = Math.max(1, ...weeklyRows.map(row => Number(row.sales || 0)));
-      weeklyContainer.innerHTML = weeklyRows.map(row => {
-        const amount = Number(row.sales || 0);
-        const transactions = Number(row.transaction_count || 0);
-        const active = row.week_start === latestWeekStart;
-        const label = `${shortDate(row.week_start)}–${shortDate(row.week_end)}`;
-        return `<div class="week-col"><div class="week-bar actual" style="height:${Math.max(2, amount / maxWeeklySales * 88)}%"><span class="week-value">${money(amount)}</span></div><span class="week-label">${escapeHtml(label)}${active ? " · נוכחי" : ""}</span><small>${transactions} עסקאות</small></div>`;
+      const monthStart = new Date(latest.getFullYear(), latest.getMonth(), 1);
+      const monthEndDate = new Date(latest.getFullYear(), latest.getMonth() + 1, 0);
+      const monthlyRows = weeklyRows
+        .map(row => {
+          const start = dateOnly(row.week_start);
+          const end = dateOnly(row.week_end);
+          if (end < monthStart || start > monthEndDate) return null;
+          const clippedStart = start < monthStart ? monthStart : start;
+          const clippedEnd = end > monthEndDate ? monthEndDate : end;
+          return {
+            sales: Number(row.sales || 0),
+            transaction_count: Number(row.transaction_count || 0),
+            week_start: clippedStart,
+            week_end: clippedEnd
+          };
+        })
+        .filter(Boolean);
+
+      while (monthlyRows.length > 4) {
+        const firstSpan = monthlyRows[0].week_end - monthlyRows[0].week_start;
+        const lastSpan = monthlyRows.at(-1).week_end - monthlyRows.at(-1).week_start;
+        if (firstSpan <= lastSpan) {
+          monthlyRows[1] = {
+            sales: monthlyRows[0].sales + monthlyRows[1].sales,
+            transaction_count: monthlyRows[0].transaction_count + monthlyRows[1].transaction_count,
+            week_start: monthlyRows[0].week_start,
+            week_end: monthlyRows[1].week_end
+          };
+          monthlyRows.shift();
+        } else {
+          const last = monthlyRows.pop();
+          const previous = monthlyRows.at(-1);
+          previous.sales += last.sales;
+          previous.transaction_count += last.transaction_count;
+          previous.week_end = last.week_end;
+        }
+      }
+
+      const latestWeekStart = monthlyRows.at(-1)?.week_start?.getTime();
+      const maxWeeklySales = Math.max(1, ...monthlyRows.map(row => Number(row.sales || 0)));
+      weeklyContainer.innerHTML = monthlyRows.map((row, index) => {
+        const active = row.week_start.getTime() === latestWeekStart;
+        const label = `שבוע ${index + 1} · ${shortDate(row.week_start)}–${shortDate(row.week_end)}`;
+        return `<div class="week-col"><div class="week-bar actual" style="height:${Math.max(2, row.sales / maxWeeklySales * 88)}%"><span class="week-value">${money(row.sales)}</span></div><span class="week-label">${escapeHtml(label)}${active ? " · נוכחי" : ""}</span><small>${row.transaction_count} עסקאות</small></div>`;
       }).join("");
-      weeklyNote.textContent = "מכירות בפועל לפי עסקאות EasyBusy, מיום ראשון עד יום שישי כולל. שבת אינה נכללת.";
+      weeklyNote.textContent = "מוצגים עד ארבעה שבועות ורק נתונים מתוך החודש הנוכחי. שבוע חלקי בתחילת או בסוף החודש מאוחד עם השבוע הסמוך.";
     } else {
       weeklyContainer.innerHTML = `<div class="executive-loans-empty">אין כרגע נתוני מכירות שבועיים להצגה.</div>`;
       weeklyNote.textContent = "הדוח ממתין לנתוני weekly_sales מ־Supabase.";
