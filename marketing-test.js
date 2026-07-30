@@ -26,16 +26,17 @@
     section.id="monthly-performance-section";
     section.className="dashboard-section";
     section.innerHTML=`
-      <div class="section-title-block"><span class="section-kicker">מגמה חודשית</span><h2>ביצועי לידים והמרה לפי חודש</h2><p>שלושה מבטים משלימים: כמות לידים, שיעורי המרה והכנסה מיוחסת.</p></div>
+      <div class="section-title-block"><span class="section-kicker">מגמה חודשית</span><h2>ביצועי לידים והמרה לפי חודש</h2><p>לידים והמרות לפי חודש יצירת הליד; הכנסות לפי חודש ביצוע העסקה בפועל.</p></div>
       <div class="monthly-chart-grid">
         <article class="chart-card"><div class="chart-card-head"><div><span>לידים לפי חודש</span><strong id="monthly-leads-total">—</strong></div><small>כמות לידים חדשים</small></div><div id="monthly-leads-chart" class="chart-stage"></div></article>
         <article class="chart-card"><div class="chart-card-head"><div><span>שיעורי המרה</span><strong id="monthly-best-conversion">—</strong></div><small>ליד → לקוח וליד → משלם</small></div><div id="monthly-conversion-chart" class="chart-stage"></div><div class="chart-legend"><span><i class="legend-purple"></i>ללקוח</span><span><i class="legend-pink"></i>למשלם</span></div></article>
-        <article class="chart-card"><div class="chart-card-head"><div><span>הכנסה מיוחסת</span><strong id="monthly-attributed-sales">—</strong></div><small>לפי חודש יצירת הליד</small></div><div id="monthly-sales-chart" class="chart-stage"></div></article>
+        <article class="chart-card"><div class="chart-card-head"><div><span>הכנסה מלקוחות שהגיעו מלידים</span><strong id="monthly-attributed-sales">—</strong></div><small>לפי חודש ביצוע העסקה</small></div><div id="monthly-sales-chart" class="chart-stage"></div></article>
+        <article class="chart-card"><div class="chart-card-head"><div><span>זמן ממוצע להמרה</span><strong id="monthly-conversion-days">—</strong></div><small>מתאריך הליד לעסקה הראשונה</small></div><div id="monthly-conversion-days-chart" class="chart-stage"></div></article>
       </div>`;
     first.insertAdjacentElement("afterend",section);
   }
 
-  function barChart(rows,valueKey,formatter){
+  function barChart(rows,valueKey,formatter,barClass="chart-bar"){
     if(!rows.length)return '<div class="chart-empty">אין נתונים</div>';
     const width=640,height=230,pad={top:22,right:12,bottom:48,left:12};
     const innerW=width-pad.left-pad.right,innerH=height-pad.top-pad.bottom;
@@ -44,7 +45,7 @@
     const bars=rows.map((row,index)=>{
       const value=Number(row[valueKey]||0),h=(value/max)*innerH;
       const x=pad.left+index*slot+(slot-barW)/2,y=pad.top+innerH-h;
-      return `<g><rect class="chart-bar" x="${x}" y="${y}" width="${barW}" height="${Math.max(h,2)}" rx="8"><title>${monthText(row.month_start)}: ${formatter(value)}</title></rect><text class="chart-value" x="${x+barW/2}" y="${Math.max(y-7,12)}" text-anchor="middle">${formatter(value)}</text><text class="chart-label" x="${x+barW/2}" y="${height-18}" text-anchor="middle">${monthText(row.month_start)}</text></g>`;
+      return `<g><rect class="${barClass}" x="${x}" y="${y}" width="${barW}" height="${Math.max(h,2)}" rx="8"><title>${monthText(row.month_start)}: ${formatter(value)}</title></rect><text class="chart-value" x="${x+barW/2}" y="${Math.max(y-7,12)}" text-anchor="middle">${formatter(value)}</text><text class="chart-label" x="${x+barW/2}" y="${height-18}" text-anchor="middle">${monthText(row.month_start)}</text></g>`;
     }).join("");
     return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="גרף חודשי">${bars}</svg>`;
   }
@@ -68,12 +69,18 @@
     const best=rows.reduce((max,row)=>Math.max(max,Number(row.lead_to_customer_pct||0)),0);
     set("monthly-best-conversion",`${number(best)}%`);
     set("monthly-attributed-sales",money(rows.reduce((sum,row)=>sum+Number(row.attributed_sales||0),0)));
+    const conversionRows=rows.filter(row=>row.avg_conversion_days!==null&&row.avg_conversion_days!==undefined);
+    const weightedDays=conversionRows.reduce((sum,row)=>sum+Number(row.avg_conversion_days||0)*Number(row.converted_customers||0),0);
+    const convertedCount=conversionRows.reduce((sum,row)=>sum+Number(row.converted_customers||0),0);
+    set("monthly-conversion-days",convertedCount?`${number(weightedDays/convertedCount)} ימים`:"—");
     const leads=document.getElementById("monthly-leads-chart");
     const conversion=document.getElementById("monthly-conversion-chart");
     const sales=document.getElementById("monthly-sales-chart");
+    const conversionDays=document.getElementById("monthly-conversion-days-chart");
     if(leads)leads.innerHTML=barChart(rows,"leads",value=>number(value));
     if(conversion)conversion.innerHTML=lineChart(rows);
     if(sales)sales.innerHTML=barChart(rows,"attributed_sales",value=>money(value));
+    if(conversionDays)conversionDays.innerHTML=barChart(conversionRows,"avg_conversion_days",value=>`${number(value)} ימים`,"chart-bar-days");
   }
 
   function render(report){
