@@ -15,6 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=20260727-siteshell3" />
   <link rel="stylesheet" href="marketing-test.css?v=20260730-mobile2" />
+  <style>.record-count-badge{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:8px;padding:3px 9px;border-radius:999px;background:#eee7fb;color:#6f42a8;font-size:.72em;font-weight:800;vertical-align:middle}</style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -61,12 +62,12 @@
       </section>
 
       <section class="dashboard-section two-column-reports">
-        <article class="report-panel"><div class="section-title-block"><span class="section-kicker">קמפיינים</span><h2>ביצועים לפי קמפיין</h2></div><div class="table-wrap"><table><thead><tr><th>קמפיין</th><th>לידים</th><th>לקוחות</th><th>משלמים</th><th>הכנסה</th></tr></thead><tbody id="campaign-table"></tbody></table></div></article>
-        <article class="report-panel"><div class="section-title-block"><span class="section-kicker">חובות</span><h2>לקוחות עם יתרה שלילית</h2></div><div class="table-wrap"><table><thead><tr><th>לקוח</th><th>טלפון</th><th>חוב</th><th>ביקורים</th></tr></thead><tbody id="debtors-table"></tbody></table></div></article>
+        <article class="report-panel"><div class="section-title-block"><span class="section-kicker">קמפיינים</span><h2 id="campaign-title">ביצועים לפי קמפיין</h2></div><div class="table-wrap"><table><thead><tr><th>קמפיין</th><th>לידים</th><th>לקוחות</th><th>משלמים</th><th>הכנסה</th></tr></thead><tbody id="campaign-table"></tbody></table></div></article>
+        <article class="report-panel"><div class="section-title-block"><span class="section-kicker">חובות</span><h2 id="debtors-title">לקוחות עם יתרה שלילית</h2></div><div class="table-wrap"><table><thead><tr><th>לקוח</th><th>טלפון</th><th>חוב</th><th>ביקורים</th></tr></thead><tbody id="debtors-table"></tbody></table></div></article>
       </section>
 
       <section class="dashboard-section">
-        <div class="section-title-block"><span class="section-kicker">מעקב מכירות</span><h2>לידים שנמצאו כלקוחות אך מספר הביקורים שלהם אפס</h2><p>הנתון מסמן קבוצה לבדיקה; הוא אינו מוכיח ביטול או אי-הגעה.</p></div>
+        <div class="section-title-block"><span class="section-kicker">מעקב מכירות</span><h2 id="never-visited-title">לידים שנמצאו כלקוחות אך מספר הביקורים שלהם אפס</h2><p>הנתון מסמן קבוצה לבדיקה; הוא אינו מוכיח ביטול או אי-הגעה.</p></div>
         <div class="table-wrap"><table><thead><tr><th>שם ליד</th><th>טלפון</th><th>קמפיין</th><th>תאריך ליד</th><th>שם לקוח</th><th>פגישה עתידית</th></tr></thead><tbody id="never-visited-table"></tbody></table></div>
       </section>
 
@@ -80,6 +81,24 @@
   <script src="config.js?v=20260727-authcontrols1"></script>
   <script src="site-shell.js?v=20260727-siteshell3"></script>
   <script src="marketing-test.js?v=20260730-mobile2"></script>
+  <script>
+    (()=>{
+      const categories=[
+        {table:"campaign-table",title:"campaign-title",selector:":scope > tr"},
+        {table:"debtors-table",title:"debtors-title",selector:":scope > tr.desktop-customer-row"},
+        {table:"never-visited-table",title:"never-visited-title",selector:":scope > tr.desktop-customer-row"}
+      ];
+      const update=()=>categories.forEach(({table,title,selector})=>{
+        const body=document.getElementById(table),heading=document.getElementById(title);if(!body||!heading)return;
+        const count=body.querySelectorAll(selector).length;
+        let badge=heading.querySelector(".record-count-badge");
+        if(!badge){badge=document.createElement("span");badge.className="record-count-badge";heading.appendChild(badge);}
+        badge.textContent=`${count} רשומות`;
+      });
+      const observer=new MutationObserver(update);
+      window.addEventListener("load",()=>{categories.forEach(({table})=>{const body=document.getElementById(table);if(body)observer.observe(body,{childList:true});});update();});
+    })();
+  </script>
   <script src="analytics-auth.js?v=20260727-siteshell3"></script>
 </body>
 </html>
