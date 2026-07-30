@@ -20,6 +20,13 @@ window.BEAUTIX_CONFIG = {
     script.dataset.beautixCashflowActions = "true";
     document.head.appendChild(script);
   }
+  if (!document.querySelector('script[data-beautix-cashflow-action-ui]')) {
+    const script = document.createElement("script");
+    script.src = "cashflow-action-ui.js?v=20260730-actionui1";
+    script.defer = true;
+    script.dataset.beautixCashflowActionUi = "true";
+    document.head.appendChild(script);
+  }
   if (!document.querySelector('script[data-beautix-whatsapp-messages]')) {
     const script = document.createElement("script");
     script.src = "whatsapp-messages.js?v=20260730-wa1";
