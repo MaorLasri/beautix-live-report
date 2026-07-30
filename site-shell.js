@@ -1,6 +1,23 @@
 (() => {
   function q(id){ return document.getElementById(id); }
+  function ensureMarketingNavigation(){
+    document.querySelectorAll(".sidebar-nav").forEach(nav=>{
+      let link=nav.querySelector('a[href="marketing.html"]');
+      if(!link){
+        link=document.createElement("a");
+        link.href="marketing.html";
+        link.innerHTML="<span>שיווק והמרה</span>";
+        nav.appendChild(link);
+      }
+      const page=window.location.pathname.split("/").pop()||"index.html";
+      if(page==="marketing.html"){
+        nav.querySelectorAll("a").forEach(item=>item.classList.remove("active"));
+        link.classList.add("active");
+      }
+    });
+  }
   function createShell({ client, refresh, onSignedOut }){
+    ensureMarketingNavigation();
     const button=q("site-profile-button"), menu=q("site-profile-menu"), avatar=q("site-profile-avatar"), fallback=q("site-profile-fallback"), name=q("site-profile-name"), role=q("site-profile-role"), edit=q("site-edit-profile"), password=q("site-change-password"), session=q("site-refresh-session"), logout=q("site-logout"), refreshButton=q("site-refresh-button"), modal=q("site-profile-modal"), close=q("site-profile-close"), form=q("site-profile-form"), displayName=q("site-profile-display-name"), fileInput=q("site-profile-avatar-file"), status=q("site-profile-status"), save=q("site-profile-save");
     if(!button||!menu) throw new Error("Site shell markup is missing");
     const closeMenu=()=>{ menu.hidden=true; button.setAttribute("aria-expanded","false"); };
