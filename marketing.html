@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>BeautiX — שיווק והמרה TEST</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20260727-1">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20260727-1">
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png?v=20260727-1">
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=20260727-1">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260727-siteshell3" />
+  <link rel="stylesheet" href="marketing-test.css?v=20260730-1" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <section id="analytics-auth-check" class="auth-screen"><div class="auth-card"><p>בודק הרשאת כניסה...</p></div></section>
+
+  <div id="analytics-app" hidden>
+    <aside class="site-sidebar" aria-label="ניווט ראשי">
+      <div class="profile-menu-wrap">
+        <button id="site-profile-button" class="profile-avatar-button" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="site-profile-menu" title="תפריט משתמש"><img id="site-profile-avatar" alt="תמונת משתמש" hidden /><span id="site-profile-fallback" aria-hidden="true">👤</span></button>
+        <div id="site-profile-menu" class="profile-menu" hidden>
+          <div class="profile-menu-head"><strong id="site-profile-name">—</strong><span id="site-profile-role">—</span></div>
+          <button id="site-edit-profile" type="button" class="profile-menu-item">עריכת פרופיל</button>
+          <button id="site-change-password" type="button" class="profile-menu-item">שינוי סיסמה</button>
+          <button id="site-refresh-session" type="button" class="profile-menu-item">רענון התחברות</button>
+          <button id="site-logout" type="button" class="profile-menu-item danger">התנתקות</button>
+        </div>
+      </div>
+      <nav class="sidebar-nav"><a href="./"><span>דשבורד</span></a><a href="detailed-analytics.html"><span>ניתוחים מפורטים</span></a><a class="active" href="marketing.html"><span>שיווק והמרה</span></a></nav>
+      <div class="nav-utilities"><button id="site-refresh-button" type="button" class="icon-control" aria-label="רענון" title="רענון">↻</button></div>
+      <div class="sidebar-test">TEST</div>
+    </aside>
+
+    <main class="app-shell site-content">
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">משפך שיווקי</span><h2>מליד ללקוח משלם</h2><p>התאמה לפי מספר טלפון בין Meta, מאגר הלקוחות והיסטוריית המכירות.</p></div>
+        <div class="grid marketing-kpi-grid">
+          <article class="card"><span>לידים</span><strong id="m-total-leads">—</strong><p id="m-phone-coverage">—</p></article>
+          <article class="card"><span>לידים שנמצאו כלקוחות</span><strong id="m-matched">—</strong><p id="m-match-rate">—</p></article>
+          <article class="card"><span>הגיעו לביקור</span><strong id="m-visitors">—</strong><p id="m-visit-rate">—</p></article>
+          <article class="card"><span>הפכו ללקוחות משלמים</span><strong id="m-paying">—</strong><p id="m-paying-rate">—</p></article>
+          <article class="card"><span>הכנסה מיוחסת ללידים</span><strong id="m-attributed-sales">—</strong><p>לפי לקוחות תואמים והיסטוריית המכירות</p></article>
+          <article class="card"><span>נמצאו כלקוחות אך לא ביקרו</span><strong id="m-never-visited">—</strong><p>קבוצה לבדיקה ממוקדת, לא הוכחה לביטול או No-show</p></article>
+        </div>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">לקוחות וגבייה</span><h2>חובות, ביקורים ופגישות עתידיות</h2></div>
+        <div class="grid marketing-kpi-grid">
+          <article class="card"><span>לקוחות במאגר</span><strong id="m-customers-total">—</strong></article>
+          <article class="card"><span>לקוחות שמעולם לא ביקרו</span><strong id="m-customers-never">—</strong></article>
+          <article class="card"><span>לקוחות עם פגישה עתידית</span><strong id="m-future-meetings">—</strong></article>
+          <article class="card"><span>לקוחות בחוב</span><strong id="m-debtors-count">—</strong><p id="m-debt-total">—</p></article>
+        </div>
+      </section>
+
+      <section class="dashboard-section two-column-reports">
+        <article class="report-panel"><div class="section-title-block"><span class="section-kicker">קמפיינים</span><h2>ביצועים לפי קמפיין</h2></div><div class="table-wrap"><table><thead><tr><th>קמפיין</th><th>לידים</th><th>לקוחות</th><th>משלמים</th><th>הכנסה</th></tr></thead><tbody id="campaign-table"></tbody></table></div></article>
+        <article class="report-panel"><div class="section-title-block"><span class="section-kicker">חובות</span><h2>לקוחות עם יתרה שלילית</h2></div><div class="table-wrap"><table><thead><tr><th>לקוח</th><th>טלפון</th><th>חוב</th><th>ביקורים</th></tr></thead><tbody id="debtors-table"></tbody></table></div></article>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">מעקב מכירות</span><h2>לידים שנמצאו כלקוחות אך מספר הביקורים שלהם אפס</h2><p>הנתון מסמן קבוצה לבדיקה; הוא אינו מוכיח ביטול או אי-הגעה.</p></div>
+        <div class="table-wrap"><table><thead><tr><th>שם ליד</th><th>טלפון</th><th>קמפיין</th><th>תאריך ליד</th><th>שם לקוח</th><th>פגישה עתידית</th></tr></thead><tbody id="never-visited-table"></tbody></table></div>
+      </section>
+
+      <p id="marketing-error" class="error" role="alert" hidden></p>
+      <footer class="report-footer"><span id="marketing-updated">טוען נתונים...</span></footer>
+    </main>
+  </div>
+
+  <div id="site-profile-modal" class="modal-backdrop" hidden><section class="profile-editor" role="dialog" aria-modal="true" aria-labelledby="site-profile-modal-title"><button id="site-profile-close" type="button" class="modal-close" aria-label="סגירה">×</button><h2 id="site-profile-modal-title">עריכת פרופיל</h2><form id="site-profile-form"><label>שם לתצוגה<input id="site-profile-display-name" type="text" maxlength="80" required /></label><label>תמונת פרופיל<input id="site-profile-avatar-file" type="file" accept="image/png,image/jpeg,image/webp" /></label><p class="profile-help">PNG, JPG או WebP עד 3MB.</p><button id="site-profile-save" type="submit">שמירת שינויים</button><p id="site-profile-status" class="auth-status" role="status" hidden></p></form></section></div>
+
+  <script src="config.js?v=20260727-authcontrols1"></script>
+  <script src="site-shell.js?v=20260727-siteshell3"></script>
+  <script src="marketing-test.js?v=20260730-1"></script>
+  <script src="analytics-auth.js?v=20260727-siteshell3"></script>
+</body>
+</html>
