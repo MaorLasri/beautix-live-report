@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>BeautiX — שיווק והמרה</title>
+  <link rel="stylesheet" href="styles.css?v=20260730-1" />
+  <link rel="stylesheet" href="marketing.css?v=20260730-1" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="app-shell marketing-shell">
+    <section id="marketing-view" hidden>
+      <header class="topbar">
+        <div class="brand-block">
+          <img class="brand-logo" src="assets/beautix-logo.png" alt="BeautiX" />
+          <div><p class="report-title">שיווק והמרה</p><p id="marketing-updated">טוען נתונים...</p></div>
+        </div>
+        <div class="actions">
+          <a class="nav-button secondary" href="index.html">דו״ח פיננסי</a>
+          <button id="marketing-refresh" type="button">רענון</button>
+        </div>
+      </header>
+
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">משפך שיווקי</span><h2>מליד ללקוח משלם</h2><p>התאמה לפי מספר טלפון בין Meta, מאגר הלקוחות והיסטוריית המכירות</p></div>
+        <div class="grid marketing-kpi-grid">
+          <article class="card"><span>לידים</span><strong id="m-total-leads">—</strong><p id="m-phone-coverage">—</p></article>
+          <article class="card"><span>לידים שנמצאו כלקוחות</span><strong id="m-matched">—</strong><p id="m-match-rate">—</p></article>
+          <article class="card"><span>הגיעו לביקור</span><strong id="m-visitors">—</strong><p id="m-visit-rate">—</p></article>
+          <article class="card"><span>הפכו ללקוחות משלמים</span><strong id="m-paying">—</strong><p id="m-paying-rate">—</p></article>
+          <article class="card"><span>הכנסה מיוחסת ללידים</span><strong id="m-attributed-sales">—</strong><p>לפי לקוחות תואמים והיסטוריית המכירות</p></article>
+          <article class="card"><span>נמצאו כלקוחות אך לא ביקרו</span><strong id="m-never-visited">—</strong><p>אוכלוסיית מעקב לביטול/אי-הגעה ראשונה</p></article>
+        </div>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">לקוחות וגבייה</span><h2>חובות, ביקורים ופגישות עתידיות</h2></div>
+        <div class="grid marketing-kpi-grid">
+          <article class="card"><span>לקוחות במאגר</span><strong id="m-customers-total">—</strong></article>
+          <article class="card"><span>לקוחות שמעולם לא ביקרו</span><strong id="m-customers-never">—</strong></article>
+          <article class="card"><span>לקוחות עם פגישה עתידית</span><strong id="m-future-meetings">—</strong></article>
+          <article class="card"><span>לקוחות בחוב</span><strong id="m-debtors-count">—</strong><p id="m-debt-total">—</p></article>
+        </div>
+      </section>
+
+      <section class="dashboard-section two-column-reports">
+        <article class="report-panel">
+          <div class="section-title-block"><span class="section-kicker">קמפיינים</span><h2>ביצועים לפי קמפיין</h2></div>
+          <div class="table-wrap"><table><thead><tr><th>קמפיין</th><th>לידים</th><th>לקוחות</th><th>משלמים</th><th>הכנסה</th></tr></thead><tbody id="campaign-table"></tbody></table></div>
+        </article>
+        <article class="report-panel">
+          <div class="section-title-block"><span class="section-kicker">חובות</span><h2>לקוחות עם יתרה שלילית</h2></div>
+          <div class="table-wrap"><table><thead><tr><th>לקוח</th><th>טלפון</th><th>חוב</th><th>ביקורים</th></tr></thead><tbody id="debtors-table"></tbody></table></div>
+        </article>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="section-title-block"><span class="section-kicker">מעקב מכירות</span><h2>לידים שנמצאו כלקוחות אך מספר הביקורים שלהם אפס</h2><p>הנתון אינו מוכיח ביטול או No-show; הוא מסמן את הקבוצה לבדיקה ממוקדת.</p></div>
+        <div class="table-wrap"><table><thead><tr><th>שם ליד</th><th>טלפון</th><th>קמפיין</th><th>תאריך ליד</th><th>שם לקוח</th><th>פגישה עתידית</th></tr></thead><tbody id="never-visited-table"></tbody></table></div>
+      </section>
+
+      <section id="marketing-error" class="error-box" hidden></section>
+    </section>
+  </main>
+  <script src="config.js?v=20260730-1"></script>
+  <script src="marketing.js?v=20260730-1"></script>
+</body>
+</html>
