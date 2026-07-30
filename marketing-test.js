@@ -9,6 +9,13 @@
   const monthText=value=>value?new Intl.DateTimeFormat("he-IL",{month:"short",year:"2-digit"}).format(new Date(`${String(value).slice(0,10)}T00:00:00`)):"—";
   const set=(id,value)=>{const element=document.getElementById(id);if(element)element.textContent=value;};
   const escapeHtml=value=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  const phoneLink=value=>{
+    const display=String(value??"").trim();
+    if(!display)return "—";
+    const dial=display.replace(/[^\d+]/g,"");
+    if(!dial)return escapeHtml(display);
+    return `<a class="phone-link" href="tel:${escapeHtml(dial)}" dir="ltr" aria-label="חיוג אל ${escapeHtml(display)}">${escapeHtml(display)}</a>`;
+  };
   const errorBox=document.getElementById("marketing-error");
 
   function renderRows(targetId,rows,renderer,colspan){
@@ -101,8 +108,8 @@
     set("m-debtors-count",number(summary.debtors_count));
     set("m-debt-total",`סה״כ ${money(summary.customer_debt_total)}`);
     renderRows("campaign-table",report.campaigns||[],row=>`<tr><td>${escapeHtml(row.campaign_name||"—")}</td><td>${number(row.leads)}</td><td>${number(row.matched_customers)}</td><td>${number(row.paying_customers)}</td><td>${money(row.attributed_sales)}</td></tr>`,5);
-    renderRows("debtors-table",report.debtors||[],row=>`<tr><td>${escapeHtml(row.customer_name||"—")}</td><td dir="ltr">${escapeHtml(row.phone||"—")}</td><td>${money(Math.abs(Number(row.balance||0)))}</td><td>${number(row.history_meetings_count)}</td></tr>`,4);
-    renderRows("never-visited-table",report.never_visited||[],row=>`<tr><td>${escapeHtml(row.lead_name||"—")}</td><td dir="ltr">${escapeHtml(row.phone||"—")}</td><td>${escapeHtml(row.campaign_name||"—")}</td><td>${dateText(row.lead_date)}</td><td>${escapeHtml(row.customer_name||"—")}</td><td>${row.has_future_meeting?dateText(row.next_meeting_at):"אין"}</td></tr>`,6);
+    renderRows("debtors-table",report.debtors||[],row=>`<tr><td>${escapeHtml(row.customer_name||"—")}</td><td>${phoneLink(row.phone)}</td><td>${money(Math.abs(Number(row.balance||0)))}</td><td>${number(row.history_meetings_count)}</td></tr>`,4);
+    renderRows("never-visited-table",report.never_visited||[],row=>`<tr><td>${escapeHtml(row.lead_name||"—")}</td><td>${phoneLink(row.phone)}</td><td>${escapeHtml(row.campaign_name||"—")}</td><td>${dateText(row.lead_date)}</td><td>${escapeHtml(row.customer_name||"—")}</td><td>${row.has_future_meeting?dateText(row.next_meeting_at):"אין"}</td></tr>`,6);
     set("marketing-updated",`עודכן ${new Intl.DateTimeFormat("he-IL",{dateStyle:"short",timeStyle:"medium"}).format(new Date())}`);
   }
 
