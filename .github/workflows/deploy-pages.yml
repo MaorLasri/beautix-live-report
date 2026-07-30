@@ -87,7 +87,7 @@ jobs:
               'analytics link': 'href="detailed-analytics.html"' in index,
               'marketing link': 'href="marketing.html"' in index,
               'analytics protected view': 'id="analytics-app"' in analytics,
-              'marketing protected view': 'id="marketing-app"' in marketing,
+              'marketing protected view': 'id="analytics-app"' in marketing,
               'internal work queue removed': 'id="work-queue"' not in analytics,
           }
           failed = [name for name, ok in checks.items() if not ok]
