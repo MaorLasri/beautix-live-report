@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>BeautiX Live Report</title>
-  <link rel="stylesheet" href="styles.css?v=20260727-0200" />
+  <link rel="stylesheet" href="styles.css?v=20260730-3" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -30,6 +30,7 @@
           <div><p class="report-title">דו״ח חי</p><p id="last-updated">טוען נתונים...</p></div>
         </div>
         <div class="actions">
+          <a class="nav-button secondary" href="marketing.html">שיווק והמרה</a>
           <button id="refresh-btn" type="button">רענון</button>
           <button id="logout-btn" type="button" class="secondary">יציאה</button>
         </div>
@@ -65,12 +66,21 @@
       </section>
 
       <section class="dashboard-section opportunities-section">
-        <div class="section-title-block"><span class="section-kicker">הזדמנויות מכירה</span><h2>מוצרים, לקוחות ופוטנציאל</h2><p>מוצג רק מידע שהמערכת תומכת בו בפועל</p></div>
+        <div class="section-title-block"><span class="section-kicker">הזדמנויות מכירה</span><h2>מוצרים, לקוחות ופוטנציאל</h2><p>הנתונים מחוברים כעת להיסטוריית EasyBusy ולמאגר הלקוחות</p></div>
         <div class="grid opportunity-grid">
-          <article class="card"><span>חובות לקוחות</span><strong id="customer-debts">—</strong><p>פוטנציאל גבייה מיידי לפי הנתון החודשי</p></article>
+          <article class="card"><span>חובות לקוחות</span><strong id="customer-debts">—</strong><p id="customer-debts-note">מחושב מיתרות הלקוחות</p></article>
           <article class="card"><span>מכירות שטרם הפכו לתקבול מיידי</span><strong id="uncollected-sales">—</strong><p id="uncollected-sales-note">—</p></article>
-          <article class="card"><span>מוצרים / טיפולים מובילים</span><strong>אין נתון</strong><p>נדרש חיבור פירוט עסקאות לפי מוצר או טיפול</p></article>
-          <article class="card"><span>לקוחות עם פוטנציאל חזרה</span><strong>אין נתון</strong><p>נדרש חיבור ביקורים והיסטוריית לקוחות</p></article>
+          <article class="card"><span>הטיפול המוביל ב־12 חודשים</span><strong id="top-services">—</strong><p id="top-services-note">טוען פירוט טיפולים</p></article>
+          <article class="card"><span>לקוחות עם פוטנציאל חזרה</span><strong id="return-customers">—</strong><p id="return-customers-note">טוען היסטוריית ביקורים</p></article>
+        </div>
+      </section>
+
+      <section class="dashboard-section marketing-summary-section">
+        <div class="section-title-block"><span class="section-kicker">שיווק והמרה</span><h2>תמצית משפך הלידים</h2><p><a href="marketing.html">לדו״ח השיווק המלא</a></p></div>
+        <div class="grid opportunity-grid">
+          <article class="card"><span>ליד → לקוח</span><strong id="marketing-match-rate">—</strong></article>
+          <article class="card"><span>ליד → לקוח משלם</span><strong id="marketing-paying-rate">—</strong></article>
+          <article class="card"><span>הכנסה מיוחסת ללידים</span><strong id="marketing-attributed-sales">—</strong></article>
         </div>
       </section>
 
@@ -127,7 +137,8 @@
     </section>
   </main>
 
-  <script src="config.js?v=20260727-0200"></script>
+  <script src="config.js?v=20260730-3"></script>
   <script src="app.js?v=20260727-0200"></script>
+  <script src="dashboard-crm.js?v=20260730-3"></script>
 </body>
 </html>
