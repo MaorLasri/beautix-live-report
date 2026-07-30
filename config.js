@@ -6,10 +6,18 @@ window.BEAUTIX_CONFIG = {
 };
 
 (() => {
-  if (document.querySelector('script[data-beautix-opportunities]')) return;
-  const script = document.createElement("script");
-  script.src = "opportunities.js?v=20260730-actions1";
-  script.defer = true;
-  script.dataset.beautixOpportunities = "true";
-  document.head.appendChild(script);
+  if (!document.querySelector('script[data-beautix-opportunities]')) {
+    const script = document.createElement("script");
+    script.src = "opportunities.js?v=20260730-actions1";
+    script.defer = true;
+    script.dataset.beautixOpportunities = "true";
+    document.head.appendChild(script);
+  }
+  if (!document.querySelector('script[data-beautix-cashflow-actions]')) {
+    const script = document.createElement("script");
+    script.src = "cashflow-actions.js?v=20260730-cashflow1";
+    script.defer = true;
+    script.dataset.beautixCashflowActions = "true";
+    document.head.appendChild(script);
+  }
 })();
