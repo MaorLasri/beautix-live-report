@@ -29,9 +29,13 @@ jobs:
           set -euo pipefail
           test -s index.html
           test -s detailed-analytics.html
+          test -s marketing.html
           test -s app.js
           test -s analytics-auth.js
+          test -s marketing-test.js
+          test -s site-shell.js
           test -s styles.css
+          test -s marketing-test.css
           test -s config.js
 
       - name: Verify local asset references
@@ -42,7 +46,11 @@ jobs:
           from pathlib import Path
           import re
 
-          pages = [Path('index.html'), Path('detailed-analytics.html')]
+          pages = [
+              Path('index.html'),
+              Path('detailed-analytics.html'),
+              Path('marketing.html'),
+          ]
           missing = []
           for page in pages:
               text = page.read_text(encoding='utf-8')
@@ -70,13 +78,16 @@ jobs:
 
           index = Path('index.html').read_text(encoding='utf-8')
           analytics = Path('detailed-analytics.html').read_text(encoding='utf-8')
+          marketing = Path('marketing.html').read_text(encoding='utf-8')
 
           checks = {
               'login view': 'id="login-view"' in index,
               'app view': 'id="app-view"' in index,
               'dashboard link': 'href="./"' in index,
               'analytics link': 'href="detailed-analytics.html"' in index,
+              'marketing link': 'href="marketing.html"' in index,
               'analytics protected view': 'id="analytics-app"' in analytics,
+              'marketing protected view': 'id="marketing-app"' in marketing,
               'internal work queue removed': 'id="work-queue"' not in analytics,
           }
           failed = [name for name, ok in checks.items() if not ok]
@@ -87,8 +98,9 @@ jobs:
           if not nav_links:
               raise SystemExit('Sidebar navigation block not found')
           hrefs = re.findall(r'href="([^"]+)"', nav_links[0])
-          if hrefs != ['./', 'detailed-analytics.html']:
-              raise SystemExit(f'Unexpected navigation links: {hrefs}')
+          expected = ['./', 'detailed-analytics.html', 'marketing.html']
+          if hrefs != expected:
+              raise SystemExit(f'Unexpected navigation links: {hrefs}; expected {expected}')
           PY
 
       - name: Check JavaScript syntax
@@ -97,4 +109,6 @@ jobs:
           set -euo pipefail
           node --check app.js
           node --check analytics-auth.js
+          node --check marketing-test.js
+          node --check site-shell.js
           node --check config.js
