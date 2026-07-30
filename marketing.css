@@ -1,0 +1,13 @@
+.marketing-shell { max-width: 1500px; }
+.nav-button { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 18px; border-radius:14px; text-decoration:none; font-weight:700; }
+.marketing-kpi-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.two-column-reports { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
+.report-panel { min-width:0; }
+.table-wrap { overflow:auto; border:1px solid rgba(255,255,255,.12); border-radius:18px; background:rgba(255,255,255,.04); }
+table { width:100%; border-collapse:collapse; min-width:650px; }
+th, td { padding:13px 14px; text-align:right; border-bottom:1px solid rgba(255,255,255,.09); white-space:nowrap; }
+th { position:sticky; top:0; background:#241928; color:#f8d9e9; font-size:.85rem; z-index:1; }
+td { color:#f6eef4; }
+tbody tr:hover { background:rgba(255,255,255,.035); }
+.empty-row { text-align:center; color:#bdaeba; padding:26px; }
+@media (max-width: 900px) { .two-column-reports { grid-template-columns:1fr; } .actions { flex-wrap:wrap; } }
