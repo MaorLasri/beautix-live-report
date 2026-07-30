@@ -15,7 +15,7 @@ window.BEAUTIX_CONFIG = {
   }
   if (!document.querySelector('script[data-beautix-cashflow-actions]')) {
     const script = document.createElement("script");
-    script.src = "cashflow-actions.js?v=20260730-cashflow6";
+    script.src = "cashflow-actions.js?v=20260730-cashflow7";
     script.defer = true;
     script.dataset.beautixCashflowActions = "true";
     document.head.appendChild(script);
