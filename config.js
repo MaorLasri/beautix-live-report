@@ -8,7 +8,7 @@ window.BEAUTIX_CONFIG = {
 (() => {
   if (document.querySelector('script[data-beautix-opportunities]')) return;
   const script = document.createElement("script");
-  script.src = "opportunities.js?v=20260730-expand1";
+  script.src = "opportunities.js?v=20260730-actions1";
   script.defer = true;
   script.dataset.beautixOpportunities = "true";
   document.head.appendChild(script);
