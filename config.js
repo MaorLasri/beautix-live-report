@@ -35,7 +35,7 @@ window.BEAUTIX_CONFIG = {
   }
   if (!window.BEAUTIX_DISABLE_EXPENSE_PAYMENT_REPORTING && !document.querySelector('script[data-beautix-expense-payment-reporting]')) {
     const script = document.createElement("script");
-    script.src = "expense-payment-reporting.js?v=20260731-expense-payment-restore1";
+    script.src = "expense-payment-reporting.js?v=20260731-expense-layout2";
     script.defer = true;
     script.dataset.beautixExpensePaymentReporting = "true";
     document.head.appendChild(script);
