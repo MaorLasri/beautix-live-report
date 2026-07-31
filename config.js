@@ -1,5 +1,5 @@
 window.BEAUTIX_DISABLE_I18N = true;
-window.BEAUTIX_DISABLE_WHATSAPP = true;
+window.BEAUTIX_DISABLE_WHATSAPP = false;
 window.BEAUTIX_DISABLE_OPPORTUNITIES = false;
 window.BEAUTIX_DISABLE_CASHFLOW_ACTIONS = false;
 window.BEAUTIX_DISABLE_EXPENSE_PAYMENT_REPORTING = false;
@@ -32,6 +32,13 @@ window.BEAUTIX_CONFIG = {
     script.src = "cashflow-payment-editor-v3.js?v=20260731-editor-v3a";
     script.defer = true;
     script.dataset.beautixCashflowPaymentEditorV3 = "true";
+    document.head.appendChild(script);
+  }
+  if (!window.BEAUTIX_DISABLE_WHATSAPP && !document.querySelector('script[data-beautix-whatsapp-messages-v2]')) {
+    const script = document.createElement("script");
+    script.src = "whatsapp-messages-v2.js?v=20260731-wa-v2a";
+    script.defer = true;
+    script.dataset.beautixWhatsappMessagesV2 = "true";
     document.head.appendChild(script);
   }
   if (!document.querySelector('script[data-beautix-mobile-topbar-cleanup]')) {
