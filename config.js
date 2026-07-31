@@ -27,7 +27,7 @@ window.BEAUTIX_CONFIG = {
   }
   if (!document.querySelector('script[data-beautix-mobile-topbar-cleanup]')) {
     const script = document.createElement("script");
-    script.src = "mobile-topbar-cleanup.js?v=20260731-mobile-restore1";
+    script.src = "mobile-topbar-cleanup.js?v=20260731-ipad-breakpoint1";
     script.defer = true;
     script.dataset.beautixMobileTopbarCleanup = "true";
     document.head.appendChild(script);
