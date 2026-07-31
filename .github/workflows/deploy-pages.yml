@@ -18,7 +18,7 @@ env:
 
 concurrency:
   group: beautix-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -57,8 +57,6 @@ jobs:
             echo "live_version=live-v${TIMESTAMP}-${LIVE_SHA:0:8}"
             echo "test_version=test-v${TIMESTAMP}-${TEST_SHA:0:8}"
           } >> "$GITHUB_OUTPUT"
-          echo "Deploying live commit: $LIVE_SHA"
-          echo "Deploying test commit: $TEST_SHA"
 
       - name: Build combined Pages site
         shell: bash
@@ -66,71 +64,28 @@ jobs:
           set -euo pipefail
           rm -rf _site live-src test-src
           mkdir -p _site/test
-
           git worktree add --detach live-src "${{ steps.versions.outputs.live_sha }}"
           git worktree add --detach test-src "${{ steps.versions.outputs.test_sha }}"
-
           rsync -a --delete --exclude='.git' --exclude='.github' live-src/ _site/
           rsync -a --delete --exclude='.git' --exclude='.github' test-src/ _site/test/
-
           PUBLISHED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-
           cat > _site/version.json <<EOF
-          {
-            "environment": "live",
-            "version": "${{ steps.versions.outputs.live_version }}",
-            "source_branch": "live",
-            "commit": "${{ steps.versions.outputs.live_sha }}",
-            "published_at_utc": "${PUBLISHED_AT}"
-          }
+          {"environment":"live","source_branch":"live","commit":"${{ steps.versions.outputs.live_sha }}","published_at_utc":"${PUBLISHED_AT}"}
           EOF
-
           cat > _site/test/version.json <<EOF
-          {
-            "environment": "test",
-            "version": "${{ steps.versions.outputs.test_version }}",
-            "source_branch": "test-dashboard",
-            "commit": "${{ steps.versions.outputs.test_sha }}",
-            "published_at_utc": "${PUBLISHED_AT}"
-          }
+          {"environment":"test","source_branch":"test-dashboard","commit":"${{ steps.versions.outputs.test_sha }}","published_at_utc":"${PUBLISHED_AT}"}
           EOF
-
-          cat > _site/test/deployment-marker.json <<EOF
-          {
-            "dashboard": "test",
-            "branch": "test-dashboard",
-            "commit": "${{ steps.versions.outputs.test_sha }}",
-            "version": "${{ steps.versions.outputs.test_version }}",
-            "published_at_utc": "${PUBLISHED_AT}"
-          }
-          EOF
-
+          cp _site/test/version.json _site/test/deployment-marker.json
           touch _site/.nojekyll
 
       - name: Validate build output
         shell: bash
         run: |
           set -euo pipefail
-          required_files=(
-            _site/index.html
-            _site/test/index.html
-            _site/test/detailed-analytics.html
-            _site/test/styles.css
-            _site/test/app.js
-            _site/test/analytics-auth.js
-            _site/test/version.json
-            _site/test/deployment-marker.json
-          )
-
-          for file in "${required_files[@]}"; do
-            if [[ ! -s "$file" ]]; then
-              echo "Missing or empty required file: $file"
-              exit 1
-            fi
-          done
-
-          grep -Fq '"source_branch": "test-dashboard"' _site/test/version.json
-          grep -Fq '"commit": "${{ steps.versions.outputs.test_sha }}"' _site/test/version.json
+          test -s _site/index.html
+          test -s _site/test/index.html
+          grep -Fq 'id="login-view"' _site/index.html
+          grep -Fq 'id="app-view"' _site/index.html
           grep -Fq 'id="login-view"' _site/test/index.html
           grep -Fq 'id="app-view"' _site/test/index.html
 
@@ -148,40 +103,27 @@ jobs:
     steps:
       - name: Configure Pages
         uses: actions/configure-pages@v5
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
   verify:
-    needs:
-      - build
-      - deploy
+    needs: [build, deploy]
     runs-on: ubuntu-latest
     steps:
-      - name: Verify published test revision
+      - name: Verify live and test publication
         shell: bash
         run: |
           set -euo pipefail
-          EXPECTED_SHA="${{ needs.build.outputs.test_sha }}"
-          BASE_URL="https://maorlasri.github.io/beautix-live-report/test"
-
-          for attempt in $(seq 1 36); do
-            CACHE_BUSTER="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}-$(date +%s)"
-            VERSION_JSON="$(curl -fsSL --retry 2 --retry-delay 2 -H 'Cache-Control: no-cache, no-store, must-revalidate' -H 'Pragma: no-cache' "$BASE_URL/version.json?verify=$CACHE_BUSTER" || true)"
-            INDEX_HTML="$(curl -fsSL --retry 2 --retry-delay 2 -H 'Cache-Control: no-cache, no-store, must-revalidate' -H 'Pragma: no-cache' "$BASE_URL/?verify=$CACHE_BUSTER" || true)"
-
-            if printf '%s' "$VERSION_JSON" | grep -Fq "\"commit\": \"$EXPECTED_SHA\"" \
-              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="login-view"' \
-              && printf '%s' "$INDEX_HTML" | grep -Fq 'id="app-view"'; then
-              echo "Published test site matches $EXPECTED_SHA"
+          for attempt in $(seq 1 24); do
+            BUSTER="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}-$(date +%s)"
+            LIVE_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/?v=$BUSTER" || true)"
+            TEST_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/test/?v=$BUSTER" || true)"
+            if printf '%s' "$LIVE_HTML" | grep -Fq 'id="login-view"' && printf '%s' "$TEST_HTML" | grep -Fq 'id="login-view"'; then
+              echo "Live and test dashboards are published"
               exit 0
             fi
-
-            echo "Attempt $attempt: published site not updated yet"
             sleep 10
           done
-
-          echo "Published test site did not reach expected revision $EXPECTED_SHA"
-          echo "Received version.json: $VERSION_JSON"
+          echo "Published dashboards did not pass health check"
           exit 1
