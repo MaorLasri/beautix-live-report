@@ -6,25 +6,11 @@ window.BEAUTIX_CONFIG = {
 };
 
 (() => {
-  if (!document.querySelector('script[data-beautix-language-switcher]')) {
-    const script = document.createElement("script");
-    script.src = "language-switcher.js?v=20260730-i18n1";
-    script.defer = true;
-    script.dataset.beautixLanguageSwitcher = "true";
-    document.head.appendChild(script);
-  }
   if (!document.querySelector('script[data-beautix-opportunities]')) {
     const script = document.createElement("script");
     script.src = "opportunities.js?v=20260730-actions1";
     script.defer = true;
     script.dataset.beautixOpportunities = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-cashflow-refresh-sync]')) {
-    const script = document.createElement("script");
-    script.src = "cashflow-refresh-sync.js?v=20260730-refresh1";
-    script.defer = true;
-    script.dataset.beautixCashflowRefreshSync = "true";
     document.head.appendChild(script);
   }
   if (!document.querySelector('script[data-beautix-cashflow-actions]')) {
