@@ -1,0 +1,4 @@
+Force GitHub Pages deployment for TEST WhatsApp module update.
+Source branch: test-dashboard
+Source commit: ed82dedf113790efc2f1e61391bf2bf593c18837
+Requested at: 2026-07-31T11:59:00-07:00
