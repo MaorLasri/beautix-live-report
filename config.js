@@ -33,11 +33,11 @@ window.BEAUTIX_CONFIG = {
     script.dataset.beautixMobileTopbarCleanup = "true";
     document.head.appendChild(script);
   }
-  if (!window.BEAUTIX_DISABLE_EXPENSE_PAYMENT_REPORTING && !document.querySelector('script[data-beautix-expense-payment-reporting]')) {
+  if (!window.BEAUTIX_DISABLE_EXPENSE_PAYMENT_REPORTING && !document.querySelector('script[data-beautix-expense-payment-reporting-v3]')) {
     const script = document.createElement("script");
-    script.src = "expense-payment-reporting.js?v=20260731-expense-layout2";
+    script.src = "expense-payment-reporting-v3.js?v=20260731-expense-v3a";
     script.defer = true;
-    script.dataset.beautixExpensePaymentReporting = "true";
+    script.dataset.beautixExpensePaymentReportingV3 = "true";
     document.head.appendChild(script);
   }
 })();
