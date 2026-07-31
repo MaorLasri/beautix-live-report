@@ -68,7 +68,7 @@ jobs:
           git worktree add --detach test-src "${{ steps.versions.outputs.test_sha }}"
           rsync -a --delete --exclude='.git' --exclude='.github' live-src/ _site/
           rsync -a --delete --exclude='.git' --exclude='.github' test-src/ _site/test/
-          CACHE_BUSTER="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${{ steps.versions.outputs.test_sha }}"
+          export CACHE_BUSTER="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${{ steps.versions.outputs.test_sha }}"
           python3 - <<'PY'
           from pathlib import Path
           import os, re
