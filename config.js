@@ -20,7 +20,9 @@ window.BEAUTIX_CONFIG = {
   loadScript("i18n-map.js?v=20260730-map1", "beautix-i18n-map", () => {
     loadScript("i18n-map-extra.js?v=20260730-map2", "beautix-i18n-map-extra", () => {
       loadScript("i18n-map-audit3.js?v=20260730-map3", "beautix-i18n-map-audit3", () => {
-        loadScript("language-switcher-v4.js?v=20260730-i18n4b", "beautix-language-switcher-v4");
+        loadScript("language-switcher-v4.js?v=20260730-i18n4c", "beautix-language-switcher-v4", () => {
+          loadScript("i18n-report-content-fix.js?v=20260730-reportfix1", "beautix-i18n-report-content-fix");
+        });
       });
     });
   });
