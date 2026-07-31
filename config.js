@@ -36,7 +36,7 @@ window.BEAUTIX_CONFIG = {
   }
   if (!window.BEAUTIX_DISABLE_WHATSAPP && !document.querySelector('script[data-beautix-whatsapp-messages-v2]')) {
     const script = document.createElement("script");
-    script.src = "whatsapp-messages-v2.js?v=20260731-wa-v2b";
+    script.src = "whatsapp-messages-v2.js?v=20260731-wa-overflow1";
     script.defer = true;
     script.dataset.beautixWhatsappMessagesV2 = "true";
     document.head.appendChild(script);
