@@ -6,6 +6,13 @@ window.BEAUTIX_CONFIG = {
 };
 
 (() => {
+  if (!document.querySelector('script[data-beautix-language-switcher-v2]')) {
+    const script = document.createElement("script");
+    script.src = "language-switcher-v2.js?v=20260730-i18n2";
+    script.defer = true;
+    script.dataset.beautixLanguageSwitcherV2 = "true";
+    document.head.appendChild(script);
+  }
   if (!document.querySelector('script[data-beautix-opportunities]')) {
     const script = document.createElement("script");
     script.src = "opportunities.js?v=20260730-actions1";
