@@ -1,0 +1,2 @@
+Force GitHub Pages rebuild for restored mobile topbar changes at 2026-07-31 07:39 -0700.
+Source test-dashboard commit: f9f21230c7410244ebd3b18a17016c4161df2bd4
