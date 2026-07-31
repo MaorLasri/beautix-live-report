@@ -30,6 +30,8 @@ window.BEAUTIX_CONFIG = {
   });
 
   loadScript("opportunities.js?v=20260730-actions1", "beautix-opportunities");
-  loadScript("cashflow-actions.js?v=20260730-cashflow8", "beautix-cashflow-actions");
+  loadScript("cashflow-actions.js?v=20260730-cashflow8", "beautix-cashflow-actions", () => {
+    loadScript("cashflow-payment-editor-v2.js?v=20260731-editor2", "beautix-cashflow-payment-editor-v2");
+  });
   loadScript("whatsapp-messages.js?v=20260730-wa1", "beautix-whatsapp-messages");
 })();
