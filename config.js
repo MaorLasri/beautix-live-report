@@ -1,7 +1,7 @@
 window.BEAUTIX_CONFIG = {
   supabaseUrl: "https://bkosuztxdgvfhykzuigx.supabase.co",
   supabasePublishableKey: "sb_publishable_wXoQC8djBvfiLYK1eX-h_Q_uFnGTAPB",
-  reportRpc: "get_business_status_report_v3",
+  reportRpc: "get_business_status_report_v4",
   refreshIntervalMs: 60000
 };
 
@@ -23,6 +23,7 @@ window.BEAUTIX_CONFIG = {
         loadScript("language-switcher-v4.js?v=20260730-i18n4c", "beautix-language-switcher-v4", () => {
           loadScript("i18n-report-content-fix.js?v=20260730-reportfix1", "beautix-i18n-report-content-fix");
           loadScript("mobile-topbar-cleanup.js?v=20260730-mobile2", "beautix-mobile-topbar-cleanup-v2");
+          loadScript("expense-payment-reporting.js?v=20260731-expense-payment1", "beautix-expense-payment-reporting");
         });
       });
     });
