@@ -3,6 +3,7 @@ window.BEAUTIX_DISABLE_WHATSAPP = true;
 window.BEAUTIX_DISABLE_OPPORTUNITIES = false;
 window.BEAUTIX_DISABLE_CASHFLOW_ACTIONS = false;
 window.BEAUTIX_DISABLE_EXPENSE_PAYMENT_REPORTING = false;
+window.BEAUTIX_DISABLE_CASHFLOW_PAYMENT_EDITOR = false;
 
 window.BEAUTIX_CONFIG = {
   supabaseUrl: "https://bkosuztxdgvfhykzuigx.supabase.co",
@@ -24,6 +25,13 @@ window.BEAUTIX_CONFIG = {
     script.src = "cashflow-actions.js?v=20260730-cashflow8";
     script.defer = true;
     script.dataset.beautixCashflowActions = "true";
+    document.head.appendChild(script);
+  }
+  if (!window.BEAUTIX_DISABLE_CASHFLOW_PAYMENT_EDITOR && !document.querySelector('script[data-beautix-cashflow-payment-editor-v2]')) {
+    const script = document.createElement("script");
+    script.src = "cashflow-payment-editor-v2.js?v=20260731-editor-restore1";
+    script.defer = true;
+    script.dataset.beautixCashflowPaymentEditorV2 = "true";
     document.head.appendChild(script);
   }
   if (!document.querySelector('script[data-beautix-mobile-topbar-cleanup]')) {
