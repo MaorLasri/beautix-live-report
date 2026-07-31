@@ -1,7 +1,7 @@
 window.BEAUTIX_DISABLE_I18N = true;
 window.BEAUTIX_DISABLE_WHATSAPP = true;
 window.BEAUTIX_DISABLE_OPPORTUNITIES = false;
-window.BEAUTIX_DISABLE_CASHFLOW_ACTIONS = true;
+window.BEAUTIX_DISABLE_CASHFLOW_ACTIONS = false;
 
 window.BEAUTIX_CONFIG = {
   supabaseUrl: "https://bkosuztxdgvfhykzuigx.supabase.co",
@@ -16,6 +16,13 @@ window.BEAUTIX_CONFIG = {
     script.src = "opportunities.js?v=20260730-actions1";
     script.defer = true;
     script.dataset.beautixOpportunities = "true";
+    document.head.appendChild(script);
+  }
+  if (!window.BEAUTIX_DISABLE_CASHFLOW_ACTIONS && !document.querySelector('script[data-beautix-cashflow-actions]')) {
+    const script = document.createElement("script");
+    script.src = "cashflow-actions.js?v=20260730-cashflow8";
+    script.defer = true;
+    script.dataset.beautixCashflowActions = "true";
     document.head.appendChild(script);
   }
 })();
