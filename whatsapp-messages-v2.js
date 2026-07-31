@@ -6,9 +6,10 @@
     let digits = String(value || '').replace(/\D/g, '');
     if (digits.startsWith('0')) digits = `972${digits.slice(1)}`;
     if (!digits.startsWith('972') && digits.length === 9) digits = `972${digits}`;
-    return digits;
+    return /^9725\d{8}$/.test(digits) ? digits : '';
   };
   const firstName = value => String(value || '').trim().split(/\s+/)[0] || 'יקרה';
+  const phonePattern = /(?:\+?972[-\s]?5\d|05\d)(?:[-\s]?\d){7}/;
 
   function contextFor(element) {
     if (element.closest('#debtors-table') || /חוב|יתרה שלילית/.test(element.closest('section')?.textContent || '')) return 'debt';
@@ -53,7 +54,7 @@
     const style = document.createElement('style');
     style.id = 'whatsapp-message-style-v2';
     style.textContent = `
-      .whatsapp-message-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:7px 11px;border:0;border-radius:11px;background:#25D366;color:#fff;font:inherit;font-weight:800;text-decoration:none;cursor:pointer;white-space:nowrap}
+      .whatsapp-message-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:7px 11px;border:0;border-radius:11px;background:#25D366;color:#fff;font:inherit;font-weight:800;text-decoration:none;cursor:pointer;white-space:nowrap;margin-inline-start:8px}
       .whatsapp-message-button::before{content:'◉';font-size:.9em}.whatsapp-message-button.compact{min-width:42px;padding:7px 9px;font-size:0}.whatsapp-message-button.compact::before{font-size:1rem}
       .whatsapp-message-backdrop{position:fixed;inset:0;z-index:1800;display:grid;place-items:center;padding:16px;background:rgba(20,18,30,.55);backdrop-filter:blur(5px)}.whatsapp-message-backdrop[hidden]{display:none}
       .whatsapp-message-dialog{position:relative;width:min(560px,100%);max-height:calc(100dvh - 24px);overflow:auto;padding:24px;border-radius:22px;background:#fff;box-shadow:0 24px 80px rgba(30,20,50,.3);direction:rtl}
@@ -99,18 +100,29 @@
     };
   }
 
+  function addButton(anchor, phone) {
+    if (!phone || anchor.dataset.beautixWhatsappEnhanced === 'true') return;
+    anchor.dataset.beautixWhatsappEnhanced = 'true';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'whatsapp-message-button';
+    button.textContent = 'WhatsApp';
+    button.addEventListener('click', event => { event.preventDefault(); openComposer(anchor, phone); });
+    anchor.insertAdjacentElement('afterend', button);
+  }
+
   function enhance() {
     ensureModal();
-    document.querySelectorAll('a[href^="tel:"]').forEach(link => {
-      const phone = cleanPhone(link.getAttribute('href').slice(4));
-      if (!phone || link.dataset.beautixWhatsappEnhanced === 'true') return;
-      link.dataset.beautixWhatsappEnhanced = 'true';
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'whatsapp-message-button';
-      button.textContent = 'WhatsApp';
-      button.addEventListener('click', event => { event.preventDefault(); openComposer(link, phone); });
-      link.insertAdjacentElement('afterend', button);
+    document.querySelectorAll('a[href^="tel:"]').forEach(link => addButton(link, cleanPhone(link.getAttribute('href').slice(4))));
+
+    document.querySelectorAll('tr, li, article, .mobile-customer-card, .customer-card, .opportunity-item').forEach(row => {
+      if (row.dataset.beautixWhatsappScanned === 'true') return;
+      row.dataset.beautixWhatsappScanned = 'true';
+      const match = (row.textContent || '').match(phonePattern);
+      const phone = cleanPhone(match?.[0]);
+      if (!phone) return;
+      const phoneElement = Array.from(row.querySelectorAll('td, span, div, p, a')).find(el => phonePattern.test(el.textContent || '')) || row;
+      addButton(phoneElement, phone);
     });
   }
 
