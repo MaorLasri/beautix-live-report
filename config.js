@@ -20,6 +20,13 @@ window.BEAUTIX_CONFIG = {
     script.dataset.beautixOpportunities = "true";
     document.head.appendChild(script);
   }
+  if (!document.querySelector('script[data-beautix-cashflow-refresh-sync]')) {
+    const script = document.createElement("script");
+    script.src = "cashflow-refresh-sync.js?v=20260730-refresh1";
+    script.defer = true;
+    script.dataset.beautixCashflowRefreshSync = "true";
+    document.head.appendChild(script);
+  }
   if (!document.querySelector('script[data-beautix-cashflow-actions]')) {
     const script = document.createElement("script");
     script.src = "cashflow-actions.js?v=20260730-cashflow8";
