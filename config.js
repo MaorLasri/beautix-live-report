@@ -13,6 +13,13 @@ window.BEAUTIX_CONFIG = {
 };
 
 (() => {
+  if (!document.querySelector('script[data-beautix-mobile-width-guard]')) {
+    const script = document.createElement("script");
+    script.src = "mobile-width-guard.js?v=20260731-width-guard1";
+    script.defer = true;
+    script.dataset.beautixMobileWidthGuard = "true";
+    document.head.appendChild(script);
+  }
   if (!window.BEAUTIX_DISABLE_OPPORTUNITIES && !document.querySelector('script[data-beautix-opportunities]')) {
     const script = document.createElement("script");
     script.src = "opportunities.js?v=20260730-actions1";
