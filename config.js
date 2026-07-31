@@ -27,11 +27,11 @@ window.BEAUTIX_CONFIG = {
     script.dataset.beautixCashflowActions = "true";
     document.head.appendChild(script);
   }
-  if (!window.BEAUTIX_DISABLE_CASHFLOW_PAYMENT_EDITOR && !document.querySelector('script[data-beautix-cashflow-payment-editor-v2]')) {
+  if (!window.BEAUTIX_DISABLE_CASHFLOW_PAYMENT_EDITOR && !document.querySelector('script[data-beautix-cashflow-payment-editor-v3]')) {
     const script = document.createElement("script");
-    script.src = "cashflow-payment-editor-v2.js?v=20260731-editor-restore1";
+    script.src = "cashflow-payment-editor-v3.js?v=20260731-editor-v3a";
     script.defer = true;
-    script.dataset.beautixCashflowPaymentEditorV2 = "true";
+    script.dataset.beautixCashflowPaymentEditorV3 = "true";
     document.head.appendChild(script);
   }
   if (!document.querySelector('script[data-beautix-mobile-topbar-cleanup]')) {
