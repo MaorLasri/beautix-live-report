@@ -6,12 +6,21 @@ window.BEAUTIX_CONFIG = {
 };
 
 (() => {
-  if (!document.querySelector('script[data-beautix-language-switcher-v2]')) {
-    const script = document.createElement("script");
-    script.src = "language-switcher-v2.js?v=20260730-i18n2";
-    script.defer = true;
-    script.dataset.beautixLanguageSwitcherV2 = "true";
-    document.head.appendChild(script);
+  if (!document.querySelector('script[data-beautix-i18n-map]')) {
+    const map = document.createElement("script");
+    map.src = "i18n-map.js?v=20260730-map1";
+    map.defer = true;
+    map.dataset.beautixI18nMap = "true";
+    map.onload = () => {
+      if (!document.querySelector('script[data-beautix-language-switcher-v3]')) {
+        const engine = document.createElement("script");
+        engine.src = "language-switcher-v3.js?v=20260730-i18n3";
+        engine.defer = true;
+        engine.dataset.beautixLanguageSwitcherV3 = "true";
+        document.head.appendChild(engine);
+      }
+    };
+    document.head.appendChild(map);
   }
   if (!document.querySelector('script[data-beautix-opportunities]')) {
     const script = document.createElement("script");
