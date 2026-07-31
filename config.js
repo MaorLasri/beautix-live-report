@@ -1,4 +1,5 @@
 window.BEAUTIX_DISABLE_I18N = true;
+window.BEAUTIX_DISABLE_WHATSAPP = true;
 
 window.BEAUTIX_CONFIG = {
   supabaseUrl: "https://bkosuztxdgvfhykzuigx.supabase.co",
@@ -20,13 +21,6 @@ window.BEAUTIX_CONFIG = {
     script.src = "cashflow-actions.js?v=20260730-cashflow8";
     script.defer = true;
     script.dataset.beautixCashflowActions = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-whatsapp-messages]')) {
-    const script = document.createElement("script");
-    script.src = "whatsapp-messages.js?v=20260730-wa1";
-    script.defer = true;
-    script.dataset.beautixWhatsappMessages = "true";
     document.head.appendChild(script);
   }
 })();
