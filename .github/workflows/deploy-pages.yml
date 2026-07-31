@@ -85,7 +85,7 @@ jobs:
           test -s _site/index.html
           test -s _site/test/index.html
           grep -Fq 'id="login-view"' _site/index.html
-          grep -Fq 'id="app-view"' _site/index.html
+          grep -Fq 'id="report-view"' _site/index.html
           grep -Fq 'id="login-view"' _site/test/index.html
           grep -Fq 'id="app-view"' _site/test/index.html
 
@@ -119,7 +119,10 @@ jobs:
             BUSTER="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}-$(date +%s)"
             LIVE_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/?v=$BUSTER" || true)"
             TEST_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/test/?v=$BUSTER" || true)"
-            if printf '%s' "$LIVE_HTML" | grep -Fq 'id="login-view"' && printf '%s' "$TEST_HTML" | grep -Fq 'id="login-view"'; then
+            if printf '%s' "$LIVE_HTML" | grep -Fq 'id="login-view"' \
+              && printf '%s' "$LIVE_HTML" | grep -Fq 'id="report-view"' \
+              && printf '%s' "$TEST_HTML" | grep -Fq 'id="login-view"' \
+              && printf '%s' "$TEST_HTML" | grep -Fq 'id="app-view"'; then
               echo "Live and test dashboards are published"
               exit 0
             fi
