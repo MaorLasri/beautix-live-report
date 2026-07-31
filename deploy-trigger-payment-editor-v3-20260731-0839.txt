@@ -1,0 +1,4 @@
+Force GitHub Pages deploy for cashflow payment editor v3.
+Source branch: test-dashboard
+Source commit: 18e00076800cc0ea51c2f8288a0fceb4a2a96d52
+Created: 2026-07-31T15:39:00Z
