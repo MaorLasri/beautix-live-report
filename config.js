@@ -1,3 +1,5 @@
+window.BEAUTIX_DISABLE_I18N = true;
+
 window.BEAUTIX_CONFIG = {
   supabaseUrl: "https://bkosuztxdgvfhykzuigx.supabase.co",
   supabasePublishableKey: "sb_publishable_wXoQC8djBvfiLYK1eX-h_Q_uFnGTAPB",
