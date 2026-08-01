@@ -92,7 +92,7 @@ window.BEAUTIX_CONFIG = {
   }
   if (!document.querySelector('script[data-beautix-cashflow-confirmation-queue-v1]')) {
     const script = document.createElement("script");
-    script.src = "cashflow-confirmation-queue-v1.js?v=20260801-confirmation-queue1";
+    script.src = "cashflow-confirmation-queue-v1.js?v=20260801-confirmation-queue2";
     script.defer = true;
     script.dataset.beautixCashflowConfirmationQueueV1 = "true";
     document.head.appendChild(script);
