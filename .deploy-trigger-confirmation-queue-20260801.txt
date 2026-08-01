@@ -1,0 +1,3 @@
+Trigger Pages deployment for cashflow confirmation queue module.
+Source branch: test-dashboard
+Expected config includes cashflow-confirmation-queue-v1.js
