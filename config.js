@@ -8,7 +8,7 @@ window.BEAUTIX_DISABLE_CASHFLOW_PAYMENT_EDITOR = false;
 window.BEAUTIX_CONFIG = {
   supabaseUrl: "https://bkosuztxdgvfhykzuigx.supabase.co",
   supabasePublishableKey: "sb_publishable_wXoQC8djBvfiLYK1eX-h_Q_uFnGTAPB",
-  reportRpc: "get_business_status_report_v6",
+  reportRpc: "get_business_status_report_v7",
   refreshIntervalMs: 60000
 };
 
@@ -81,6 +81,13 @@ window.BEAUTIX_CONFIG = {
     script.src = "dashboard-management-metrics-v1.js?v=20260801-management1";
     script.defer = true;
     script.dataset.beautixDashboardManagementMetricsV1 = "true";
+    document.head.appendChild(script);
+  }
+  if (!document.querySelector('script[data-beautix-collection-metrics-v1]')) {
+    const script = document.createElement("script");
+    script.src = "collection-metrics-v1.js?v=20260801-collection1";
+    script.defer = true;
+    script.dataset.beautixCollectionMetricsV1 = "true";
     document.head.appendChild(script);
   }
 })();
