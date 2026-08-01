@@ -113,10 +113,10 @@
       balance += Number(day.net || 0);
       return { ...day, income: Number(day.inflows || 0), expense: Number(day.outflows || 0), projectedBalance: balance };
     });
-    container.innerHTML = days.map((day, index) => `<article class="day-card" data-day-card><button class="day-toggle" type="button" aria-expanded="false" aria-controls="range-day-panel-${index}"><div class="summary-date"><span class="chevron">⌄</span><div><h3>${dateText(day.date)}</h3><small>${day.event_count || 0} תנועות</small></div></div><div class="day-kpis"><div><span>הכנסות</span><strong class="pos">${money(day.income)}</strong></div><div><span>הוצאות</span><strong class="neg">${money(day.expense)}</strong></div><div><span>נטו</span><strong class="${Number(day.net)>=0?'pos':'neg'}">${money(day.net)}</strong></div><div><span>יתרה חזויה</span><strong class="${day.projectedBalance>=0?'pos':'neg'}">${money(day.projectedBalance)}</strong></div></div></button><div id="range-day-panel-${index}" hidden><div class="day-body"><section><h4>הכנסות</h4><ul>${renderEntries(day.entries || [], 'income')}</ul></section><section><h4>הוצאות</h4><ul>${renderEntries(day.entries || [], 'expense')}</ul></section></div></div></article>`).join('');
+    container.innerHTML = days.map((day, index) => `<article class="day-card" data-day-card data-cashflow-date="${escapeHtml(day.date)}"><button class="day-toggle" type="button" aria-expanded="false" aria-controls="day-panel-range-${index}"><div class="summary-date"><span class="chevron">⌄</span><div><h3>${dateText(day.date)}</h3><small>${day.event_count || 0} תנועות</small></div></div><div class="day-kpis"><div><span>הכנסות</span><strong class="pos">${money(day.income)}</strong></div><div><span>הוצאות</span><strong class="neg">${money(day.expense)}</strong></div><div><span>נטו</span><strong class="${Number(day.net)>=0?'pos':'neg'}">${money(day.net)}</strong></div><div><span>יתרה חזויה</span><strong class="${day.projectedBalance>=0?'pos':'neg'}">${money(day.projectedBalance)}</strong></div></div></button><div id="day-panel-range-${index}" hidden><div class="day-body"><section><h4>הכנסות</h4><ul>${renderEntries(day.entries || [], 'income')}</ul></section><section><h4>הוצאות</h4><ul>${renderEntries(day.entries || [], 'expense')}</ul></section></div></div></article>`).join('');
     container.querySelectorAll('[data-day-card]').forEach(card => card.querySelector('.day-toggle').addEventListener('click', () => {
       const button = card.querySelector('.day-toggle');
-      const panel = card.querySelector('[id^="range-day-panel-"]');
+      const panel = card.querySelector('[id^="day-panel-range-"]');
       const open = button.getAttribute('aria-expanded') !== 'true';
       button.setAttribute('aria-expanded', String(open)); panel.hidden = !open; card.classList.toggle('is-open', open);
     }));
@@ -133,6 +133,7 @@
     set('forecast-largest-expense-day', largest?.expense > 0 ? dateText(largest.date) : '—'); set('forecast-largest-expense-note', largest?.expense > 0 ? `הוצאה צפויה: ${money(largest.expense)}` : 'אין הוצאות בטווח');
     set('forecast-coverage', `${Math.round(coverage * 100)}%`, coverage >= 1 ? 'pos' : 'neg'); set('forecast-coverage-note', coverage >= 1 ? 'ההכנסות בטווח מכסות את ההוצאות' : 'חסר כיסוי מלא להוצאות בטווח');
     const progress = document.getElementById('coverage-progress-bar'); if (progress) progress.style.width = `${Math.max(0, Math.min(coverage * 100, 100))}%`;
+    window.dispatchEvent(new CustomEvent('beautix:cashflow-range-rendered', { detail: { start: state.start, end: state.end } }));
   }
 
   async function applyRange(start, end) {
