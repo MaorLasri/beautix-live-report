@@ -64,9 +64,16 @@ window.BEAUTIX_CONFIG = {
   }
   if (!document.querySelector('script[data-beautix-cashflow-range-selector-v1]')) {
     const script = document.createElement("script");
-    script.src = "cashflow-range-selector-v1.js?v=20260731-range2";
+    script.src = "cashflow-range-selector-v1.js?v=20260801-range-actions1";
     script.defer = true;
     script.dataset.beautixCashflowRangeSelectorV1 = "true";
+    document.head.appendChild(script);
+  }
+  if (!document.querySelector('script[data-beautix-cashflow-range-actions-bridge-v1]')) {
+    const script = document.createElement("script");
+    script.src = "cashflow-range-actions-bridge-v1.js?v=20260801-bridge1";
+    script.defer = true;
+    script.dataset.beautixCashflowRangeActionsBridgeV1 = "true";
     document.head.appendChild(script);
   }
 })();
