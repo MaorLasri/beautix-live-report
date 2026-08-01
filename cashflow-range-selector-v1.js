@@ -43,10 +43,12 @@
     const style = document.createElement('style');
     style.id = 'cashflow-range-style-v1';
     style.textContent = `
-      .cashflow-range-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 18px;padding:16px;border:1px solid #e2dceb;border-radius:18px;background:#fff;box-shadow:0 8px 26px rgba(70,45,100,.07)}
-      .cashflow-range-controls label{display:grid;gap:6px;font-weight:800;color:#566176}.cashflow-range-controls input{width:100%;box-sizing:border-box;min-height:44px;padding:9px 11px;border:1px solid #d8deea;border-radius:12px;background:#fff;font:inherit;color:#25384d}
-      .cashflow-range-actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}.cashflow-range-actions button{min-height:42px;padding:8px 13px;border:1px solid #d9dcea;border-radius:12px;background:#fff;color:#573074;font:inherit;font-weight:800;cursor:pointer}.cashflow-range-actions .primary{border:0;background:linear-gradient(90deg,#f22991,#8743b7);color:#fff}.cashflow-range-status{grid-column:1/-1;margin:0;color:#6f7a8b;font-weight:700}.cashflow-range-status.error{color:#b53b48}
-      @media(max-width:620px){.cashflow-range-controls{grid-template-columns:1fr}.cashflow-range-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.cashflow-range-actions .primary{grid-column:1/-1}}
+      .cashflow-range-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 18px;padding:16px;border:1px solid #e2dceb;border-radius:18px;background:#fff;box-shadow:0 8px 26px rgba(70,45,100,.07);box-sizing:border-box;max-width:100%;overflow:hidden}
+      .cashflow-range-controls>*{min-width:0;max-width:100%;box-sizing:border-box}
+      .cashflow-range-controls label{display:grid;gap:6px;font-weight:800;color:#566176;min-width:0;max-width:100%}
+      .cashflow-range-controls input{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;min-height:44px;padding:9px 11px;border:1px solid #d8deea;border-radius:12px;background:#fff;font:inherit;color:#25384d;overflow:hidden}
+      .cashflow-range-actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;min-width:0}.cashflow-range-actions button{min-height:42px;padding:8px 13px;border:1px solid #d9dcea;border-radius:12px;background:#fff;color:#573074;font:inherit;font-weight:800;cursor:pointer;box-sizing:border-box;max-width:100%}.cashflow-range-actions .primary{border:0;background:linear-gradient(90deg,#f22991,#8743b7);color:#fff}.cashflow-range-status{grid-column:1/-1;margin:0;color:#6f7a8b;font-weight:700;overflow-wrap:anywhere}.cashflow-range-status.error{color:#b53b48}
+      @media(max-width:620px){.cashflow-range-controls{grid-template-columns:minmax(0,1fr);padding:14px}.cashflow-range-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.cashflow-range-actions .primary{grid-column:1/-1}.cashflow-range-controls input{font-size:16px}}
     `;
     document.head.appendChild(style);
   }
