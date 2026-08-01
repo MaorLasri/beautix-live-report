@@ -62,4 +62,11 @@ window.BEAUTIX_CONFIG = {
     script.dataset.beautixExpensePaymentReportingV3 = "true";
     document.head.appendChild(script);
   }
+  if (!document.querySelector('script[data-beautix-cashflow-range-selector-v1]')) {
+    const script = document.createElement("script");
+    script.src = "cashflow-range-selector-v1.js?v=20260731-range1";
+    script.defer = true;
+    script.dataset.beautixCashflowRangeSelectorV1 = "true";
+    document.head.appendChild(script);
+  }
 })();
