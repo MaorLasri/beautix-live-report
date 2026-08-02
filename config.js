@@ -13,6 +13,25 @@ window.BEAUTIX_CONFIG = {
 };
 
 (() => {
+  if (window.supabase?.createClient && !window.__beautixSharedAuthCreateClient) {
+    window.__beautixSharedAuthCreateClient = true;
+    const originalCreateClient = window.supabase.createClient.bind(window.supabase);
+    window.supabase.createClient = (url, key, options = {}) => {
+      const remember = window.localStorage.getItem('beautix-remember-device') === 'true';
+      const storage = remember ? window.localStorage : window.sessionStorage;
+      return originalCreateClient(url, key, {
+        ...options,
+        auth: {
+          persistSession: true,
+          storage,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          ...(options.auth || {})
+        }
+      });
+    };
+  }
+
   const load = (selector, src, datasetKey) => {
     if (document.querySelector(selector)) return;
     const script = document.createElement("script");
@@ -31,8 +50,8 @@ window.BEAUTIX_CONFIG = {
   load('script[data-beautix-mobile-topbar-cleanup]', 'mobile-topbar-cleanup.js?v=20260731-ipad-breakpoint1', 'beautixMobileTopbarCleanup');
   if (!window.BEAUTIX_DISABLE_EXPENSE_PAYMENT_REPORTING) load('script[data-beautix-expense-payment-reporting-v3]', 'expense-payment-reporting-v3.js?v=20260731-expense-v3a', 'beautixExpensePaymentReportingV3');
   load('script[data-beautix-cashflow-range-selector-v1]', 'cashflow-range-selector-v1.js?v=20260801-range-actions1', 'beautixCashflowRangeSelectorV1');
-  load('script[data-beautix-cashflow-range-actions-bridge-v1]', 'cashflow-range-actions-bridge-v1.js?v=20260801-scope1', 'beautixCashflowRangeActionsBridgeV1');
-  load('script[data-beautix-cashflow-entry-live-fixes-v1]', 'cashflow-entry-live-fixes-v1.js?v=20260802-payment1', 'beautixCashflowEntryLiveFixesV1');
+  load('script[data-beautix-cashflow-range-actions-bridge-v1]', 'cashflow-range-actions-bridge-v1.js?v=20260802-auth2', 'beautixCashflowRangeActionsBridgeV1');
+  load('script[data-beautix-cashflow-entry-live-fixes-v1]', 'cashflow-entry-live-fixes-v1.js?v=20260802-auth2', 'beautixCashflowEntryLiveFixesV1');
   load('script[data-beautix-personal-cashflow-range-v1]', 'personal-cashflow-range-v1.js?v=20260801-personal1', 'beautixPersonalCashflowRangeV1');
   load('script[data-beautix-dashboard-management-metrics-v1]', 'dashboard-management-metrics-v1.js?v=20260801-management1', 'beautixDashboardManagementMetricsV1');
   load('script[data-beautix-collection-metrics-v1]', 'collection-metrics-v1.js?v=20260801-collection1', 'beautixCollectionMetricsV1');
