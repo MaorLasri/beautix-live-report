@@ -52,6 +52,7 @@ window.BEAUTIX_CONFIG = {
   load('script[data-beautix-cashflow-range-selector-v1]', 'cashflow-range-selector-v1.js?v=20260801-range-actions1', 'beautixCashflowRangeSelectorV1');
   load('script[data-beautix-cashflow-range-actions-bridge-v1]', 'cashflow-range-actions-bridge-v1.js?v=20260802-auth2', 'beautixCashflowRangeActionsBridgeV1');
   load('script[data-beautix-cashflow-entry-live-fixes-v1]', 'cashflow-entry-live-fixes-v1.js?v=20260802-auth2', 'beautixCashflowEntryLiveFixesV1');
+  load('script[data-beautix-cashflow-live-auth-guard-v1]', 'cashflow-live-auth-guard-v1.js?v=20260802-auth3', 'beautixCashflowLiveAuthGuardV1');
   load('script[data-beautix-personal-cashflow-range-v1]', 'personal-cashflow-range-v1.js?v=20260801-personal1', 'beautixPersonalCashflowRangeV1');
   load('script[data-beautix-dashboard-management-metrics-v1]', 'dashboard-management-metrics-v1.js?v=20260801-management1', 'beautixDashboardManagementMetricsV1');
   load('script[data-beautix-collection-metrics-v1]', 'collection-metrics-v1.js?v=20260801-collection1', 'beautixCollectionMetricsV1');
