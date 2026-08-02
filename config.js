@@ -76,6 +76,13 @@ window.BEAUTIX_CONFIG = {
     script.dataset.beautixCashflowRangeActionsBridgeV1 = "true";
     document.head.appendChild(script);
   }
+  if (!document.querySelector('script[data-beautix-personal-cashflow-range-v1]')) {
+    const script = document.createElement("script");
+    script.src = "personal-cashflow-range-v1.js?v=20260801-personal1";
+    script.defer = true;
+    script.dataset.beautixPersonalCashflowRangeV1 = "true";
+    document.head.appendChild(script);
+  }
   if (!document.querySelector('script[data-beautix-dashboard-management-metrics-v1]')) {
     const script = document.createElement("script");
     script.src = "dashboard-management-metrics-v1.js?v=20260801-management1";
