@@ -8,7 +8,7 @@ window.BEAUTIX_DISABLE_CASHFLOW_PAYMENT_EDITOR = false;
 window.BEAUTIX_CONFIG = {
   supabaseUrl: "https://bkosuztxdgvfhykzuigx.supabase.co",
   supabasePublishableKey: "sb_publishable_wXoQC8djBvfiLYK1eX-h_Q_uFnGTAPB",
-  reportRpc: "get_business_status_report_v8",
+  reportRpc: "get_business_status_report_v9",
   refreshIntervalMs: 60000
 };
 
