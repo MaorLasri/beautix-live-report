@@ -22,6 +22,7 @@ window.BEAUTIX_CONFIG = {
     document.head.appendChild(script);
   };
 
+  load('script[data-beautix-data-import-nav]', 'data-import-nav.js?v=20260802-import1', 'beautixDataImportNav');
   load('script[data-beautix-mobile-width-guard]', 'mobile-width-guard.js?v=20260731-width-guard1', 'beautixMobileWidthGuard');
   if (!window.BEAUTIX_DISABLE_OPPORTUNITIES) load('script[data-beautix-opportunities]', 'opportunities.js?v=20260730-actions1', 'beautixOpportunities');
   if (!window.BEAUTIX_DISABLE_CASHFLOW_ACTIONS) load('script[data-beautix-cashflow-actions]', 'cashflow-actions.js?v=20260730-cashflow8', 'beautixCashflowActions');
