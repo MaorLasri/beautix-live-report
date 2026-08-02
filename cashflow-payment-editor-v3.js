@@ -4,7 +4,16 @@
 
   const config = window.BEAUTIX_CONFIG;
   if (!config || !window.supabase) return;
-  const client = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey);
+  const rememberPreference = localStorage.getItem('beautix-remember-device') === 'true';
+  const authStorage = rememberPreference ? window.localStorage : window.sessionStorage;
+  const client = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, {
+    auth: {
+      persistSession: true,
+      storage: authStorage,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
   let byId = new Map();
 
   const methods = [
@@ -63,6 +72,9 @@
     if (box) box.hidden = true;
     if (submit) submit.disabled = true;
     try {
+      const { data: sessionData } = await client.auth.getSession();
+      if (!sessionData?.session) throw new Error('ההתחברות פגה. יש לרענן את הדף ולהתחבר מחדש.');
+
       const id = document.getElementById('cashflow-entry-id').value;
       const payload = {
         date: document.getElementById('cashflow-date').value,
