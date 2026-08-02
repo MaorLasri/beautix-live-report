@@ -13,95 +13,26 @@ window.BEAUTIX_CONFIG = {
 };
 
 (() => {
-  if (!document.querySelector('script[data-beautix-mobile-width-guard]')) {
+  const load = (selector, src, datasetKey) => {
+    if (document.querySelector(selector)) return;
     const script = document.createElement("script");
-    script.src = "mobile-width-guard.js?v=20260731-width-guard1";
+    script.src = src;
     script.defer = true;
-    script.dataset.beautixMobileWidthGuard = "true";
+    script.dataset[datasetKey] = "true";
     document.head.appendChild(script);
-  }
-  if (!window.BEAUTIX_DISABLE_OPPORTUNITIES && !document.querySelector('script[data-beautix-opportunities]')) {
-    const script = document.createElement("script");
-    script.src = "opportunities.js?v=20260730-actions1";
-    script.defer = true;
-    script.dataset.beautixOpportunities = "true";
-    document.head.appendChild(script);
-  }
-  if (!window.BEAUTIX_DISABLE_CASHFLOW_ACTIONS && !document.querySelector('script[data-beautix-cashflow-actions]')) {
-    const script = document.createElement("script");
-    script.src = "cashflow-actions.js?v=20260730-cashflow8";
-    script.defer = true;
-    script.dataset.beautixCashflowActions = "true";
-    document.head.appendChild(script);
-  }
-  if (!window.BEAUTIX_DISABLE_CASHFLOW_PAYMENT_EDITOR && !document.querySelector('script[data-beautix-cashflow-payment-editor-v3]')) {
-    const script = document.createElement("script");
-    script.src = "cashflow-payment-editor-v3.js?v=20260731-editor-v3a";
-    script.defer = true;
-    script.dataset.beautixCashflowPaymentEditorV3 = "true";
-    document.head.appendChild(script);
-  }
-  if (!window.BEAUTIX_DISABLE_WHATSAPP && !document.querySelector('script[data-beautix-whatsapp-messages-v2]')) {
-    const script = document.createElement("script");
-    script.src = "whatsapp-messages-v2.js?v=20260731-wa-overflow1";
-    script.defer = true;
-    script.dataset.beautixWhatsappMessagesV2 = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-mobile-topbar-cleanup]')) {
-    const script = document.createElement("script");
-    script.src = "mobile-topbar-cleanup.js?v=20260731-ipad-breakpoint1";
-    script.defer = true;
-    script.dataset.beautixMobileTopbarCleanup = "true";
-    document.head.appendChild(script);
-  }
-  if (!window.BEAUTIX_DISABLE_EXPENSE_PAYMENT_REPORTING && !document.querySelector('script[data-beautix-expense-payment-reporting-v3]')) {
-    const script = document.createElement("script");
-    script.src = "expense-payment-reporting-v3.js?v=20260731-expense-v3a";
-    script.defer = true;
-    script.dataset.beautixExpensePaymentReportingV3 = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-cashflow-range-selector-v1]')) {
-    const script = document.createElement("script");
-    script.src = "cashflow-range-selector-v1.js?v=20260801-range-actions1";
-    script.defer = true;
-    script.dataset.beautixCashflowRangeSelectorV1 = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-cashflow-range-actions-bridge-v1]')) {
-    const script = document.createElement("script");
-    script.src = "cashflow-range-actions-bridge-v1.js?v=20260801-bridge-confirm1";
-    script.defer = true;
-    script.dataset.beautixCashflowRangeActionsBridgeV1 = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-personal-cashflow-range-v1]')) {
-    const script = document.createElement("script");
-    script.src = "personal-cashflow-range-v1.js?v=20260801-personal1";
-    script.defer = true;
-    script.dataset.beautixPersonalCashflowRangeV1 = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-dashboard-management-metrics-v1]')) {
-    const script = document.createElement("script");
-    script.src = "dashboard-management-metrics-v1.js?v=20260801-management1";
-    script.defer = true;
-    script.dataset.beautixDashboardManagementMetricsV1 = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-collection-metrics-v1]')) {
-    const script = document.createElement("script");
-    script.src = "collection-metrics-v1.js?v=20260801-collection1";
-    script.defer = true;
-    script.dataset.beautixCollectionMetricsV1 = "true";
-    document.head.appendChild(script);
-  }
-  if (!document.querySelector('script[data-beautix-cashflow-confirmation-queue-v1]')) {
-    const script = document.createElement("script");
-    script.src = "cashflow-confirmation-queue-v1.js?v=20260801-confirmation-queue2";
-    script.defer = true;
-    script.dataset.beautixCashflowConfirmationQueueV1 = "true";
-    document.head.appendChild(script);
-  }
+  };
+
+  load('script[data-beautix-mobile-width-guard]', 'mobile-width-guard.js?v=20260731-width-guard1', 'beautixMobileWidthGuard');
+  if (!window.BEAUTIX_DISABLE_OPPORTUNITIES) load('script[data-beautix-opportunities]', 'opportunities.js?v=20260730-actions1', 'beautixOpportunities');
+  if (!window.BEAUTIX_DISABLE_CASHFLOW_ACTIONS) load('script[data-beautix-cashflow-actions]', 'cashflow-actions.js?v=20260730-cashflow8', 'beautixCashflowActions');
+  if (!window.BEAUTIX_DISABLE_CASHFLOW_PAYMENT_EDITOR) load('script[data-beautix-cashflow-payment-editor-v3]', 'cashflow-payment-editor-v3.js?v=20260731-editor-v3a', 'beautixCashflowPaymentEditorV3');
+  if (!window.BEAUTIX_DISABLE_WHATSAPP) load('script[data-beautix-whatsapp-messages-v2]', 'whatsapp-messages-v2.js?v=20260731-wa-overflow1', 'beautixWhatsappMessagesV2');
+  load('script[data-beautix-mobile-topbar-cleanup]', 'mobile-topbar-cleanup.js?v=20260731-ipad-breakpoint1', 'beautixMobileTopbarCleanup');
+  if (!window.BEAUTIX_DISABLE_EXPENSE_PAYMENT_REPORTING) load('script[data-beautix-expense-payment-reporting-v3]', 'expense-payment-reporting-v3.js?v=20260731-expense-v3a', 'beautixExpensePaymentReportingV3');
+  load('script[data-beautix-cashflow-range-selector-v1]', 'cashflow-range-selector-v1.js?v=20260801-range-actions1', 'beautixCashflowRangeSelectorV1');
+  load('script[data-beautix-cashflow-range-actions-bridge-v1]', 'cashflow-range-actions-bridge-v1.js?v=20260801-scope1', 'beautixCashflowRangeActionsBridgeV1');
+  load('script[data-beautix-personal-cashflow-range-v1]', 'personal-cashflow-range-v1.js?v=20260801-personal1', 'beautixPersonalCashflowRangeV1');
+  load('script[data-beautix-dashboard-management-metrics-v1]', 'dashboard-management-metrics-v1.js?v=20260801-management1', 'beautixDashboardManagementMetricsV1');
+  load('script[data-beautix-collection-metrics-v1]', 'collection-metrics-v1.js?v=20260801-collection1', 'beautixCollectionMetricsV1');
+  load('script[data-beautix-cashflow-confirmation-queue-v1]', 'cashflow-confirmation-queue-v1.js?v=20260801-confirmation-queue2', 'beautixCashflowConfirmationQueueV1');
 })();
