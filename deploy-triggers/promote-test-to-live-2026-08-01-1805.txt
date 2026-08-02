@@ -1,0 +1,5 @@
+Promote test-dashboard commit e5c84f17e42a7023e7e74186711c494a726cf81a to live.
+Backups:
+- backup/2026-08-01-pre-promotion-main
+- backup/2026-08-01-pre-promotion-test-dashboard
+- backup/2026-08-01-pre-promotion-live
