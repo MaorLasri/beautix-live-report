@@ -35,5 +35,4 @@ window.BEAUTIX_CONFIG = {
   load('script[data-beautix-dashboard-management-metrics-v1]', 'dashboard-management-metrics-v1.js?v=20260801-management1', 'beautixDashboardManagementMetricsV1');
   load('script[data-beautix-collection-metrics-v1]', 'collection-metrics-v1.js?v=20260801-collection1', 'beautixCollectionMetricsV1');
   load('script[data-beautix-cashflow-confirmation-queue-v1]', 'cashflow-confirmation-queue-v1.js?v=20260802-count1', 'beautixCashflowConfirmationQueueV1');
-  load('script[data-beautix-business-logic-ui-fixes-v1]', 'business-logic-ui-fixes-v1.js?v=20260802-ui-logic1', 'beautixBusinessLogicUiFixesV1');
 })();
