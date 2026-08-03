@@ -27,10 +27,10 @@
           <div class="hero cashflow-hero">
             <div><h2>תזרים מזומנים לפי טווח</h2><p>אותו דוח מציג תנועות שבוצעו בעבר ותנועות מתוכננות בעתיד לפי הטווח הנבחר.</p></div>
             <div class="range-presets" role="group" aria-label="בחירת טווח תזרים">
-              <button type="button" data-range="back90" class="active">90 יום אחורה</button>
+              <button type="button" data-range="back90">90 יום אחורה</button>
               <button type="button" data-range="back60">60 יום אחורה</button>
               <button type="button" data-range="back30">30 יום אחורה</button>
-              <button type="button" data-range="current_month">חודש נוכחי</button>
+              <button type="button" data-range="current_month" class="active">חודש נוכחי</button>
               <button type="button" data-range="forward30">30 יום קדימה</button>
               <button type="button" data-range="forward60">60 יום קדימה</button>
               <button type="button" data-range="forward90">90 יום קדימה</button>
@@ -45,7 +45,7 @@
           </div>
           <div id="cashflow-summary" class="summary-grid"><article class="summary-card"><span>טוען</span><strong>—</strong><p>מחשב תזרים…</p></article></div>
           <section class="section"><div class="section-head"><div><h2>נקודות מרכזיות בטווח</h2><p>יתרה נמוכה, יום ההוצאה הגדול ביותר והרכב הנתונים.</p></div></div><div id="cashflow-insights" class="placeholder-grid"><article class="placeholder"><div><b>טוען נתונים</b><p>ממתין לתזרים.</p></div></article></div></section>
-          <section class="section"><div class="section-head"><div><h2>תנועות בטווח</h2><p>מוצגים רק ימים שבהם קיימת תנועת מזומן.</p></div></div><div id="cashflow-upcoming" class="cashflow-list"><div class="empty-state"><p>טוען תנועות…</p></div></div></section>
+          <section class="section"><div class="section-head"><div><h2>תנועות בטווח</h2><p>מוצג כל יום שיש בו תנועה, כולל סופי שבוע וחגים.</p></div></div><div id="cashflow-upcoming" class="cashflow-list"><div class="empty-state"><p>טוען תנועות…</p></div></div></section>
         </section>
 
         <section id="panel-sales" class="tab-panel" hidden><div class="empty-state"><h2>לשונית מכירות ויעדים</h2><p>כאן נבנה את החישובים החודשיים, הרבעוניים והשנתיים לפי אותה תקופה גלובלית.</p></div></section>
@@ -55,6 +55,6 @@
       </main>
     </div>
   </div>
-  <script src="test-v2.js?v=20260803-range2" defer></script>
+  <script src="test-v2.js?v=20260803-range3" defer></script>
 </body>
 </html>
