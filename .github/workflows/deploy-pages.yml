@@ -6,6 +6,7 @@ on:
       - main
       - live
       - test-dashboard
+      - test-v2
   workflow_dispatch:
 
 permissions:
@@ -26,8 +27,7 @@ jobs:
     outputs:
       live_sha: ${{ steps.versions.outputs.live_sha }}
       test_sha: ${{ steps.versions.outputs.test_sha }}
-      live_version: ${{ steps.versions.outputs.live_version }}
-      test_version: ${{ steps.versions.outputs.test_version }}
+      test_v2_sha: ${{ steps.versions.outputs.test_v2_sha }}
     steps:
       - name: Checkout deployment controller
         uses: actions/checkout@v4
@@ -35,39 +35,36 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Fetch live and test branches
+      - name: Fetch application branches
         shell: bash
         run: |
           set -euo pipefail
           git fetch --no-tags --prune origin \
             +refs/heads/live:refs/remotes/origin/live \
-            +refs/heads/test-dashboard:refs/remotes/origin/test-dashboard
+            +refs/heads/test-dashboard:refs/remotes/origin/test-dashboard \
+            +refs/heads/test-v2:refs/remotes/origin/test-v2
 
       - name: Resolve source commits
         id: versions
         shell: bash
         run: |
           set -euo pipefail
-          LIVE_SHA="$(git rev-parse refs/remotes/origin/live^{commit})"
-          TEST_SHA="$(git rev-parse refs/remotes/origin/test-dashboard^{commit})"
-          TIMESTAMP="$(date -u +'%Y%m%d-%H%M%S')"
-          {
-            echo "live_sha=$LIVE_SHA"
-            echo "test_sha=$TEST_SHA"
-            echo "live_version=live-v${TIMESTAMP}-${LIVE_SHA:0:8}"
-            echo "test_version=test-v${TIMESTAMP}-${TEST_SHA:0:8}"
-          } >> "$GITHUB_OUTPUT"
+          echo "live_sha=$(git rev-parse refs/remotes/origin/live^{commit})" >> "$GITHUB_OUTPUT"
+          echo "test_sha=$(git rev-parse refs/remotes/origin/test-dashboard^{commit})" >> "$GITHUB_OUTPUT"
+          echo "test_v2_sha=$(git rev-parse refs/remotes/origin/test-v2^{commit})" >> "$GITHUB_OUTPUT"
 
       - name: Build combined Pages site
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf _site live-src test-src
-          mkdir -p _site/test
+          rm -rf _site live-src test-src test-v2-src
+          mkdir -p _site/test _site/test-v2
           git worktree add --detach live-src "${{ steps.versions.outputs.live_sha }}"
           git worktree add --detach test-src "${{ steps.versions.outputs.test_sha }}"
+          git worktree add --detach test-v2-src "${{ steps.versions.outputs.test_v2_sha }}"
           rsync -a --delete --exclude='.git' --exclude='.github' live-src/ _site/
           rsync -a --delete --exclude='.git' --exclude='.github' test-src/ _site/test/
+          rsync -a --delete --exclude='.git' --exclude='.github' test-v2-src/ _site/test-v2/
           PUBLISHED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           cat > _site/version.json <<EOF
           {"environment":"live","source_branch":"live","commit":"${{ steps.versions.outputs.live_sha }}","published_at_utc":"${PUBLISHED_AT}"}
@@ -75,7 +72,11 @@ jobs:
           cat > _site/test/version.json <<EOF
           {"environment":"test","source_branch":"test-dashboard","commit":"${{ steps.versions.outputs.test_sha }}","published_at_utc":"${PUBLISHED_AT}"}
           EOF
+          cat > _site/test-v2/version.json <<EOF
+          {"environment":"test-v2","source_branch":"test-v2","commit":"${{ steps.versions.outputs.test_v2_sha }}","published_at_utc":"${PUBLISHED_AT}"}
+          EOF
           cp _site/test/version.json _site/test/deployment-marker.json
+          cp _site/test-v2/version.json _site/test-v2/deployment-marker.json
           touch _site/.nojekyll
 
       - name: Validate build output
@@ -84,10 +85,12 @@ jobs:
           set -euo pipefail
           test -s _site/index.html
           test -s _site/test/index.html
+          test -s _site/test-v2/index.html
           grep -Fq 'id="login-view"' _site/index.html
           grep -Fq 'id="report-view"' _site/index.html
-          grep -Fq 'id="login-view"' _site/test/index.html
           grep -Fq 'id="app-view"' _site/test/index.html
+          grep -Fq 'id="panel-overview"' _site/test-v2/index.html
+          grep -Fq 'data-tab="cashflow"' _site/test-v2/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -111,7 +114,7 @@ jobs:
     needs: [build, deploy]
     runs-on: ubuntu-latest
     steps:
-      - name: Verify live and test publication
+      - name: Verify all published environments
         shell: bash
         run: |
           set -euo pipefail
@@ -119,14 +122,14 @@ jobs:
             BUSTER="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}-$(date +%s)"
             LIVE_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/?v=$BUSTER" || true)"
             TEST_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/test/?v=$BUSTER" || true)"
-            if printf '%s' "$LIVE_HTML" | grep -Fq 'id="login-view"' \
-              && printf '%s' "$LIVE_HTML" | grep -Fq 'id="report-view"' \
-              && printf '%s' "$TEST_HTML" | grep -Fq 'id="login-view"' \
-              && printf '%s' "$TEST_HTML" | grep -Fq 'id="app-view"'; then
-              echo "Live and test dashboards are published"
+            TEST_V2_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/test-v2/?v=$BUSTER" || true)"
+            if printf '%s' "$LIVE_HTML" | grep -Fq 'id="report-view"' \
+              && printf '%s' "$TEST_HTML" | grep -Fq 'id="app-view"' \
+              && printf '%s' "$TEST_V2_HTML" | grep -Fq 'id="panel-overview"'; then
+              echo "Live, test and test-v2 are published"
               exit 0
             fi
             sleep 10
           done
-          echo "Published dashboards did not pass health check"
+          echo "Published environments did not pass health check"
           exit 1
