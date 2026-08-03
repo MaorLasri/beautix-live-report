@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="test-v2.css?v=20260803-cashflow1">
-  <link rel="stylesheet" href="test-v2-refinements.css?v=20260803-cashflow2">
+  <link rel="stylesheet" href="test-v2-refinements.css?v=20260803-history1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="test-v2-config.js?v=20260802-shell1"></script>
 </head>
@@ -24,10 +24,25 @@
         <section id="panel-overview" class="tab-panel"><div class="hero"><h2>מרכז שליטה ניהולי</h2><p>מספר מצומצם של מדדים שמובילים להחלטה או לפעולה.</p><div class="quality-strip"><span class="quality-chip">מקור אמת: Supabase</span><span class="quality-chip">תקופה גלובלית פעילה</span><span class="quality-chip">הוצאות בפועל בלבד</span></div></div><div class="summary-grid"><article class="summary-card"><span>טוען</span><strong>—</strong><p>מחשב נתוני תקופה…</p></article></div><section class="section"><div class="section-head"><div><h2>תובנות התקופה</h2><p>השוואה, איכות נתונים והפעולה החשובה הבאה.</p></div></div><div class="placeholder-grid"><article class="placeholder"><div><b>טוען נתונים</b><p>ממתין למקור האמת.</p></div></article></div></section></section>
 
         <section id="panel-cashflow" class="tab-panel" hidden>
-          <div class="hero cashflow-hero"><div><h2>תחזית תזרים ונזילות</h2><p>מבט קדימה בלבד. התקופה כאן עצמאית מתקופת הדשבורד הכללית.</p></div><div class="horizon-switch" role="group" aria-label="אופק תחזית"><button type="button" data-horizon="month_end" class="active">עד סוף החודש</button><button type="button" data-horizon="30">30 יום</button><button type="button" data-horizon="60">60 יום</button><button type="button" data-horizon="90">90 יום</button></div><div class="quality-strip"><span id="cashflow-as-of" class="quality-chip">נכון ל־—</span><span id="cashflow-balance-quality" class="quality-chip">יתרת פתיחה: —</span><span class="quality-chip">תנועות מתוכננות ומאושרות בלבד</span></div></div>
-          <div id="cashflow-summary" class="summary-grid"><article class="summary-card"><span>טוען</span><strong>—</strong><p>מחשב תחזית…</p></article></div>
-          <section class="section"><div class="section-head"><div><h2>נקודות סיכון והזדמנות</h2><p>הימים שמשפיעים הכי הרבה על יתרת המזומן.</p></div></div><div id="cashflow-insights" class="placeholder-grid"><article class="placeholder"><div><b>טוען נתונים</b><p>ממתין לתחזית.</p></div></article></div></section>
-          <section class="section"><div class="section-head"><div><h2>תנועות קרובות</h2><p>מוצגים רק ימים שיש בהם תנועה.</p></div></div><div id="cashflow-upcoming" class="cashflow-list"><div class="empty-state"><p>טוען תנועות…</p></div></div></section>
+          <div class="hero cashflow-hero"><div><h2>תזרים מזומנים</h2><p>עבר בפועל ותחזית קדימה מוצגים בנפרד כדי למנוע ערבוב בין מה שכבר קרה לבין מה שמתוכנן.</p></div><div class="quality-strip"><span class="quality-chip">מקור אמת: Supabase</span><span class="quality-chip">עסקי בלבד</span><span class="quality-chip">עבר = תנועות בפועל בלבד</span></div></div>
+
+          <section class="section cashflow-block historical-block">
+            <div class="section-head history-head"><div><h2>עבר בפועל</h2><p>מה נכנס ויצא בפועל בתקופה שנבחרה.</p></div><div class="horizon-switch history-switch" role="group" aria-label="טווח עבר"><button type="button" data-history-range="30">30 יום</button><button type="button" data-history-range="90" class="active">90 יום</button><button type="button" data-history-range="180">180 יום</button><button type="button" data-history-range="ytd">מתחילת השנה</button></div></div>
+            <div id="cashflow-history-quality" class="quality-strip"><span class="quality-chip">טוען נתוני עבר…</span></div>
+            <div id="cashflow-history-summary" class="summary-grid"><article class="summary-card"><span>טוען</span><strong>—</strong><p>מחשב תזרים בפועל…</p></article></div>
+            <div class="history-layout">
+              <article class="history-panel"><h3>מגמה חודשית</h3><p>הכנסות, הוצאות ונטו לפי חודש.</p><div id="cashflow-history-monthly" class="history-monthly"></div></article>
+              <article class="history-panel"><h3>ימים אחרונים עם תנועה</h3><p>רק ימים שבהם נרשמה תנועת מזומן בפועל.</p><div id="cashflow-history-days" class="cashflow-list"></div></article>
+            </div>
+          </section>
+
+          <section class="section cashflow-block forecast-block">
+            <div class="section-head"><div><h2>תחזית קדימה</h2><p>תנועות עתידיות שהוזנו במערכת בלבד.</p></div></div>
+            <div class="hero cashflow-hero forecast-hero"><div class="horizon-switch" role="group" aria-label="אופק תחזית"><button type="button" data-horizon="month_end" class="active">עד סוף החודש</button><button type="button" data-horizon="30">30 יום</button><button type="button" data-horizon="60">60 יום</button><button type="button" data-horizon="90">90 יום</button></div><div class="quality-strip"><span id="cashflow-as-of" class="quality-chip">נכון ל־—</span><span id="cashflow-balance-quality" class="quality-chip">יתרת פתיחה: —</span><span class="quality-chip">מתוכנן ומאושר בלבד</span></div></div>
+            <div id="cashflow-summary" class="summary-grid"><article class="summary-card"><span>טוען</span><strong>—</strong><p>מחשב תחזית…</p></article></div>
+            <section class="section"><div class="section-head"><div><h2>נקודות סיכון והזדמנות</h2><p>הימים שמשפיעים הכי הרבה על יתרת המזומן.</p></div></div><div id="cashflow-insights" class="placeholder-grid"><article class="placeholder"><div><b>טוען נתונים</b><p>ממתין לתחזית.</p></div></article></div></section>
+            <section class="section"><div class="section-head"><div><h2>תנועות קרובות</h2><p>מוצגים רק ימים שיש בהם תנועה.</p></div></div><div id="cashflow-upcoming" class="cashflow-list"><div class="empty-state"><p>טוען תנועות…</p></div></div></section>
+          </section>
         </section>
 
         <section id="panel-sales" class="tab-panel" hidden><div class="empty-state"><h2>לשונית מכירות ויעדים</h2><p>כאן נבנה את החישובים החודשיים, הרבעוניים והשנתיים לפי אותה תקופה גלובלית.</p></div></section>
@@ -37,6 +52,6 @@
       </main>
     </div>
   </div>
-  <script src="test-v2.js?v=20260803-cashflow2" defer></script>
+  <script src="test-v2.js?v=20260803-history1" defer></script>
 </body>
 </html>
