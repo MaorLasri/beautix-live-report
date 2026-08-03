@@ -9,66 +9,34 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="test-v2.css?v=20260802-mobile-nav1">
+  <link rel="stylesheet" href="test-v2.css?v=20260802-mobile2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="test-v2-config.js?v=20260802-shell1"></script>
 </head>
 <body>
   <section id="login-view" class="auth-screen">
     <div class="auth-card">
-      <span class="brand-mark">BX</span>
-      <h1>BeautiX Test V2</h1>
-      <p>סביבת בנייה חדשה ומבודדת לדוחות הניהול.</p>
-      <form id="login-form" class="form-grid">
-        <label>אימייל<input id="email" type="email" autocomplete="email" required></label>
-        <label>סיסמה<input id="password" type="password" autocomplete="current-password" required></label>
-        <button class="primary-btn" type="submit">כניסה</button>
-        <p id="login-error" class="auth-error hidden" role="alert"></p>
-      </form>
+      <span class="brand-mark">BX</span><h1>BeautiX Test V2</h1><p>סביבת בנייה חדשה ומבודדת לדוחות הניהול.</p>
+      <form id="login-form" class="form-grid"><label>אימייל<input id="email" type="email" autocomplete="email" required></label><label>סיסמה<input id="password" type="password" autocomplete="current-password" required></label><button class="primary-btn" type="submit">כניסה</button><p id="login-error" class="auth-error hidden" role="alert"></p></form>
     </div>
   </section>
-
   <div id="app-view" class="app hidden">
     <aside id="sidebar" class="sidebar" aria-label="ניווט ראשי">
       <div class="sidebar-head"><span class="brand-mark">BX</span><div class="sidebar-title"><strong>BeautiX</strong><span>TEST V2 · בנייה מחדש</span></div></div>
-      <nav class="nav">
-        <button type="button" data-tab="overview">סקירה כללית</button>
-        <button type="button" data-tab="cashflow">תזרים</button>
-        <button type="button" data-tab="sales">מכירות ויעדים</button>
-        <button type="button" data-tab="retention">שיווק ושימור</button>
-        <button type="button" data-tab="reports">דוחות מפורטים</button>
-        <button type="button" data-tab="input">הזנת נתונים</button>
-      </nav>
-      <div class="sidebar-foot">
-        <div class="system-state"><div><i></i><span id="system-text">בודק חיבור…</span></div><small id="user-email">—</small></div>
-        <button id="logout" class="logout-btn" type="button">התנתקות</button>
-      </div>
+      <nav class="nav"><button type="button" data-tab="overview">סקירה כללית</button><button type="button" data-tab="cashflow">תזרים</button><button type="button" data-tab="sales">מכירות ויעדים</button><button type="button" data-tab="retention">שיווק ושימור</button><button type="button" data-tab="reports">דוחות מפורטים</button><button type="button" data-tab="input">הזנת נתונים</button></nav>
+      <div class="sidebar-foot"><div class="system-state"><div><i></i><span id="system-text">בודק חיבור…</span></div><small id="user-email">—</small></div><button id="logout" class="logout-btn" type="button">התנתקות</button></div>
     </aside>
-
     <div class="content">
       <header class="topbar">
         <div style="display:flex;align-items:center;gap:10px"><button id="mobile-nav-toggle" class="mobile-nav-toggle" type="button">תפריט</button><div class="page-title"><h1 id="page-heading">סקירה כללית</h1><p id="page-subheading">מה מצב העסק ומה דורש פעולה</p></div></div>
-        <div class="period-control" aria-label="בחירת תקופה גלובלית">
-          <select id="period-mode" aria-label="סוג תקופה"><option value="month">חודשי</option><option value="quarter">רבעוני</option><option value="year">שנתי</option></select>
-          <button id="period-prev" type="button" aria-label="תקופה קודמת">‹</button>
-          <span id="period-label" class="period-label">—</span>
-          <button id="period-next" type="button" aria-label="תקופה הבאה">›</button>
-          <button id="period-today" type="button">התקופה הנוכחית</button>
-        </div>
+        <div class="period-control" aria-label="בחירת תקופה גלובלית"><select id="period-mode" aria-label="סוג תקופה"><option value="month">חודשי</option><option value="quarter">רבעוני</option><option value="year">שנתי</option></select><button id="period-prev" type="button" aria-label="תקופה קודמת">‹</button><span id="period-label" class="period-label">—</span><button id="period-next" type="button" aria-label="תקופה הבאה">›</button><button id="period-today" type="button">התקופה הנוכחית</button></div>
       </header>
-
       <main class="main">
         <section id="panel-overview" class="tab-panel">
-          <div class="hero"><h2>מרכז שליטה ניהולי</h2><p>הלשונית תיבנה מחדש עם מספר מצומצם של מדדים שמובילים להחלטה או לפעולה.</p><div class="quality-strip"><span class="quality-chip">מקור אמת: Supabase</span><span class="quality-chip">תקופה גלובלית פעילה</span><span class="quality-chip">איכות נתונים תוצג בכל דוח</span></div></div>
-          <div class="summary-grid">
-            <article class="summary-card"><span>מכירות מול יעד</span><strong>בבנייה</strong><p>יוחלף במדד תקופתי אמין.</p></article>
-            <article class="summary-card"><span>מצב תזרים</span><strong>בבנייה</strong><p>תחזית קדימה עם אופק עצמאי.</p></article>
-            <article class="summary-card"><span>בריאות העסק</span><strong>בבנייה</strong><p>ציון שמסביר גם מה חסר.</p></article>
-            <article class="summary-card"><span>הפעולה החשובה הבאה</span><strong>בבנייה</strong><p>המלצה אחת ברורה בכל פעם.</p></article>
-          </div>
-          <section class="section"><div class="section-head"><div><h2>מפת הדוחות המתוכננת</h2><p>כל כרטיס יתווסף רק לאחר אימות הנתונים והערך הניהולי.</p></div></div><div class="placeholder-grid"><article class="placeholder"><div><b>מכירות ויעדים</b><p>תקופה, יעד, פער וקצב נדרש.</p></div><small>לא מחובר עדיין</small></article><article class="placeholder"><div><b>תזרים ונזילות</b><p>סיכונים, יום שפל והתחייבויות קרובות.</p></div><small>לא מחובר עדיין</small></article><article class="placeholder"><div><b>שיווק ושימור</b><p>לקוחות ומנויים עם הזדמנות ממשית.</p></div><small>לא מחובר עדיין</small></article></div></section>
+          <div class="hero"><h2>מרכז שליטה ניהולי</h2><p>מספר מצומצם של מדדים שמובילים להחלטה או לפעולה.</p><div class="quality-strip"><span class="quality-chip">מקור אמת: Supabase</span><span class="quality-chip">תקופה גלובלית פעילה</span><span class="quality-chip">הוצאות בפועל בלבד</span></div></div>
+          <div class="summary-grid"><article class="summary-card"><span>טוען</span><strong>—</strong><p>מחשב נתוני תקופה…</p></article></div>
+          <section class="section"><div class="section-head"><div><h2>תובנות התקופה</h2><p>השוואה, איכות נתונים והפעולה החשובה הבאה.</p></div></div><div class="placeholder-grid"><article class="placeholder"><div><b>טוען נתונים</b><p>ממתין למקור האמת.</p></div></article></div></section>
         </section>
-
         <section id="panel-cashflow" class="tab-panel" hidden><div class="empty-state"><h2>לשונית תזרים</h2><p>כאן נבנה מחדש את תחזית סוף החודש, 30/60/90 יום ואת דוח האישורים.</p></div></section>
         <section id="panel-sales" class="tab-panel" hidden><div class="empty-state"><h2>לשונית מכירות ויעדים</h2><p>כאן נבנה את החישובים החודשיים, הרבעוניים והשנתיים לפי אותה תקופה גלובלית.</p></div></section>
         <section id="panel-retention" class="tab-panel" hidden><div class="empty-state"><h2>לשונית שיווק ושימור</h2><p>כאן נשלב את דוחות הלקוחות והמנויים כרשימות פעולה ולא כמאגר מידע נוסף.</p></div></section>
@@ -77,6 +45,6 @@
       </main>
     </div>
   </div>
-  <script src="test-v2.js?v=20260802-shell1" defer></script>
+  <script src="test-v2.js?v=20260802-overview1" defer></script>
 </body>
 </html>
