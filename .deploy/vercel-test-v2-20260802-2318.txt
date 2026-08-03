@@ -1,0 +1,1 @@
+Trigger Vercel production deployment for beautix-test-v2 from branch test-v2.
