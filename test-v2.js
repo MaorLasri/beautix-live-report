@@ -4,7 +4,7 @@
   const $ = id => document.getElementById(id);
   const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const today = () => { const d=new Date(); return new Date(d.getFullYear(),d.getMonth(),d.getDate()); };
-  const state = { tab: cfg.defaultTab, mode: cfg.defaultPeriodMode, anchor: new Date(), client: null, cashflowRange: 'back90', cashflowStart: null, cashflowEnd: null };
+  const state = { tab: cfg.defaultTab, mode: cfg.defaultPeriodMode, anchor: new Date(), client: null, cashflowRange: 'current_month', cashflowStart: null, cashflowEnd: null };
   const tabMeta = {
     overview:['סקירה כללית','מה מצב העסק ומה דורש פעולה'], cashflow:['תזרים','עבר ועתיד באותו דוח לפי טווח נבחר'], sales:['מכירות ויעדים','ביצועים, קצב ויעדים לפי התקופה'], retention:['שיווק ושימור','לקוחות ומנויים עם הזדמנות לפעולה'], reports:['דוחות מפורטים','הסברים, מגמות ואיכות נתונים'], input:['הזנת נתונים','העלאה, אישור וניהול תנועות']
   };
