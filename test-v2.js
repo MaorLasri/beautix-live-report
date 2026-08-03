@@ -30,7 +30,10 @@
     else if(key==='forward30')end.setDate(end.getDate()+29);
     else if(key==='forward60')end.setDate(end.getDate()+59);
     else if(key==='forward90')end.setDate(end.getDate()+89);
-    else if(key==='month_end')end=new Date(t.getFullYear(),t.getMonth()+1,0);
+    else if(key==='current_month'){
+      start=new Date(t.getFullYear(),t.getMonth(),1);
+      end=new Date(t.getFullYear(),t.getMonth()+1,0);
+    }
     return {start:iso(start),end:iso(end)};
   }
   function currentCashflowRange(){return state.cashflowRange==='custom'?{start:state.cashflowStart,end:state.cashflowEnd}:resolveCashflowRange(state.cashflowRange)}
