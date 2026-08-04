@@ -1,22 +1,33 @@
 (() => {
   'use strict';
 
+  const openDays = new Set();
+
+  function setLegacyDayState(day, open) {
+    const head = day.querySelector('.cashflow-day-head');
+    const entries = day.querySelector('.cashflow-entries');
+    if (!head || !entries) return;
+    day.classList.toggle('open', open);
+    entries.hidden = !open;
+    entries.style.display = open ? '' : 'none';
+    head.setAttribute('aria-expanded', String(open));
+    const date = day.dataset.dayKey;
+    if (date) open ? openDays.add(date) : openDays.delete(date);
+  }
+
   function enhanceLegacyDays(root = document) {
-    root.querySelectorAll('.cashflow-day').forEach((day, index) => {
-      if (day.dataset.accordionReady === 'true') return;
+    const days = [...root.querySelectorAll('.cashflow-day')];
+    days.forEach((day, index) => {
       const head = day.querySelector('.cashflow-day-head');
       const entries = day.querySelector('.cashflow-entries');
       if (!head || !entries) return;
 
+      const dateText = head.querySelector('strong')?.textContent?.trim() || `day-${index}`;
+      day.dataset.dayKey = dateText;
       day.dataset.accordionReady = 'true';
       day.classList.add('cashflow-day-accordion-legacy');
       head.setAttribute('role', 'button');
       head.setAttribute('tabindex', '0');
-
-      const open = index === 0;
-      day.classList.toggle('open', open);
-      entries.hidden = !open;
-      head.setAttribute('aria-expanded', String(open));
 
       if (!head.querySelector('.cashflow-day-toggle')) {
         const toggle = document.createElement('span');
@@ -25,41 +36,36 @@
         toggle.textContent = '⌄';
         head.appendChild(toggle);
       }
+
+      const shouldOpen = openDays.has(dateText) || (openDays.size === 0 && index === 0);
+      setLegacyDayState(day, shouldOpen);
     });
   }
 
   function toggleLegacyDay(head) {
     const day = head.closest('.cashflow-day');
-    const entries = day?.querySelector('.cashflow-entries');
-    if (!day || !entries) return;
-    const open = !day.classList.contains('open');
-    day.classList.toggle('open', open);
-    entries.hidden = !open;
-    head.setAttribute('aria-expanded', String(open));
+    if (!day) return;
+    setLegacyDayState(day, !day.classList.contains('open'));
   }
 
   document.addEventListener('click', event => {
     const head = event.target.closest('.cashflow-day-head');
     if (!head || !head.closest('#cashflow-upcoming')) return;
+    event.preventDefault();
+    event.stopPropagation();
     toggleLegacyDay(head);
-  });
+  }, true);
 
   document.addEventListener('keydown', event => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     const head = event.target.closest('.cashflow-day-head');
     if (!head || !head.closest('#cashflow-upcoming')) return;
     event.preventDefault();
+    event.stopPropagation();
     toggleLegacyDay(head);
-  });
+  }, true);
 
-  const observer = new MutationObserver(mutations => {
-    for (const mutation of mutations) {
-      if (mutation.type === 'childList' && mutation.addedNodes.length) {
-        enhanceLegacyDays(document);
-        break;
-      }
-    }
-  });
+  const observer = new MutationObserver(() => enhanceLegacyDays(document));
 
   function init() {
     const host = document.getElementById('cashflow-upcoming');
