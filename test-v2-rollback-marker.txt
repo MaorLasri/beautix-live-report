@@ -1,0 +1,1 @@
+Stable rollback deployment marker — 2026-08-04.
