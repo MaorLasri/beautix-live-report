@@ -8,21 +8,47 @@ window.BEAUTIX_V2_CONFIG = Object.freeze({
 });
 
 (() => {
+  const addAsset = (kind, src, marker) => {
+    if (document.querySelector(`[data-${marker}]`)) return;
+    const element = document.createElement(kind === 'css' ? 'link' : 'script');
+    if (kind === 'css') {
+      element.rel = 'stylesheet';
+      element.href = src;
+    } else {
+      element.src = src;
+      element.defer = true;
+    }
+    element.dataset[marker.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())] = 'true';
+    document.head.appendChild(element);
+  };
+
   const load = () => {
-    if (!document.querySelector('link[data-beautix-cashflow-ui]')) {
-      const css = document.createElement('link');
-      css.rel = 'stylesheet';
-      css.href = 'test-v2-cashflow-ui.css?v=20260803-1';
-      css.dataset.beautixCashflowUi = 'true';
-      document.head.appendChild(css);
+    addAsset('css','test-v2-cashflow-ui.css?v=20260803-1','beautix-cashflow-ui');
+    addAsset('js','test-v2-cashflow-ui.js?v=20260803-1','beautix-cashflow-ui-script');
+
+    const nav = document.querySelector('.nav');
+    if (nav && !nav.querySelector('[data-tab="debts"]')) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.tab = 'debts';
+      button.textContent = 'חובות';
+      const reports = nav.querySelector('[data-tab="reports"]');
+      reports ? nav.insertBefore(button,reports) : nav.appendChild(button);
     }
-    if (!document.querySelector('script[data-beautix-cashflow-ui]')) {
-      const script = document.createElement('script');
-      script.src = 'test-v2-cashflow-ui.js?v=20260803-1';
-      script.defer = true;
-      script.dataset.beautixCashflowUi = 'true';
-      document.head.appendChild(script);
+
+    const main = document.querySelector('.main');
+    if (main && !document.getElementById('panel-debts')) {
+      const panel = document.createElement('section');
+      panel.id = 'panel-debts';
+      panel.className = 'tab-panel';
+      panel.hidden = true;
+      panel.innerHTML = '<div class="empty-state"><p>טוען חובות…</p></div>';
+      const reportsPanel = document.getElementById('panel-reports');
+      reportsPanel ? main.insertBefore(panel,reportsPanel) : main.appendChild(panel);
     }
+
+    addAsset('css','test-v2-debts.css?v=20260804-debts1','beautix-debts-css');
+    addAsset('js','test-v2-debts.js?v=20260804-debts1','beautix-debts-js');
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once: true });
   else load();
