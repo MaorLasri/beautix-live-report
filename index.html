@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="test-v2-cashflow-ui.css?v=20260803-actions2">
   <link rel="stylesheet" href="test-v2-sales.css?v=20260803-sales1">
   <link rel="stylesheet" href="test-v2-retention.css?v=20260803-retention2">
+  <link rel="stylesheet" href="test-v2-reports.css?v=20260803-reports1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="test-v2-config.js?v=20260802-shell1"></script>
 </head>
@@ -28,7 +29,7 @@
         <section id="panel-cashflow" class="tab-panel" hidden><div class="hero cashflow-hero"><div><h2>תזרים מזומנים לפי טווח</h2><p>אותו דוח מציג תנועות שבוצעו בעבר ותנועות מתוכננות בעתיד לפי הטווח הנבחר.</p></div><div class="range-presets" role="group" aria-label="בחירת טווח תזרים"><button type="button" data-range="back90">90 יום אחורה</button><button type="button" data-range="back60">60 יום אחורה</button><button type="button" data-range="back30">30 יום אחורה</button><button type="button" data-range="current_month" class="active">חודש נוכחי</button><button type="button" data-range="forward30">30 יום קדימה</button><button type="button" data-range="forward60">60 יום קדימה</button><button type="button" data-range="forward90">90 יום קדימה</button><button type="button" data-range="custom">טווח מותאם</button></div><form id="cashflow-custom-range" class="custom-range hidden"><label>מתאריך<input id="cashflow-start" type="date" required></label><label>עד תאריך<input id="cashflow-end" type="date" required></label><button class="primary-btn" type="submit">הצג טווח</button></form><div class="quality-strip"><span id="cashflow-as-of" class="quality-chip">טווח: —</span><span id="cashflow-balance-quality" class="quality-chip">יתרת פתיחה: —</span><span class="quality-chip">עבר: בפועל בלבד · עתיד: בפועל וצפוי</span></div></div><div id="cashflow-summary" class="summary-grid"><article class="summary-card"><span>טוען</span><strong>—</strong><p>מחשב תזרים…</p></article></div><section class="section"><div class="section-head"><div><h2>נקודות מרכזיות בטווח</h2><p>יתרה נמוכה, יום ההוצאה הגדול ביותר והרכב הנתונים.</p></div></div><div id="cashflow-insights" class="placeholder-grid"><article class="placeholder"><div><b>טוען נתונים</b><p>ממתין לתזרים.</p></div></article></div></section><section class="section"><div class="section-head"><div><h2>תנועות בטווח</h2><p>מוצג כל יום שיש בו תנועה, כולל סופי שבוע וחגים.</p></div></div><div id="cashflow-upcoming" class="cashflow-list"><div class="empty-state"><p>טוען תנועות…</p></div></div></section></section>
         <section id="panel-sales" class="tab-panel" hidden><div class="empty-state"><p>טוען דוח מכירות ויעדים…</p></div></section>
         <section id="panel-retention" class="tab-panel" hidden><div class="empty-state"><p>טוען שיווק ושימור…</p></div></section>
-        <section id="panel-reports" class="tab-panel" hidden><div class="empty-state"><h2>דוחות מפורטים</h2><p>דוחות עומק עם איכות נתונים, מידע חסר ומועד עדכון.</p></div></section>
+        <section id="panel-reports" class="tab-panel" hidden><div class="empty-state"><p>טוען דוחות מפורטים…</p></div></section>
         <section id="panel-input" class="tab-panel" hidden><div class="empty-state"><h2>הזנת נתונים</h2><p>הוספה, עריכה, אישור תנועות והעלאת דוחות יעברו לכאן בהדרגה.</p></div></section>
       </main>
     </div>
@@ -37,5 +38,6 @@
   <script src="test-v2-cashflow-ui.js?v=20260803-actions2" defer></script>
   <script src="test-v2-sales.js?v=20260803-sales1" defer></script>
   <script src="test-v2-retention.js?v=20260803-retention2" defer></script>
+  <script src="test-v2-reports.js?v=20260803-reports1" defer></script>
 </body>
 </html>
