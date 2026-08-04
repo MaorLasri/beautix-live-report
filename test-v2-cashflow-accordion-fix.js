@@ -3,80 +3,94 @@
 
   const openDays = new Set();
 
-  function setLegacyDayState(day, open) {
-    const head = day.querySelector('.cashflow-day-head');
-    const entries = day.querySelector('.cashflow-entries');
-    if (!head || !entries) return;
-    day.classList.toggle('open', open);
-    entries.hidden = !open;
-    entries.style.display = open ? '' : 'none';
-    head.setAttribute('aria-expanded', String(open));
-    const date = day.dataset.dayKey;
-    if (date) open ? openDays.add(date) : openDays.delete(date);
+  function keyFor(day, index) {
+    return day.dataset.day || day.dataset.dayKey || day.querySelector('strong')?.textContent?.trim() || `day-${index}`;
   }
 
-  function enhanceLegacyDays(root = document) {
-    const days = [...root.querySelectorAll('.cashflow-day')];
-    days.forEach((day, index) => {
-      const head = day.querySelector('.cashflow-day-head');
-      const entries = day.querySelector('.cashflow-entries');
-      if (!head || !entries) return;
+  function applyState(day, open) {
+    const details = day.querySelector('.cashflow-entries, .cash-day-details');
+    const trigger = day.querySelector('.cashflow-day-head, .cash-day-summary');
+    if (!details || !trigger) return;
+    day.classList.toggle('open', open);
+    details.hidden = !open;
+    details.style.setProperty('display', open ? '' : 'none', 'important');
+    trigger.setAttribute('aria-expanded', String(open));
+    const key = day.dataset.accordionKey;
+    if (key) open ? openDays.add(key) : openDays.delete(key);
+  }
 
-      const dateText = head.querySelector('strong')?.textContent?.trim() || `day-${index}`;
-      day.dataset.dayKey = dateText;
-      day.dataset.accordionReady = 'true';
-      day.classList.add('cashflow-day-accordion-legacy');
-      head.setAttribute('role', 'button');
-      head.setAttribute('tabindex', '0');
+  function attach(day, index) {
+    const trigger = day.querySelector('.cashflow-day-head, .cash-day-summary');
+    const details = day.querySelector('.cashflow-entries, .cash-day-details');
+    if (!trigger || !details) return;
 
-      if (!head.querySelector('.cashflow-day-toggle')) {
-        const toggle = document.createElement('span');
-        toggle.className = 'cashflow-day-toggle';
-        toggle.setAttribute('aria-hidden', 'true');
-        toggle.textContent = '⌄';
-        head.appendChild(toggle);
-      }
+    const key = keyFor(day, index);
+    day.dataset.accordionKey = key;
+    day.classList.add('cashflow-day-accordion-ready');
 
-      const shouldOpen = openDays.has(dateText) || (openDays.size === 0 && index === 0);
-      setLegacyDayState(day, shouldOpen);
+    if (!trigger.querySelector('.cashflow-day-toggle-button')) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'cashflow-day-toggle-button';
+      button.setAttribute('aria-label', 'פתיחה או סגירה של פירוט היום');
+      button.innerHTML = '<span aria-hidden="true">⌄</span>';
+      button.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        applyState(day, !day.classList.contains('open'));
+      });
+      trigger.appendChild(button);
+    }
+
+    if (trigger.dataset.directAccordionBound !== 'true') {
+      trigger.dataset.directAccordionBound = 'true';
+      trigger.addEventListener('click', event => {
+        if (event.target.closest('.cashflow-day-toggle-button')) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        applyState(day, !day.classList.contains('open'));
+      });
+      trigger.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        applyState(day, !day.classList.contains('open'));
+      });
+    }
+
+    if (!trigger.matches('button')) {
+      trigger.setAttribute('role', 'button');
+      trigger.setAttribute('tabindex', '0');
+    }
+
+    const shouldOpen = openDays.has(key) || (openDays.size === 0 && index === 0);
+    applyState(day, shouldOpen);
+  }
+
+  function scan() {
+    const host = document.getElementById('cashflow-upcoming');
+    if (!host) return;
+    const days = [...host.querySelectorAll('.cashflow-day, .cash-day-accordion')];
+    days.forEach(attach);
+  }
+
+  let queued = false;
+  function queueScan() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      scan();
     });
   }
-
-  function toggleLegacyDay(head) {
-    const day = head.closest('.cashflow-day');
-    if (!day) return;
-    setLegacyDayState(day, !day.classList.contains('open'));
-  }
-
-  document.addEventListener('click', event => {
-    const head = event.target.closest('.cashflow-day-head');
-    if (!head || !head.closest('#cashflow-upcoming')) return;
-    event.preventDefault();
-    event.stopPropagation();
-    toggleLegacyDay(head);
-  }, true);
-
-  document.addEventListener('keydown', event => {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    const head = event.target.closest('.cashflow-day-head');
-    if (!head || !head.closest('#cashflow-upcoming')) return;
-    event.preventDefault();
-    event.stopPropagation();
-    toggleLegacyDay(head);
-  }, true);
-
-  const observer = new MutationObserver(() => enhanceLegacyDays(document));
 
   function init() {
     const host = document.getElementById('cashflow-upcoming');
     if (!host) return;
-    observer.observe(host, { childList: true, subtree: true });
-    enhanceLegacyDays(host);
+    new MutationObserver(queueScan).observe(host, { childList: true, subtree: true });
+    scan();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init, { once: true });
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
 })();
