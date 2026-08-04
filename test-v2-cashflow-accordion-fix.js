@@ -7,6 +7,16 @@
     return day.dataset.day || day.dataset.dayKey || day.querySelector('strong')?.textContent?.trim() || `day-${index}`;
   }
 
+  function moveAddButton() {
+    const host = document.getElementById('cashflow-upcoming');
+    const button = document.getElementById('cashflow-add-entry');
+    const section = host?.closest('.section');
+    const heading = section?.querySelector('.section-head');
+    if (!host || !button || !heading) return;
+    button.classList.add('cashflow-add-btn-in-list');
+    heading.insertAdjacentElement('afterend', button);
+  }
+
   function markNegativeBalance(day) {
     const balance = day.querySelector('.cashflow-day-totals b, .day-balance');
     if (!balance) return;
@@ -79,6 +89,7 @@
   function scan() {
     const host = document.getElementById('cashflow-upcoming');
     if (!host) return;
+    moveAddButton();
     const days = [...host.querySelectorAll('.cashflow-day, .cash-day-accordion')];
     days.forEach(attach);
   }
@@ -98,6 +109,7 @@
     if (!host) return;
     new MutationObserver(queueScan).observe(host, { childList: true, subtree: true });
     scan();
+    setTimeout(moveAddButton, 1000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
