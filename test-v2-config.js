@@ -25,6 +25,7 @@ window.BEAUTIX_V2_CONFIG = Object.freeze({
   const load = () => {
     addAsset('css','test-v2-cashflow-ui.css?v=20260803-1','beautix-cashflow-ui');
     addAsset('js','test-v2-cashflow-ui.js?v=20260803-1','beautix-cashflow-ui-script');
+    addAsset('js','test-v2-cashflow-submit-guard.js?v=20260804-guard1','beautix-cashflow-submit-guard');
 
     const nav = document.querySelector('.nav');
     if (nav && !nav.querySelector('[data-tab="debts"]')) {
