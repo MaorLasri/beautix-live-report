@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ייבוא EasyBusy — BeautiX Test V2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="test-v2-config.js"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#fff;font-family:Assistant,Arial,sans-serif;color:#1d2433}.shell{padding:4px}.intro{margin-bottom:16px}.intro h3{margin:0 0 5px}.intro p{margin:0;color:#68758a}.upload{display:block;border:2px dashed #b990d2;border-radius:18px;padding:28px 18px;text-align:center;background:#fcf9fe;cursor:pointer}.upload input{display:none}.upload strong{display:block;font-size:1.05rem}.upload span{display:block;margin-top:7px;color:#7b8392}.status{margin:14px 0;padding:12px 14px;border-radius:12px;background:#f4f2f7;color:#596174}.status.ok{background:#edf9f2;color:#18794e}.status.error{background:#fff0f1;color:#b33a45}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0}.summary article{border:1px solid #eadff0;border-radius:14px;padding:13px}.summary span{display:block;color:#727a89}.summary strong{display:block;margin-top:3px;font-size:1.3rem;color:#69328e}.table-wrap{overflow:auto;margin-top:14px}.preview{width:100%;border-collapse:collapse;min-width:720px}.preview th,.preview td{padding:9px;border-bottom:1px solid #ece6f1;text-align:right;vertical-align:top}.preview th{color:#586174}.actions{display:flex;justify-content:flex-end;margin-top:16px}.primary{border:0;border-radius:14px;padding:13px 22px;background:linear-gradient(135deg,#ef2d9a,#7135ae);color:#fff;font-weight:800;font-size:1rem}.primary:disabled{opacity:.45}.note{font-size:.92rem;color:#7a8290;margin-top:10px}@media(max-width:600px){.upload{padding:23px 12px}.summary{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="intro"><h3>ייבוא EasyBusy</h3><p>ZIP המכיל את דוחות Incomes, Intakes ו־ZIndexes בפורמט Excel.</p></section>
+    <label class="upload"><input id="zip-file" type="file" accept=".zip,application/zip"><strong>לחיצה לבחירת קובץ ZIP</strong><span id="file-name">טרם נבחר קובץ</span></label>
+    <p class="note">קובצי PDF שבתוך ה־ZIP יידלגו. לפני הייבוא תוצג תצוגה מקדימה מלאה.</p>
+    <div id="import-status" class="status">ממתין לקובץ.</div>
+    <section id="summary" class="summary" hidden></section>
+    <section id="preview-wrap" class="table-wrap" hidden><table class="preview"><thead><tr><th>תאריך</th><th>מסמך</th><th>לקוח</th><th>סכום</th><th>אמצעי תשלום</th><th>מוצרים / טיפולים</th></tr></thead><tbody id="preview-body"></tbody></table></section>
+    <div class="actions"><button id="import-button" class="primary" type="button" disabled>אישור וייבוא למסד</button></div>
+  </main>
+  <script src="test-v2-easybusy-import.js?v=20260804-isolated1"></script>
+</body>
+</html>
