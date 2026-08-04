@@ -1,0 +1,86 @@
+@media (max-width:620px) and (orientation:portrait){
+  .sidebar{
+    inset:auto 10px calc(10px + env(safe-area-inset-bottom)) 10px!important;
+    width:auto!important;
+    max-width:560px;
+    margin-inline:auto;
+    border-radius:24px!important;
+    padding:7px!important;
+    background:rgba(31,36,51,.94)!important;
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 16px 42px rgba(24,29,44,.34)!important;
+    overflow:hidden;
+  }
+  .sidebar::before{
+    content:"";
+    position:absolute;
+    top:4px;
+    left:50%;
+    width:34px;
+    height:3px;
+    transform:translateX(-50%);
+    border-radius:999px;
+    background:rgba(255,255,255,.24);
+  }
+  .nav{
+    display:flex!important;
+    gap:5px!important;
+    padding:4px 1px 0!important;
+    overflow-x:auto!important;
+    scroll-snap-type:x mandatory!important;
+    scrollbar-width:none;
+  }
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{
+    position:relative;
+    flex:0 0 72px!important;
+    min-width:72px!important;
+    min-height:58px!important;
+    padding:7px 4px 6px!important;
+    border-radius:17px!important;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    color:#cdd3df!important;
+    background:transparent!important;
+    font-size:.72rem!important;
+    line-height:1.05;
+    scroll-snap-align:center;
+    transition:background .18s ease,color .18s ease,transform .18s ease;
+  }
+  .nav button::before{
+    display:block;
+    font-size:1.15rem;
+    line-height:1;
+    font-weight:400;
+    color:inherit;
+  }
+  .nav button[data-tab="overview"]::before{content:"⌂"}
+  .nav button[data-tab="cashflow"]::before{content:"↕"}
+  .nav button[data-tab="sales"]::before{content:"↗"}
+  .nav button[data-tab="retention"]::before{content:"♡"}
+  .nav button[data-tab="reports"]::before{content:"▤"}
+  .nav button[data-tab="input"]::before{content:"＋"}
+  .nav button.active{
+    color:#fff!important;
+    background:linear-gradient(145deg,#8150b8,#64329d)!important;
+    box-shadow:0 6px 16px rgba(110,58,168,.42)!important;
+    transform:translateY(-1px);
+  }
+  .nav button.active::after{
+    content:"";
+    position:absolute;
+    bottom:3px;
+    width:18px;
+    height:2px;
+    border-radius:999px;
+    background:rgba(255,255,255,.78);
+  }
+  .content{
+    padding-bottom:calc(96px + env(safe-area-inset-bottom))!important;
+  }
+}
