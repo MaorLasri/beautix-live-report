@@ -45,6 +45,13 @@ window.BEAUTIX_V2_CONFIG = Object.freeze({
     before ? main.insertBefore(panel,before) : main.appendChild(panel);
   };
 
+  const mountEasyBusyImporter = () => {
+    const pane = document.getElementById('input-pane-easybusy');
+    if (!pane || pane.dataset.isolatedImporterMounted === 'true') return;
+    pane.dataset.isolatedImporterMounted = 'true';
+    pane.innerHTML = '<iframe title="ייבוא EasyBusy" src="test-v2-easybusy-import.html?v=20260804-isolated1" style="width:100%;min-height:720px;border:0;border-radius:16px;background:#fff" loading="lazy"></iframe>';
+  };
+
   const load = () => {
     addAsset('css','test-v2-cashflow-ui.css?v=20260803-1','beautix-cashflow-ui');
     addAsset('js','test-v2-cashflow-ui.js?v=20260803-1','beautix-cashflow-ui-script');
@@ -59,6 +66,14 @@ window.BEAUTIX_V2_CONFIG = Object.freeze({
     addPanel('taxes','טוען נתוני מס…','panel-reports');
     addAsset('css','test-v2-taxes.css?v=20260804-taxes1','beautix-taxes-css');
     addAsset('js','test-v2-taxes.js?v=20260804-taxes1','beautix-taxes-js');
+
+    document.addEventListener('click', event => {
+      if (event.target.closest('[data-input-tab="easybusy"]')) setTimeout(mountEasyBusyImporter, 0);
+    });
+    window.addEventListener('message', event => {
+      if (event.origin !== location.origin || event.data?.type !== 'beautix-v2-data-updated') return;
+      window.dispatchEvent(new CustomEvent('beautix-v2:data-updated',{detail:event.data}));
+    });
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once: true });
   else load();
