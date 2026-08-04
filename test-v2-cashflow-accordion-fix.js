@@ -7,6 +7,14 @@
     return day.dataset.day || day.dataset.dayKey || day.querySelector('strong')?.textContent?.trim() || `day-${index}`;
   }
 
+  function markNegativeBalance(day) {
+    const balance = day.querySelector('.cashflow-day-totals b, .day-balance');
+    if (!balance) return;
+    const text = balance.textContent || '';
+    const isNegative = /[-−]\s*(?:₪|ILS)?\s*[\d,.]+/.test(text) || /(?:₪|ILS)\s*[-−]\s*[\d,.]+/.test(text);
+    balance.classList.toggle('negative-day-balance', isNegative);
+  }
+
   function applyState(day, open) {
     const details = day.querySelector('.cashflow-entries, .cash-day-details');
     const trigger = day.querySelector('.cashflow-day-head, .cash-day-summary');
@@ -27,6 +35,7 @@
     const key = keyFor(day, index);
     day.dataset.accordionKey = key;
     day.classList.add('cashflow-day-accordion-ready');
+    markNegativeBalance(day);
 
     if (!trigger.querySelector('.cashflow-day-toggle-button')) {
       const button = document.createElement('button');
