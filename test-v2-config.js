@@ -61,6 +61,8 @@ window.BEAUTIX_V2_CONFIG = Object.freeze({
     addPanel('debts','טוען חובות…','panel-reports');
     addAsset('css','test-v2-debts.css?v=20260804-debts1','beautix-debts-css');
     addAsset('js','test-v2-debts.js?v=20260804-debts1','beautix-debts-js');
+    addAsset('css','test-v2-debts-actions.css?v=20260806-actions1','beautix-debts-actions-css');
+    addAsset('js','test-v2-debts-actions.js?v=20260806-actions1','beautix-debts-actions-js');
 
     addTab('taxes','מיסים','reports');
     addPanel('taxes','טוען נתוני מס…','panel-reports');
