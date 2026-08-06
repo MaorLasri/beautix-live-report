@@ -66,6 +66,7 @@ window.BEAUTIX_V2_CONFIG = Object.freeze({
     addPanel('taxes','טוען נתוני מס…','panel-reports');
     addAsset('css','test-v2-taxes.css?v=20260804-taxes1','beautix-taxes-css');
     addAsset('js','test-v2-taxes.js?v=20260804-taxes1','beautix-taxes-js');
+    addAsset('js','test-v2-taxes-range.js?v=20260805-range1','beautix-taxes-range-js');
 
     document.addEventListener('click', event => {
       if (event.target.closest('[data-input-tab="easybusy"]')) setTimeout(mountEasyBusyImporter, 0);
