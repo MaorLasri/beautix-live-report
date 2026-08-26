@@ -1,0 +1,18 @@
+.bank-balance-card{display:flex;flex-direction:column}
+.bank-balance-card .bank-card-main{flex:1}
+.bank-balance-update{margin-top:14px;padding-top:12px;border-top:1px solid var(--line,#e1e6ef)}
+.bank-update-toggle{border:1px solid #cfd7e4;background:#fff;color:#2e3a50;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700;cursor:pointer}
+.bank-update-toggle:hover{background:#f4f7fb}
+.bank-update-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.bank-update-form[hidden]{display:none}
+.bank-update-form label{display:grid;gap:5px;font-weight:700;color:#364157;font-size:.85rem}
+.bank-update-form label.wide{grid-column:1/-1}
+.bank-update-form input{width:100%;box-sizing:border-box;border:1px solid #cfd7e4;border-radius:12px;padding:10px 11px;font:inherit;background:#fff;font-weight:600}
+.bank-update-hint{grid-column:1/-1;margin:0;color:#7b8495;font-size:.78rem;line-height:1.35}
+.bank-update-error{grid-column:1/-1;margin:0;color:#b42332;background:#fff0f1;border-radius:10px;padding:9px 10px;font-size:.83rem;line-height:1.4}
+.bank-update-actions{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.bank-update-actions .primary-btn{padding:10px 16px;font-size:.9rem}
+.bank-update-actions .secondary-btn{border:1px solid #cfd7e4;background:#fff;border-radius:12px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
+.bank-update-form button:disabled{opacity:.55;cursor:wait}
+.bank-update-success{margin:12px 0 0;color:#138a58;background:#eaf8f1;border-radius:10px;padding:9px 10px;font-size:.83rem;font-weight:700;line-height:1.4}
+@media(max-width:620px){.bank-update-form{grid-template-columns:1fr}.bank-update-toggle,.bank-update-actions button{width:100%}}
