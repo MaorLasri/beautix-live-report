@@ -1,12 +1,15 @@
-name: Deploy BeautiX live and test dashboards
+name: Deploy BeautiX
 
+# Only main can deploy: the github-pages environment's branch protection rules
+# reject every other branch (runs 339-342 all failed that way). This workflow is
+# a deployment controller - it always builds from whatever `live` and `legacy`
+# currently point at, so publishing an app change means triggering this workflow,
+# not pushing to the app branch. Add `live` back to the trigger list once the
+# github-pages environment allows it.
 on:
   push:
     branches:
       - main
-      - live
-      - test-dashboard
-      - test-v2
   workflow_dispatch:
 
 permissions:
@@ -25,9 +28,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      live_sha: ${{ steps.versions.outputs.live_sha }}
-      test_sha: ${{ steps.versions.outputs.test_sha }}
-      test_v2_sha: ${{ steps.versions.outputs.test_v2_sha }}
+      app_sha: ${{ steps.versions.outputs.app_sha }}
+      legacy_sha: ${{ steps.versions.outputs.legacy_sha }}
     steps:
       - name: Checkout deployment controller
         uses: actions/checkout@v4
@@ -41,42 +43,34 @@ jobs:
           set -euo pipefail
           git fetch --no-tags --prune origin \
             +refs/heads/live:refs/remotes/origin/live \
-            +refs/heads/test-dashboard:refs/remotes/origin/test-dashboard \
-            +refs/heads/test-v2:refs/remotes/origin/test-v2
+            +refs/heads/legacy:refs/remotes/origin/legacy
 
       - name: Resolve source commits
         id: versions
         shell: bash
         run: |
           set -euo pipefail
-          echo "live_sha=$(git rev-parse refs/remotes/origin/live^{commit})" >> "$GITHUB_OUTPUT"
-          echo "test_sha=$(git rev-parse refs/remotes/origin/test-dashboard^{commit})" >> "$GITHUB_OUTPUT"
-          echo "test_v2_sha=$(git rev-parse refs/remotes/origin/test-v2^{commit})" >> "$GITHUB_OUTPUT"
+          echo "app_sha=$(git rev-parse refs/remotes/origin/live^{commit})" >> "$GITHUB_OUTPUT"
+          echo "legacy_sha=$(git rev-parse refs/remotes/origin/legacy^{commit})" >> "$GITHUB_OUTPUT"
 
-      - name: Build combined Pages site
+      - name: Build Pages site
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf _site live-src test-src test-v2-src
-          mkdir -p _site/test _site/test-v2
-          git worktree add --detach live-src "${{ steps.versions.outputs.live_sha }}"
-          git worktree add --detach test-src "${{ steps.versions.outputs.test_sha }}"
-          git worktree add --detach test-v2-src "${{ steps.versions.outputs.test_v2_sha }}"
-          rsync -a --delete --exclude='.git' --exclude='.github' live-src/ _site/
-          rsync -a --delete --exclude='.git' --exclude='.github' test-src/ _site/test/
-          rsync -a --delete --exclude='.git' --exclude='.github' test-v2-src/ _site/test-v2/
+          rm -rf _site app-src legacy-src
+          mkdir -p _site/legacy
+          git worktree add --detach app-src "${{ steps.versions.outputs.app_sha }}"
+          git worktree add --detach legacy-src "${{ steps.versions.outputs.legacy_sha }}"
+          rsync -a --delete --exclude='.git' --exclude='.github' app-src/ _site/
+          rsync -a --delete --exclude='.git' --exclude='.github' legacy-src/ _site/legacy/
           PUBLISHED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
           cat > _site/version.json <<EOF
-          {"environment":"live","source_branch":"live","commit":"${{ steps.versions.outputs.live_sha }}","published_at_utc":"${PUBLISHED_AT}"}
+          {"environment":"production","source_branch":"live","commit":"${{ steps.versions.outputs.app_sha }}","published_at_utc":"${PUBLISHED_AT}"}
           EOF
-          cat > _site/test/version.json <<EOF
-          {"environment":"test","source_branch":"test-dashboard","commit":"${{ steps.versions.outputs.test_sha }}","published_at_utc":"${PUBLISHED_AT}"}
+          cat > _site/legacy/version.json <<EOF
+          {"environment":"legacy","source_branch":"legacy","commit":"${{ steps.versions.outputs.legacy_sha }}","published_at_utc":"${PUBLISHED_AT}"}
           EOF
-          cat > _site/test-v2/version.json <<EOF
-          {"environment":"test-v2","source_branch":"test-v2","commit":"${{ steps.versions.outputs.test_v2_sha }}","published_at_utc":"${PUBLISHED_AT}"}
-          EOF
-          cp _site/test/version.json _site/test/deployment-marker.json
-          cp _site/test-v2/version.json _site/test-v2/deployment-marker.json
+          cp _site/legacy/version.json _site/legacy/deployment-marker.json
           touch _site/.nojekyll
 
       - name: Validate build output
@@ -84,13 +78,18 @@ jobs:
         run: |
           set -euo pipefail
           test -s _site/index.html
-          test -s _site/test/index.html
-          test -s _site/test-v2/index.html
-          grep -Fq 'id="login-view"' _site/index.html
-          grep -Fq 'id="report-view"' _site/index.html
-          grep -Fq 'id="app-view"' _site/test/index.html
-          grep -Fq 'id="panel-overview"' _site/test-v2/index.html
-          grep -Fq 'data-tab="cashflow"' _site/test-v2/index.html
+          test -s _site/legacy/index.html
+          # promoted app at the root
+          grep -Fq 'id="panel-overview"' _site/index.html
+          grep -Fq 'data-tab="cashflow"' _site/index.html
+          grep -Fq 'app.js' _site/index.html
+          # the promoted build must carry no test naming
+          if grep -rlF 'test-v2' _site --include='*.html' --include='*.css' \
+               --exclude-dir=legacy | grep .; then
+            echo "test-v2 references leaked into the promoted build"; exit 1
+          fi
+          # previous app preserved underneath
+          grep -Fq 'id="report-view"' _site/legacy/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -114,19 +113,17 @@ jobs:
     needs: [build, deploy]
     runs-on: ubuntu-latest
     steps:
-      - name: Verify all published environments
+      - name: Verify published environments
         shell: bash
         run: |
           set -euo pipefail
           for attempt in $(seq 1 24); do
             BUSTER="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${attempt}-$(date +%s)"
-            LIVE_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/?v=$BUSTER" || true)"
-            TEST_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/test/?v=$BUSTER" || true)"
-            TEST_V2_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/test-v2/?v=$BUSTER" || true)"
-            if printf '%s' "$LIVE_HTML" | grep -Fq 'id="report-view"' \
-              && printf '%s' "$TEST_HTML" | grep -Fq 'id="app-view"' \
-              && printf '%s' "$TEST_V2_HTML" | grep -Fq 'id="panel-overview"'; then
-              echo "Live, test and test-v2 are published"
+            APP_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/?v=$BUSTER" || true)"
+            LEGACY_HTML="$(curl -fsSL --retry 2 --retry-delay 2 "https://maorlasri.github.io/beautix-live-report/legacy/?v=$BUSTER" || true)"
+            if printf '%s' "$APP_HTML" | grep -Fq 'id="panel-overview"' \
+              && printf '%s' "$LEGACY_HTML" | grep -Fq 'id="report-view"'; then
+              echo "Production and legacy are published"
               exit 0
             fi
             sleep 10
