@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const cfg=window.BEAUTIX_V2_CONFIG;
+  const cfg=window.BEAUTIX_CONFIG;
   const $=id=>document.getElementById(id);
   const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true}});
   let period=null,loading=false,monthly=null,monthlyIsPeriod=false,settingsNode=null,formOpen=false;
@@ -125,7 +125,7 @@
     const saveLabel=saveBtn.textContent;
     saveBtn.textContent='שומר…';
 
-    const {data,error:rpcError}=await client.rpc('set_test_v2_sales_target_settings_v1',{
+    const {data,error:rpcError}=await client.rpc('set_sales_target_settings_v1',{
       p_base_target:base,p_growth_ratio_pct:growth,p_threshold_ratio_pct:threshold,p_note:note||null
     });
 
@@ -178,7 +178,7 @@
     monthlyIsPeriod=String(period.start).slice(0,7)===String(period.end).slice(0,7);
     const monthStart=monthlyIsPeriod?monthStartOf(period.start):currentMonthStart();
     const [report,target]=await Promise.all([
-      client.rpc('get_test_v2_sales_report_v1',{p_start:period.start,p_end:period.end}),
+      client.rpc('get_sales_report_v1',{p_start:period.start,p_end:period.end}),
       client.rpc('get_monthly_sales_target_v1',{p_month_start:monthStart})
     ]);
     loading=false;
@@ -188,7 +188,7 @@
     render(report.data||{});
   }
 
-  window.addEventListener('beautix-v2:period-change',e=>{period=e.detail;if(!$('panel-sales')?.hidden)load()});
-  document.addEventListener('click',e=>{if(e.target.closest('[data-tab="sales"]'))setTimeout(()=>{period=window.BEAUTIX_V2?.getPeriod?.()||period;load()},350)});
-  client.auth.onAuthStateChange((_event,session)=>{if(session&&location.hash==='#sales')setTimeout(()=>{period=window.BEAUTIX_V2?.getPeriod?.();load()},500)});
+  window.addEventListener('beautix:period-change',e=>{period=e.detail;if(!$('panel-sales')?.hidden)load()});
+  document.addEventListener('click',e=>{if(e.target.closest('[data-tab="sales"]'))setTimeout(()=>{period=window.BEAUTIX?.getPeriod?.()||period;load()},350)});
+  client.auth.onAuthStateChange((_event,session)=>{if(session&&location.hash==='#sales')setTimeout(()=>{period=window.BEAUTIX?.getPeriod?.();load()},500)});
 })();

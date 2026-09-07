@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const cfg=window.BEAUTIX_V2_CONFIG;
+  const cfg=window.BEAUTIX_CONFIG;
   if(!cfg||!window.supabase)return;
   const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true}});
   const $=id=>document.getElementById(id);
@@ -92,7 +92,7 @@
     btn.disabled=true;feedback.textContent='בודק ושומר…';
     try{
       if(!current&&!forceDuplicate){
-        const {data,error}=await client.rpc('check_test_v2_debt_duplicate_v1',{p_id:null,p_lender_name:payload.p_lender_name,p_loan_name:payload.p_loan_name,p_original_amount:payload.p_original_amount,p_current_balance:payload.p_current_balance});
+        const {data,error}=await client.rpc('check_debt_duplicate_v1',{p_id:null,p_lender_name:payload.p_lender_name,p_loan_name:payload.p_loan_name,p_original_amount:payload.p_original_amount,p_current_balance:payload.p_current_balance});
         if(error)throw error;const matches=Array.isArray(data?.matches)?data.matches:[];
         if(matches.length){
           const box=$('debt-duplicate-box');box.hidden=false;box.innerHTML=`<b>נמצא חוב זהה במסד</b>${matches.map(x=>`<div>${esc(x.lender_name)} · ${esc(x.loan_name||'חוב')} · ${money(x.current_balance)}</div>`).join('')}<div class="debt-duplicate-actions"><button id="debt-back-edit" type="button" class="secondary-btn">חזרה לעריכה</button><button id="debt-force-save" type="button" class="primary-btn">שמירה בכל זאת</button></div>`;
@@ -100,7 +100,7 @@
           feedback.className='debt-feedback warning full';feedback.textContent='לא נשמר דבר. יש לאשר יצירת רשומה נוספת.';return;
         }
       }
-      const {error}=await client.rpc('save_test_v2_debt_v1',payload);if(error)throw error;
+      const {error}=await client.rpc('save_debt_v1',payload);if(error)throw error;
       feedback.className='debt-feedback success full';feedback.textContent='החוב נשמר בהצלחה.';
       await reloadDebts();setTimeout(close,450);
     }catch(err){feedback.className='debt-feedback error full';feedback.textContent=`השמירה נכשלה: ${err.message||err}`}
@@ -111,7 +111,7 @@
     if(!current)return;
     const label=action==='delete'?'להסיר את החוב מהתצוגה? הרשומה תישמר בהיסטוריה.':'לבטל את החוב?';
     if(!confirm(label))return;
-    const fn=action==='delete'?'delete_test_v2_debt_v1':'cancel_test_v2_debt_v1';
+    const fn=action==='delete'?'delete_debt_v1':'cancel_debt_v1';
     const {error}=await client.rpc(fn,{p_id:current.id});
     if(error){$('debt-feedback').className='debt-feedback error full';$('debt-feedback').textContent=error.message;return}
     await reloadDebts();close();

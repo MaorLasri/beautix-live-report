@@ -13,7 +13,7 @@
       ]
     },
     {
-      "source": "/test-v2.js",
+      "source": "/app.js",
       "headers": [
         {
           "key": "Cache-Control",
@@ -22,7 +22,7 @@
       ]
     },
     {
-      "source": "/test-v2.css",
+      "source": "/app.css",
       "headers": [
         {
           "key": "Cache-Control",

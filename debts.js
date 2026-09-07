@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const cfg = window.BEAUTIX_V2_CONFIG;
+  const cfg = window.BEAUTIX_CONFIG;
   const client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabasePublishableKey, {auth:{persistSession:true,autoRefreshToken:true}});
   const $ = id => document.getElementById(id);
   const money = value => new Intl.NumberFormat('he-IL',{style:'currency',currency:'ILS',maximumFractionDigits:0}).format(Number(value||0));

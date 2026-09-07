@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const cfg = window.BEAUTIX_V2_CONFIG;
+  const cfg = window.BEAUTIX_CONFIG;
   if (!cfg || !window.supabase) return;
 
   const FIBI_ACCOUNT_ID = '6b1595b9-923a-4f67-ae5d-1d01604c6c6a';
@@ -126,7 +126,7 @@
     const saveLabel = saveButton.textContent;
     saveButton.textContent = 'שומר…';
 
-    const { data, error } = await client.rpc('update_test_v2_bank_balance_v1', {
+    const { data, error } = await client.rpc('update_bank_balance_v1', {
       p_account_id: latest?.fibi_current_account?.account_id || FIBI_ACCOUNT_ID,
       p_new_balance: balance,
       p_as_of: asOf,
@@ -150,9 +150,9 @@
     closeForm();
 
     await load();
-    window.BEAUTIX_V2?.refreshOverview?.();
-    window.BEAUTIX_V2?.refreshCashflow?.();
-    window.dispatchEvent(new CustomEvent('beautix-v2:data-updated', { detail: { source: 'overview-bank-balance' } }));
+    window.BEAUTIX?.refreshOverview?.();
+    window.BEAUTIX?.refreshCashflow?.();
+    window.dispatchEvent(new CustomEvent('beautix:data-updated', { detail: { source: 'overview-bank-balance' } }));
   }
 
   function render() {
@@ -170,7 +170,7 @@
     if (loading) return;
     loading = true;
     try {
-      const { data, error } = await client.rpc('get_test_v2_overview_period_v1', periodArgs());
+      const { data, error } = await client.rpc('get_overview_period_v1', periodArgs());
       if (error) throw error;
       latest = data || {};
       render();
@@ -187,7 +187,7 @@
     if (grid) observer.observe(grid, { childList: true });
     load();
   });
-  window.addEventListener('beautix-v2:period-change', load);
+  window.addEventListener('beautix:period-change', load);
   document.addEventListener('click', event => {
     if (event.target.closest('[data-tab="overview"]')) setTimeout(load, 0);
   });

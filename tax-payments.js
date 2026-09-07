@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const cfg=window.BEAUTIX_V2_CONFIG;
+  const cfg=window.BEAUTIX_CONFIG;
   if(!cfg||!window.supabase)return;
   const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true}});
   const $=id=>document.getElementById(id);
@@ -30,7 +30,7 @@
 
   async function loadReport(){
     if(!$('panel-taxes')||$('panel-taxes').hidden)return;
-    const {data,error}=await client.rpc('get_test_v2_tax_report_v1',{p_start:period.start,p_end:period.end});
+    const {data,error}=await client.rpc('get_tax_report_v1',{p_start:period.start,p_end:period.end});
     if(error){const box=$('tax-payment-feedback');if(box)box.textContent=error.message;return}
     report=data||{};
     const share=$('tax-vat-expense-share');if(share)share.value=String(report.input_vat_expense_share_pct||40);
@@ -53,12 +53,12 @@
     const btn=e.submitter; if(btn)btn.disabled=true;
     const feedback=$('tax-feedback');
     const args={p_start:report?.period?.start||period.start,p_end:report?.period?.end||period.end,p_input_vat_actual:$('tax-input-vat').value===''?null:Number($('tax-input-vat').value),p_vat_paid:Number($('tax-vat-paid').value||0),p_income_tax_reserve_rate:Number($('tax-income-rate').value||20),p_income_tax_paid:Number($('tax-income-paid').value||0),p_notes:$('tax-notes').value.trim()||null,p_input_vat_expense_share_pct:Number($('tax-vat-expense-share').value||40)};
-    const {error}=await client.rpc('save_test_v2_tax_period_v1',args);
+    const {error}=await client.rpc('save_tax_period_v1',args);
     if(btn)btn.disabled=false;
     if(error){feedback.className='tax-note error';feedback.textContent=`השמירה נכשלה: ${error.message}`;return}
     feedback.className='tax-note';feedback.textContent='הגדרות המס נשמרו לתקופה המוצגת.';
     await loadReport();
-    window.dispatchEvent(new CustomEvent('beautix-v2:period-change',{detail:{...period,source:'tax-settings-refresh'}}));
+    window.dispatchEvent(new CustomEvent('beautix:period-change',{detail:{...period,source:'tax-settings-refresh'}}));
   }
 
   async function createPayment(type){
@@ -67,7 +67,7 @@
     const calculated=type==='vat'?Number(report.output_vat||0):Number(report.income_tax_estimate||0);
     if(amount<=0)return;
     const due=prompt('תאריך יעד לתשלום (YYYY-MM-DD), אפשר להשאיר ריק:','')||null;
-    const {error}=await client.rpc('create_test_v2_tax_payment_v1',{p_start:report.period.start,p_end:report.period.end,p_tax_type:type,p_calculated_amount:calculated,p_amount_due:amount,p_due_date:due||null,p_notes:null});
+    const {error}=await client.rpc('create_tax_payment_v1',{p_start:report.period.start,p_end:report.period.end,p_tax_type:type,p_calculated_amount:calculated,p_amount_due:amount,p_due_date:due||null,p_notes:null});
     const box=$('tax-payment-feedback');
     if(error){box.className='tax-note error';box.textContent=error.message;return}
     box.className='tax-note';box.textContent='התשלום נוצר ונשמר כממתין לתשלום.';await loadReport();
@@ -77,17 +77,17 @@
     const amountRaw=prompt('מה הסכום ששולם בפועל?',String(due));if(amountRaw===null)return;
     const amount=Number(amountRaw);if(!Number.isFinite(amount)||amount<0)return alert('סכום לא תקין');
     const paidOn=prompt('תאריך התשלום (YYYY-MM-DD):',new Date().toISOString().slice(0,10));if(!paidOn)return;
-    const {error}=await client.rpc('mark_test_v2_tax_payment_paid_v1',{p_id:id,p_amount_paid:amount,p_paid_on:paidOn,p_notes:null});
+    const {error}=await client.rpc('mark_tax_payment_paid_v1',{p_id:id,p_amount_paid:amount,p_paid_on:paidOn,p_notes:null});
     if(error)return alert(error.message);
-    await loadReport();window.dispatchEvent(new CustomEvent('beautix-v2:period-change',{detail:{...period,source:'tax-payment-paid'}}));
+    await loadReport();window.dispatchEvent(new CustomEvent('beautix:period-change',{detail:{...period,source:'tax-payment-paid'}}));
   }
 
   async function cancelPayment(id){
     if(!confirm('לבטל את רשומת התשלום? ההיסטוריה תישמר.'))return;
-    const {error}=await client.rpc('cancel_test_v2_tax_payment_v1',{p_id:id});if(error)return alert(error.message);await loadReport();
+    const {error}=await client.rpc('cancel_tax_payment_v1',{p_id:id});if(error)return alert(error.message);await loadReport();
   }
 
-  window.addEventListener('beautix-v2:period-change',e=>{const d=e.detail||{};if(d.start&&d.end){period={start:d.start,end:d.end};setTimeout(loadReport,80)}});
+  window.addEventListener('beautix:period-change',e=>{const d=e.detail||{};if(d.start&&d.end){period={start:d.start,end:d.end};setTimeout(loadReport,80)}});
   document.addEventListener('click',e=>{if(e.target.closest('[data-tab="taxes"]'))setTimeout(()=>{inject();loadReport()},180)},true);
   function init(){let tries=0;const timer=setInterval(()=>{tries++;if(inject()||tries>60){clearInterval(timer);if($('panel-taxes')&&!$('panel-taxes').hidden)loadReport()}},100)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();

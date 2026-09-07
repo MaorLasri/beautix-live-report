@@ -4,30 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>BeautiX — Test V2</title>
+  <title>BeautiX</title>
   <link rel="icon" href="favicon-32.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="test-v2.css?v=20260803-cashflow1">
-  <link rel="stylesheet" href="test-v2-refinements.css?v=20260803-range1">
-  <link rel="stylesheet" href="test-v2-mobile-nav.css?v=20260804-dock1">
-  <link rel="stylesheet" href="test-v2-cashflow-ui.css?v=20260803-actions2">
-  <link rel="stylesheet" href="test-v2-cashflow-accordion-fix.css?v=20260804-accordion2">
-  <link rel="stylesheet" href="test-v2-sales.css?v=20260907-target1">
-  <link rel="stylesheet" href="test-v2-retention.css?v=20260803-retention2">
-  <link rel="stylesheet" href="test-v2-retention-actions.css?v=20260804-actions1">
-  <link rel="stylesheet" href="test-v2-reports.css?v=20260803-reports1">
-  <link rel="stylesheet" href="test-v2-input.css?v=20260803-input1">
-  <link rel="stylesheet" href="test-v2-overview-bank.css?v=20260826-balance1">
+  <link rel="stylesheet" href="app.css?v=20260907-promote1">
+  <link rel="stylesheet" href="refinements.css?v=20260907-promote1">
+  <link rel="stylesheet" href="mobile-nav.css?v=20260907-promote1">
+  <link rel="stylesheet" href="cashflow-ui.css?v=20260907-promote1">
+  <link rel="stylesheet" href="cashflow-accordion-fix.css?v=20260907-promote1">
+  <link rel="stylesheet" href="sales.css?v=20260907-promote1">
+  <link rel="stylesheet" href="retention.css?v=20260907-promote1">
+  <link rel="stylesheet" href="retention-actions.css?v=20260907-promote1">
+  <link rel="stylesheet" href="reports.css?v=20260907-promote1">
+  <link rel="stylesheet" href="input.css?v=20260907-promote1">
+  <link rel="stylesheet" href="overview-bank.css?v=20260907-promote1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="test-v2-config.js?v=20260802-shell1"></script>
+  <script src="config.js?v=20260907-promote1"></script>
 </head>
 <body>
-  <section id="login-view" class="auth-screen"><div class="auth-card"><span class="brand-mark">BX</span><h1>BeautiX Test V2</h1><p>סביבת בנייה חדשה ומבודדת לדוחות הניהול.</p><form id="login-form" class="form-grid"><label>אימייל<input id="email" type="email" autocomplete="email" required></label><label>סיסמה<input id="password" type="password" autocomplete="current-password" required></label><button class="primary-btn" type="submit">כניסה</button><p id="login-error" class="auth-error hidden" role="alert"></p></form></div></section>
+  <section id="login-view" class="auth-screen"><div class="auth-card"><span class="brand-mark">BX</span><h1>BeautiX</h1><p>דוחות ניהול פיננסי לעסק.</p><form id="login-form" class="form-grid"><label>אימייל<input id="email" type="email" autocomplete="email" required></label><label>סיסמה<input id="password" type="password" autocomplete="current-password" required></label><button class="primary-btn" type="submit">כניסה</button><p id="login-error" class="auth-error hidden" role="alert"></p></form></div></section>
   <div id="app-view" class="app hidden">
-    <aside id="sidebar" class="sidebar" aria-label="ניווט ראשי"><div class="sidebar-head"><span class="brand-mark">BX</span><div class="sidebar-title"><strong>BeautiX</strong><span>TEST V2 · בנייה מחדש</span></div></div><nav class="nav"><button type="button" data-tab="overview">סקירה כללית</button><button type="button" data-tab="cashflow">תזרים</button><button type="button" data-tab="sales">מכירות ויעדים</button><button type="button" data-tab="retention">שיווק ושימור</button><button type="button" data-tab="reports">דוחות מפורטים</button><button type="button" data-tab="input">הזנת נתונים</button></nav><div class="sidebar-foot"><div class="system-state"><div><i></i><span id="system-text">בודק חיבור…</span></div><small id="user-email">—</small></div><button id="logout" class="logout-btn" type="button">התנתקות</button></div></aside>
+    <aside id="sidebar" class="sidebar" aria-label="ניווט ראשי"><div class="sidebar-head"><span class="brand-mark">BX</span><div class="sidebar-title"><strong>BeautiX</strong><span>דוחות ניהול</span></div></div><nav class="nav"><button type="button" data-tab="overview">סקירה כללית</button><button type="button" data-tab="cashflow">תזרים</button><button type="button" data-tab="sales">מכירות ויעדים</button><button type="button" data-tab="retention">שיווק ושימור</button><button type="button" data-tab="reports">דוחות מפורטים</button><button type="button" data-tab="input">הזנת נתונים</button></nav><div class="sidebar-foot"><div class="system-state"><div><i></i><span id="system-text">בודק חיבור…</span></div><small id="user-email">—</small></div><button id="logout" class="logout-btn" type="button">התנתקות</button></div></aside>
     <div class="content">
       <header class="topbar"><div style="display:flex;align-items:center;gap:10px"><button id="mobile-nav-toggle" class="mobile-nav-toggle" type="button">תפריט</button><div class="page-title"><h1 id="page-heading">סקירה כללית</h1><p id="page-subheading">מה מצב העסק ומה דורש פעולה</p></div></div><div class="period-control" aria-label="בחירת תקופה גלובלית"><select id="period-mode" aria-label="סוג תקופה"><option value="month">חודשי</option><option value="quarter">רבעוני</option><option value="year">שנתי</option></select><button id="period-prev" type="button" aria-label="תקופה קודמת">‹</button><span id="period-label" class="period-label">—</span><button id="period-next" type="button" aria-label="תקופה הבאה">›</button><button id="period-today" type="button">התקופה הנוכחית</button></div></header>
       <main class="main">
@@ -40,15 +40,15 @@
       </main>
     </div>
   </div>
-  <script src="test-v2.js?v=20260803-range3" defer></script>
-  <script src="test-v2-overview-bank.js?v=20260826-balance1" defer></script>
-  <script src="test-v2-cashflow-ui.js?v=20260803-actions2" defer></script>
-  <script src="test-v2-cashflow-accordion-fix.js?v=20260804-accordion2" defer></script>
-  <script src="test-v2-sales.js?v=20260907-target1" defer></script>
-  <script src="test-v2-retention.js?v=20260803-retention2" defer></script>
-  <script src="test-v2-retention-actions.js?v=20260804-actions1" defer></script>
-  <script src="test-v2-retention-messages.js?v=20260804-messages1" defer></script>
-  <script src="test-v2-reports.js?v=20260803-reports1" defer></script>
-  <script src="test-v2-input.js?v=20260803-input1" defer></script>
+  <script src="app.js?v=20260907-promote1" defer></script>
+  <script src="overview-bank.js?v=20260907-promote1" defer></script>
+  <script src="cashflow-ui.js?v=20260907-promote1" defer></script>
+  <script src="cashflow-accordion-fix.js?v=20260907-promote1" defer></script>
+  <script src="sales.js?v=20260907-promote1" defer></script>
+  <script src="retention.js?v=20260907-promote1" defer></script>
+  <script src="retention-actions.js?v=20260907-promote1" defer></script>
+  <script src="retention-messages.js?v=20260907-promote1" defer></script>
+  <script src="reports.js?v=20260907-promote1" defer></script>
+  <script src="input.js?v=20260907-promote1" defer></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const cfg=window.BEAUTIX_V2_CONFIG;
+  const cfg=window.BEAUTIX_CONFIG;
   const statusBox=document.getElementById('import-status');
   if(!cfg||!window.supabase||!window.JSZip||!window.XLSX){statusBox.className='status error';statusBox.textContent='רכיב הייבוא לא נטען במלואו.';return}
   const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -69,6 +69,6 @@
   });
   $('import-button').addEventListener('click',async()=>{
     if(!payload)return;const btn=$('import-button');btn.disabled=true;statusBox.className='status';statusBox.textContent='מייבא ל־Supabase…';
-    try{const{data,error}=await client.rpc('import_easybusy_daily_zip_v1',{p_payload:payload});if(error)throw error;statusBox.className='status ok';statusBox.innerHTML=`<b>הייבוא הושלם</b><br>${Number(data?.inserted_sales||0)} מסמכים חדשים · ${Number(data?.updated_sales||0)} מסמכים עודכנו · ${Number(data?.inserted_payment_components||0)} רכיבי תשלום חדשים · ${Number(data?.updated_days||0)} ימי Z עודכנו.`;parent.postMessage({type:'beautix-v2-data-updated',source:'easybusy',result:data},location.origin)}catch(err){statusBox.className='status error';statusBox.textContent='הייבוא נכשל: '+(err.message||err);btn.disabled=false}
+    try{const{data,error}=await client.rpc('import_easybusy_daily_zip_v1',{p_payload:payload});if(error)throw error;statusBox.className='status ok';statusBox.innerHTML=`<b>הייבוא הושלם</b><br>${Number(data?.inserted_sales||0)} מסמכים חדשים · ${Number(data?.updated_sales||0)} מסמכים עודכנו · ${Number(data?.inserted_payment_components||0)} רכיבי תשלום חדשים · ${Number(data?.updated_days||0)} ימי Z עודכנו.`;parent.postMessage({type:'beautix-data-updated',source:'easybusy',result:data},location.origin)}catch(err){statusBox.className='status error';statusBox.textContent='הייבוא נכשל: '+(err.message||err);btn.disabled=false}
   });
 })();

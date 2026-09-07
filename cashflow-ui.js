@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const cfg=window.BEAUTIX_V2_CONFIG;
+  const cfg=window.BEAUTIX_CONFIG;
   const $=id=>document.getElementById(id);
   const money=v=>new Intl.NumberFormat('he-IL',{style:'currency',currency:'ILS',maximumFractionDigits:0}).format(Number(v||0));
   const signed=(v,type)=>`${type==='income'?'+':'−'}${money(Math.abs(Number(v||0)))}`;
@@ -58,14 +58,14 @@
 
   async function refreshAll(){
     await refresh();
-    window.BEAUTIX_V2?.refreshCashflow?.();
+    window.BEAUTIX?.refreshCashflow?.();
   }
 
   async function saveEntry(e){
     e.preventDefault();
     const errorBox=$('cashflow-entry-error');errorBox.hidden=true;
     const params={p_id:$('cashflow-entry-id').value||null,p_date:$('cashflow-entry-date').value,p_type:$('cashflow-entry-type').value,p_amount:Number($('cashflow-entry-amount').value),p_description:$('cashflow-entry-description').value.trim(),p_payment_method:$('cashflow-entry-method').value,p_status:$('cashflow-entry-status').value};
-    const {error}=await client.rpc('save_test_v2_cashflow_entry_v1',params);
+    const {error}=await client.rpc('save_cashflow_entry_v1',params);
     if(error){errorBox.textContent=error.message;errorBox.hidden=false;return}
     $('cashflow-entry-dialog').close();
     await refreshAll();
@@ -79,7 +79,7 @@
     if(!window.confirm(message))return;
     const errorBox=$('cashflow-entry-error');errorBox.hidden=true;
     const buttons=$('cashflow-destructive-actions').querySelectorAll('button');buttons.forEach(b=>b.disabled=true);
-    const rpc=isDelete?'delete_test_v2_cashflow_entry_v1':'cancel_test_v2_cashflow_entry_v1';
+    const rpc=isDelete?'delete_cashflow_entry_v1':'cancel_cashflow_entry_v1';
     const {error}=await client.rpc(rpc,{p_id:entry.id});
     buttons.forEach(b=>b.disabled=false);
     if(error){errorBox.textContent=error.message;errorBox.hidden=false;return}
@@ -90,7 +90,7 @@
 
   async function confirmEntry(id,button){
     button.disabled=true;button.textContent='מאשר…';
-    const {error}=await client.rpc('confirm_test_v2_cashflow_entry_v1',{p_id:id});
+    const {error}=await client.rpc('confirm_cashflow_entry_v2',{p_id:id});
     if(error){button.disabled=false;button.textContent='אישור';alert(error.message);return}
     await refreshAll();
   }
@@ -112,7 +112,7 @@
     if(state.loading||!$('panel-cashflow')||$('panel-cashflow').hidden)return;
     const range=currentRange();if(!range.start||!range.end)return;
     state.loading=true;
-    const {data,error}=await client.rpc('get_test_v2_cashflow_range_v1',{p_start:range.start,p_end:range.end});
+    const {data,error}=await client.rpc('get_cashflow_range_v1',{p_start:range.start,p_end:range.end});
     state.loading=false;
     if(!error)renderDays(data||{});
   }

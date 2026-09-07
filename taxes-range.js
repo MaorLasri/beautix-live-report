@@ -15,7 +15,7 @@
   };
 
   function dispatchPeriod(period, source) {
-    window.dispatchEvent(new CustomEvent('beautix-v2:period-change', {
+    window.dispatchEvent(new CustomEvent('beautix:period-change', {
       detail: { ...period, source }
     }));
   }
@@ -75,7 +75,7 @@
     return true;
   }
 
-  window.addEventListener('beautix-v2:period-change', event => {
+  window.addEventListener('beautix:period-change', event => {
     const detail = event.detail || {};
     if (detail.source === 'tax-custom' || detail.source === 'tax-global-reset') return;
     lastGlobalPeriod = detail;
